@@ -122,8 +122,6 @@ namespace TestClient
         private readonly ConsoleLogger Logger = new();
         private string Address { get; set; } = "localhost";
 
-        private int RequestId { get; set; } = 0;
-
         private async Task<Uri> DoServiceDiscovery()
         {
             // Do service discovery on a single port. 
@@ -149,9 +147,11 @@ namespace TestClient
                 }
 
                 Logger.LogLine($"Publisher responce on port {port}");
-                Logger.LogLine($"{nameof(GetServicesCommand)}", ConsoleColor.Blue);
 
-                await Discovery.SendCommandAsync(new GetServicesCommand(RequestId++, new GetServicesCommand.PayloadData(60000)));
+                var command = new GetServicesCommand(RequestId.NewID(),
+                                                     new GetServicesCommand.PayloadData(60000));
+                Logger.LogMessage(command);
+                await Discovery.SendCommandAsync(command);
                 var response = await GetCompletionAsync<GetServicesCompletion>(Discovery);
                 Logger.LogMessage(response);
                 return await FindCardReader(response.Payload);
@@ -214,10 +214,10 @@ namespace TestClient
 
         private async Task<StatusCompletion> GetStatus(XFS4IoTClient.ClientConnection service)
         {
-            Logger.LogLine($"{nameof(StatusCommand)}", ConsoleColor.Blue);
 
             // Create a new command and send it to the device
-            var command = new StatusCommand(RequestId++, new StatusCommand.PayloadData(Timeout: 1_000));
+            var command = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(Timeout: 1_000));
+            Logger.LogMessage(command);
             await service.SendCommandAsync(command);
 
             return await GetCompletionAsync<StatusCompletion>(service);
@@ -225,10 +225,10 @@ namespace TestClient
 
         private async Task<CapabilitiesCompletion> GetCapabilities(XFS4IoTClient.ClientConnection service)
         {
-            Logger.LogLine($"{nameof(CapabilitiesCommand)}", ConsoleColor.Blue);
 
             // Create a new command and send it to the device
-            var command = new CapabilitiesCommand(RequestId++, new CapabilitiesCommand.PayloadData(Timeout: 1_000));
+            var command = new CapabilitiesCommand(RequestId.NewID(), new CapabilitiesCommand.PayloadData(Timeout: 1_000));
+            Logger.LogMessage(command);
             await service.SendCommandAsync(command);
 
             return await GetCompletionAsync<CapabilitiesCompletion>(service);
@@ -237,10 +237,9 @@ namespace TestClient
 
         private async Task DoAcceptCard(XFS4IoTClient.ClientConnection cardReader)
         {
-            Logger.LogLine($"{nameof(ReadRawDataCommand)}", ConsoleColor.Blue);
 
             // Create a new command and send it to the device
-            var command = new ReadRawDataCommand(RequestId++,
+            var command = new ReadRawDataCommand(RequestId.NewID(),
                                                  new ReadRawDataCommand.PayloadData(
                                                         60_000,
                                                         Track1: true,
@@ -257,6 +256,7 @@ namespace TestClient
                                                         Track1JIS: false,
                                                         Track3JIS: false,
                                                         Ddi: false));
+            Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
@@ -268,7 +268,7 @@ namespace TestClient
         private async Task DoChipIO(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ChipIOCommand(RequestId++,
+            var command = new ChipIOCommand(RequestId.NewID(),
                 new ChipIOCommand.PayloadData(10_0000, "chipT0", Convert.ToBase64String(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 })));
 
             Logger.LogMessage(command);
@@ -283,7 +283,7 @@ namespace TestClient
         private async Task DoChipPower(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ChipPowerCommand(RequestId++,
+            var command = new ChipPowerCommand(RequestId.NewID(),
                 new ChipPowerCommand.PayloadData(10_000, ChipPowerCommand.PayloadData.ChipPowerEnum.Warm));
 
             Logger.LogMessage(command);
@@ -298,7 +298,7 @@ namespace TestClient
         private async Task DoReset(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ResetCommand(RequestId++,
+            var command = new ResetCommand(RequestId.NewID(),
                 new ResetCommand.PayloadData(10_000, ResetCommand.PayloadData.ResetInEnum.Eject));
 
             Logger.LogMessage(command);
@@ -316,7 +316,7 @@ namespace TestClient
             await DoAcceptCard(cardReader);
 
             // Create a new command and send it to the device
-            var command = new RetainCardCommand(RequestId++,
+            var command = new RetainCardCommand(RequestId.NewID(),
                 new RetainCardCommand.PayloadData(10_000));
 
             Logger.LogMessage(command);
@@ -331,7 +331,7 @@ namespace TestClient
         private async Task DoResetCount(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ResetCountCommand(RequestId++,
+            var command = new ResetCountCommand(RequestId.NewID(),
                 new ResetCountCommand.PayloadData(10_000));
 
             Logger.LogMessage(command);
@@ -346,7 +346,7 @@ namespace TestClient
         private async Task DoSetKey(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new SetKeyCommand(RequestId++,
+            var command = new SetKeyCommand(RequestId.NewID(),
                 new SetKeyCommand.PayloadData(10_000, Convert.ToBase64String(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 })));
 
             Logger.LogMessage(command);
@@ -364,7 +364,7 @@ namespace TestClient
             await DoAcceptCard(cardReader);
 
             // Create a new command and send it to the device
-            var command = new WriteRawDataCommand(RequestId++,
+            var command = new WriteRawDataCommand(RequestId.NewID(),
                 new WriteRawDataCommand.PayloadData(10_000, new()
                 {
                     new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, "12345678", WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
@@ -386,7 +386,7 @@ namespace TestClient
         private async Task DoQueryIFMIdentifier(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new QueryIFMIdentifierCommand(RequestId++,
+            var command = new QueryIFMIdentifierCommand(RequestId.NewID(),
                 new QueryIFMIdentifierCommand.PayloadData(10_000));
 
             Logger.LogMessage(command);
@@ -401,7 +401,7 @@ namespace TestClient
         private async Task DoParkCard(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ParkCardCommand(RequestId++,
+            var command = new ParkCardCommand(RequestId.NewID(),
                 new ParkCardCommand.PayloadData(10_000, ParkCardCommand.PayloadData.DirectionEnum.In, 0));
 
             Logger.LogMessage(command);
@@ -415,7 +415,7 @@ namespace TestClient
         private async Task DoEjectCard(XFS4IoTClient.ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new EjectCardCommand(RequestId++, 
+            var command = new EjectCardCommand(RequestId.NewID(), 
                                                 new(10_000)
                                                 );
             Logger.LogMessage(command);
@@ -518,14 +518,16 @@ namespace TestClient
                     _ => throw new NotImplementedException($"Unknown message type {msgBase.Headers.Type}"),
                 };
 
-                LogMessage(Message.GetType().Name, msgColour, msgBase.Serialise());
+                var reqID = msgBase.Headers?.RequestId ?? 0;
+
+                LogMessage(reqID, Message.GetType().Name, msgColour, msgBase.Serialise());
             }
 
-            private void LogMessage(string name, ConsoleColor colour, string JSON )
+            private void LogMessage( int reqId, string name, ConsoleColor colour, string JSON )
             {
                 lock(this)
                 {
-                    Log($"{name}", colour);
+                    Log($"{reqId,3:d}:{name}", colour);
                     if (WriteJSON)
                         WriteLine($" : {JSON}");
                     else

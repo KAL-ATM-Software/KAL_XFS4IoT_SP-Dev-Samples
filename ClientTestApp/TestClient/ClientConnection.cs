@@ -80,18 +80,9 @@ namespace XFS4IoTClient
                 throw new Exception("Attempted to send a command to a WebSocket that wasn't open");
 
             if (command is not MessageBase messageBase)
-            {
                 throw new Exception($"Unexpected message type{command.GetType()}");
-            }
 
-            var cmdAttrib = from CustomAttributeData attib in command.GetType().CustomAttributes
-                          where attib.AttributeType == typeof(XFS4IoTServer.CommandHandlerAttribute)
-                          select attib;
-
-            if (cmdAttrib is null)
-                throw new Exception($"Unexpected command type specifid. {command.GetType()}");
-
-            ArraySegment<byte> JSON = new ArraySegment<byte>(Encoding.UTF8.GetBytes(messageBase.Serialise()));
+            var JSON = new ArraySegment<byte>(Encoding.UTF8.GetBytes(messageBase.Serialise()));
 
             await Socket.SendAsync( JSON, WebSocketMessageType.Text, true, CancellationToken.None );
         }

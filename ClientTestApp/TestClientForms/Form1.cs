@@ -10,336 +10,162 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
-using System.Net.WebSockets;
-using XFS4IoT.Common.Commands;
-using XFS4IoT.Common.Completions;
-using XFS4IoT.CardReader.Commands;
-using XFS4IoT.CardReader.Completions;
+using TestClientForms.Devices;
 
 namespace TestClientForms
 {
     public partial class Form1 : Form
     {
+
         public Form1()
         {
             InitializeComponent();
             textBoxServiceURI.Text = "ws://localhost";
+            DispenserServiceURI.Text = "ws://localhost";
+
+            DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
+            CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
         }
+        
+        private DispenserDevice DispenserDev { get; init; }
+        private CardReaderDevice CardReaderDev { get; init; }
+
 
         private void Form1_Load(object sender, EventArgs e)
         { }
 
         private async void AcceptCard_Click(object sender, EventArgs e)
         {
-            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxCardReader.Text}"));
-
-            try
-            {
-                await cardReader.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var readRawDataCmd = new ReadRawDataCommand(
-                RequestId++,
-                new ReadRawDataCommand.PayloadData(
-                    Timeout: CommandTimeout,
-                    Track1: true,
-                    Track2: true,
-                    Track3: true,
-                    Chip: false,
-                    Security: false,
-                    FluxInactive: false,
-                    Watermark: false,
-                    MemoryChip: false,
-                    Track1Front: false,
-                    FrontImage: false,
-                    BackImage: false,
-                    Track1JIS: false,
-                    Track3JIS: false,
-                    Ddi: false));
-
-            textBoxCommand.Text = readRawDataCmd.Serialise();
-
-            await cardReader.SendCommandAsync(readRawDataCmd);
-
-            textBoxResponse.Text = string.Empty;
-            textBoxEvent.Text = string.Empty;
-
-            for (; ; )
-            {
-                object cmdResponse = await cardReader.ReceiveMessageAsync();
-                if (cmdResponse is ReadRawDataCompletion response)
-                {
-                    textBoxResponse.Text = response.Serialise();
-                    break;
-                }
-                else if (cmdResponse is XFS4IoT.CardReader.Events.MediaInsertedEvent cardInsertedEv)
-                {
-                    textBoxEvent.Text = cardInsertedEv.Serialise();
-                }
-                else if (cmdResponse is XFS4IoT.CardReader.Events.InsertCardEvent insertCardEv)
-                {
-                    textBoxEvent.Text = insertCardEv.Serialise();
-                }
-                else
-                {
-                    textBoxEvent.Text += "<Unknown Event>";
-                }
-            }
+            await CardReaderDev.AcceptCard();
         }
 
         private async void EjectCard_Click(object sender, EventArgs e)
         {
-            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxCardReader.Text}"));
-
-            try
-            {
-                await cardReader.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var ejectCmd = new EjectCardCommand(
-                RequestId++, new EjectCardCommand.PayloadData(
-                    Timeout: CommandTimeout,
-                    EjectPosition: EjectCardCommand.PayloadData.EjectPositionEnum.ExitPosition));
-
-            textBoxCommand.Text = ejectCmd.Serialise();
-
-            await cardReader.SendCommandAsync(ejectCmd);
-
-            textBoxResponse.Text = string.Empty;
-            textBoxEvent.Text = string.Empty;
-
-            while (true)
-            {
-                switch (await cardReader.ReceiveMessageAsync())
-                {
-                    case EjectCardCompletion response:
-                        textBoxResponse.Text = response.Serialise();
-                        if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                            return;
-                        break;
-
-                    case XFS4IoT.CardReader.Events.MediaRemovedEvent removedEv:
-                        textBoxEvent.Text += removedEv.Serialise();
-                        return;
-
-                    default:
-                        textBoxEvent.Text += "<Unknown Event>";
-                        break;
-                }
-            }
+            await CardReaderDev.EjectCard();
         }
 
         private async void buttonStatus_Click(object sender, EventArgs e)
         {
-            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxCardReader.Text}"));
+            var status = await CardReaderDev.GetStatus();
 
-            try
+            if (status != null)
             {
-                await cardReader.ConnectAsync();
+                textBoxStDevice.Text = status.Payload?.Common?.Device?.ToString();
+                textBoxStMedia.Text = status.Payload?.CardReader?.Media?.ToString();
             }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var statusCmd = new StatusCommand(RequestId++, new StatusCommand.PayloadData(CommandTimeout));
-            textBoxCommand.Text = statusCmd.Serialise();
-
-            await cardReader.SendCommandAsync(statusCmd);
-
-            textBoxResponse.Text = string.Empty;
-            textBoxEvent.Text = string.Empty;
-
-            object cmdResponse = await cardReader.ReceiveMessageAsync();
-            if (cmdResponse is StatusCompletion response)
-            {
-                textBoxResponse.Text = response.Serialise();
-                textBoxStDevice.Text = response.Payload?.Common?.Device?.ToString();
-                textBoxStMedia.Text = response.Payload?.CardReader?.Media?.ToString();
-            }
+            else
+                MessageBox.Show("Failed to get CardReader status.");
+            
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxCardReader.Text}"));
+            var capabilities = await CardReaderDev.GetCapabilities();
 
-            try
+            if (capabilities != null)
             {
-                await cardReader.ConnectAsync();
+                textBoxDeviceType.Text = capabilities.Payload.CardReader.Type.ToString();
             }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var capabilitiesCmd = new CapabilitiesCommand(RequestId++, new CapabilitiesCommand.PayloadData(CommandTimeout));
-            textBoxCommand.Text = capabilitiesCmd.Serialise();
-
-            await cardReader.SendCommandAsync(capabilitiesCmd);
-
-            textBoxResponse.Text = string.Empty;
-            textBoxEvent.Text = string.Empty;
-
-            object cmdResponse = await cardReader.ReceiveMessageAsync();
-            if (cmdResponse is CapabilitiesCompletion response)
-            {
-                textBoxResponse.Text = response.Serialise();
-                textBoxDeviceType.Text = response.Payload.CardReader.Type.ToString();
-            }
+            else
+                MessageBox.Show("Failed to get CardReader capabilities.");
         }
 
         private async void ServiceDiscovery_Click(object sender, EventArgs e)
         {
-            int[] PortRanges = new int[]
-            {
-                80,  // Only for HTTP
-                443, // Only for HTTPS
-                5846,
-                5847,
-                5848,
-                5849,
-                5850,
-                5851,
-                5852,
-                5853,
-                5854,
-                5855,
-                5856
-            };
-
-            string commandString = string.Empty;
-            string responseString = string.Empty;
-            string cardServiceURI = string.Empty;
-
-            textBoxCommand.Text = commandString;
-            textBoxResponse.Text = responseString;
-            textBoxCardReader.Text = cardServiceURI;
-            textBoxEvent.Text = string.Empty;
-
-            ServicePort = null;
-
-
-            foreach (int port in PortRanges)
-            {
-                try
-                {
-                    WebSocketState state;
-                    using (var socket = new ClientWebSocket())
-                    {
-                        var cancels = new CancellationTokenSource();
-                        cancels.CancelAfter(40_000);
-                        await socket.ConnectAsync(new Uri($"{textBoxServiceURI.Text}:{port}/xfs4iot/v1.0"), cancels.Token);
-                        state = socket.State;
-                    }
-
-                    if (state == WebSocketState.Open)
-                    {
-                        ServicePort = port;
-                        var Discovery = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxServiceURI.Text}:{ServicePort}/xfs4iot/v1.0"));
-
-                        try
-                        {
-                            await Discovery.ConnectAsync();
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
-
-                        var getServiceCommand = new GetServicesCommand(RequestId++, new GetServicesCommand.PayloadData(CommandTimeout));
-                        commandString = getServiceCommand.Serialise();
-                        await Discovery.SendCommandAsync(getServiceCommand);
-
-                        object cmdResponse = await Discovery.ReceiveMessageAsync();
-                        if (cmdResponse is GetServicesCompletion response)
-                        {
-                            responseString = response.Serialise();
-                            var service =
-                                (from ep in response.Payload.Services
-                                 where ep.ServiceURI.Contains("CardReader")
-                                 select ep
-                                ).FirstOrDefault()
-                                ?.ServiceURI;
-
-                            if (!string.IsNullOrEmpty(service))
-                                cardServiceURI = service;
-                        }
-                        break;
-                    }
-                }
-                catch (WebSocketException)
-                { }
-                catch (System.Net.HttpListenerException)
-                { }
-                catch (TaskCanceledException)
-                { }
-            }
-
-            if (ServicePort is null)
-            {
-                textBoxPort.Text = "";
-                MessageBox.Show("Failed on finding services.");
-            }
-            else
-                textBoxPort.Text = ServicePort.ToString();
-
-            textBoxCommand.Text = commandString;
-            textBoxResponse.Text = responseString;
-            textBoxCardReader.Text = cardServiceURI;
+            await CardReaderDev.DoServiceDiscovery();
+        }
+        private async void CaptureCard_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.CaptureCard();
         }
 
-        int? ServicePort = null;
-        readonly int CommandTimeout = 60000;
-        private int RequestId { get; set; } = 0;
 
-		private async void CaptureCard_Click(object sender, EventArgs e)
-		{
-            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{textBoxCardReader.Text}"));
+        #region Dispenser Tab
 
-            try
-            {
-                await cardReader.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
+        private async void DispenserServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.DoServiceDiscovery();
+        }
 
-            var captureCmd = new RetainCardCommand(
-                RequestId++, new RetainCardCommand.PayloadData(
-                    Timeout: CommandTimeout));
+        private async void DispenserGetCashUnitInfo_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.GetCashUnitInfo();
+        }
 
-            textBoxCommand.Text = captureCmd.Serialise();
+        private async void DispenserStatus_Click(object sender, EventArgs e)
+        {
+            var status = await DispenserDev.GetStatus();
+            if (status != null)
+                DispenserStDevice.Text = status.Payload?.Common?.Device?.ToString();
+        }
 
-            await cardReader.SendCommandAsync(captureCmd);
+        private async void DispenserCapabilities_Click(object sender, EventArgs e)
+        {
+            var capabilities = await DispenserDev.GetCapabilities();
+            if (capabilities != null)
+                DispenserDeviceType.Text = capabilities.Payload?.CashDispenser?.Type?.ToString();
+        }
 
-            textBoxResponse.Text = string.Empty;
-            textBoxEvent.Text = string.Empty;
+        private async void DispenserGetMixTypes_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.GetMixTypes();
+        }
 
-            while (true)
-            {
-                switch (await cardReader.ReceiveMessageAsync())
-                {
-                    case RetainCardCompletion response:
-                        textBoxResponse.Text = response.Serialise();
-                        return;
-                    case XFS4IoT.CardReader.Events.MediaRetainedEvent retainedEv:
-                        textBoxEvent.Text += retainedEv.Serialise();
-                        break;
-                    default:
-                        textBoxEvent.Text += "<Unknown Event>";
-                        break;
-                }
-            }
+        private async void DispenserGetPresentStatus_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.GetPresentStatus();
+        }
 
+        private async void DispenserReset_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Reset();
+        }
+
+        private async void DispenserStartExchange_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.StartExchange();
+        }
+
+        private async void DispenserEndExchange_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.EndExchange();
+        }
+
+        private async void DispenserPresent_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Present();
+        }
+
+        private async void DispenserDenominate_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Denominate();
+        }
+
+        private async void DispenserDispense_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Dispense();
+        }
+
+        private async void DispenserOpenShutter_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.OpenShutter();
+        }
+
+        private async void DispenserCloseShutter_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.CloseShutter();
+        }
+
+        #endregion
+
+        private async void DispenserReject_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Reject();
+        }
+
+        private async void DispenserRetract_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.Retract();
         }
     }
 }

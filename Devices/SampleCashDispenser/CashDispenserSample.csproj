@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.CashDispenser</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.CashDispenser.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="0.0.2-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="0.0.2-alpha.1" />
+  </ItemGroup>
+
+</Project>
