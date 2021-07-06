@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.CardReader</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.CardReader.Sample</RootNamespace>
+    <Platforms>AnyCPU;x86</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CardReader" Version="0.0.1-alpha.2" />
+  </ItemGroup>
+
+</Project>
