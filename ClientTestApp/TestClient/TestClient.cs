@@ -508,17 +508,17 @@ namespace TestClient
                     return;
                 }
 
-                ConsoleColor msgColour = msgBase.Headers.Type switch
+                ConsoleColor msgColour = msgBase.Header.Type switch
                 {
                     MessageHeader.TypeEnum.Command => ConsoleColor.Blue,
                     MessageHeader.TypeEnum.Acknowledgement => ConsoleColor.DarkGray,
                     MessageHeader.TypeEnum.Event => ConsoleColor.Yellow,
                     MessageHeader.TypeEnum.Completion => ConsoleColor.Green,
                     MessageHeader.TypeEnum.Unsolicited => ConsoleColor.DarkYellow,
-                    _ => throw new NotImplementedException($"Unknown message type {msgBase.Headers.Type}"),
+                    _ => throw new NotImplementedException($"Unknown message type {msgBase.Header.Type}"),
                 };
 
-                var reqID = msgBase.Headers?.RequestId ?? 0;
+                var reqID = msgBase.Header?.RequestId ?? 0;
 
                 LogMessage(reqID, Message.GetType().Name, msgColour, msgBase.Serialise());
             }

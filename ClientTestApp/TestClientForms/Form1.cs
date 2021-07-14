@@ -22,13 +22,16 @@ namespace TestClientForms
             InitializeComponent();
             textBoxServiceURI.Text = "ws://localhost";
             DispenserServiceURI.Text = "ws://localhost";
+            TextTerminalServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
+            TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
             CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
         }
         
         private DispenserDevice DispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
+        private TextTerminalDevice TextTerminalDev { get; init; }
 
 
         private void Form1_Load(object sender, EventArgs e)
@@ -155,9 +158,6 @@ namespace TestClientForms
         {
             await DispenserDev.CloseShutter();
         }
-
-        #endregion
-
         private async void DispenserReject_Click(object sender, EventArgs e)
         {
             await DispenserDev.Reject();
@@ -167,5 +167,86 @@ namespace TestClientForms
         {
             await DispenserDev.Retract();
         }
+
+        #endregion
+
+        #region TextTerminal Tab
+
+        private async void TextTerminalServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.DoServiceDiscovery();
+        }
+
+        private async void TextTerminalStatus_Click(object sender, EventArgs e)
+        {
+            var status = await TextTerminalDev.GetStatus();
+            if (status != null)
+                TextTerminalStDevice.Text = status.Payload?.Common?.Device?.ToString();
+
+        }
+
+        private async void TextTerminalCapabilities_Click(object sender, EventArgs e)
+        {
+            var capabilities = await TextTerminalDev.GetCapabilities();
+            if (capabilities != null)
+                TextTerminalDeviceType.Text = capabilities.Payload?.TextTerminal?.Type?.ToString();
+        }
+
+        private async void TextTerminalClearScreen_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.ClearScreen();
+        }
+
+        private async void TextTerminalWrite_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.Write();
+        }
+
+        private async void TextTerminalRead_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.Read();
+        }
+
+        private async void TextTerminalGetKeyDetail_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.GetKeyDetail();
+        }
+
+        private async void TextTerminalBeep_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.Beep();
+        }
+
+        private async void TextTerminalTurnOffLED_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.TurnOffLED();
+        }
+
+        private async void TextTerminalTurnOnLED_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.TurnOnLED();
+        }
+
+        private async void TextTerminalReset_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.Reset();
+        }
+
+        private async void TextTerminalDispLightOn_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.SetDispLight(true);
+        }
+
+        private async void TextTerminalDispLightOff_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.SetDispLight(false);
+        }
+
+        private async void TextTerminalSetResolution_Click(object sender, EventArgs e)
+        {
+            await TextTerminalDev.SetResolution();
+        }
+
+        #endregion
     }
 }

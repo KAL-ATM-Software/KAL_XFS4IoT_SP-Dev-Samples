@@ -42,6 +42,14 @@ namespace Server
                 simCashDispenserrDevice.SetServiceProvider = cashDispenserService;
                 Publisher.Add(cashDispenserService);
 
+                var simTextTerminalDevice = new TextTerminalSample.TextTerminalSample(Logger);
+                var textTerminalService = new TextTerminalProvider.TextTerminalServiceProvider(EndpointDetails,
+                                                                                               ServiceName: "SimTextTerminal",
+                                                                                               simTextTerminalDevice,
+                                                                                               Logger);
+                simTextTerminalDevice.SetServiceProvider = textTerminalService;
+                Publisher.Add(textTerminalService);
+
                 // TODO: adding other services
 
                 await Publisher.RunAsync();
