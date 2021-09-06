@@ -13,9 +13,10 @@ using System.Windows.Forms;
 using XFS4IoT.CashManagement.Commands;
 using XFS4IoT.CashManagement.Completions;
 using XFS4IoT.CashManagement.Events;
-using XFS4IoT.Dispenser.Commands;
-using XFS4IoT.Dispenser.Completions;
-using XFS4IoT.Dispenser.Events;
+using XFS4IoT.CashDispenser.Commands;
+using XFS4IoT.CashDispenser.Completions;
+using XFS4IoT.CashDispenser.Events;
+using XFS4IoT;
 
 namespace TestClientForms.Devices
 {
@@ -43,12 +44,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = getCashUnitInfoCmd.Serialise();
 
-            await dispenser.SendCommandAsync(getCashUnitInfoCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await dispenser.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getCashUnitInfoCmd);
             if (cmdResponse is GetCashUnitInfoCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -72,12 +71,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = getMixTypesCmd.Serialise();
 
-            await dispenser.SendCommandAsync(getMixTypesCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await dispenser.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getMixTypesCmd);
             if (cmdResponse is GetMixTypesCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -101,12 +98,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = getPresentStatusCmd.Serialise();
 
-            await dispenser.SendCommandAsync(getPresentStatusCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await dispenser.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getPresentStatusCmd);
             if (cmdResponse is GetPresentStatusCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -150,6 +145,9 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = cashUnitErrorEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -173,17 +171,14 @@ namespace TestClientForms.Devices
                 new(CommandTimeout, null, 1, DispenseCommand.PayloadData.PositionEnum.Default, 
                 new DispenseCommand.PayloadData.DenominationClass(new Dictionary<string, double>() {
                     { "EUR", 50 }
-                }), 
-                "NONCE=254611E63B2531576314E86527338D61,TOKENFORMAT=1,TOKENLENGTH=0164,DISPENSE1=50.00EUR,HMACSHA256=CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"));
+                })));
 
             CmdBox.Text = getPresentStatusCmd.Serialise();
-
-            await dispenser.SendCommandAsync(getPresentStatusCmd);
 
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await dispenser.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getPresentStatusCmd);
             if (cmdResponse is DispenseCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -232,6 +227,9 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                {
                 }
                 else
                 {
@@ -282,6 +280,9 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -331,6 +332,9 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -379,6 +383,9 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = incompleteRetractEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -416,6 +423,9 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -452,6 +462,9 @@ namespace TestClientForms.Devices
                 {
                     RspBox.Text = response.Serialise();
                     break;
+                }
+                else if (cmdResponse is Acknowledge)
+                {
                 }
                 else
                 {
@@ -497,6 +510,9 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                {
                 }
                 else
                 {
@@ -546,6 +562,9 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is IncompleteRetractEvent incompleteRetractEv)
                 {
                     EvtBox.Text = incompleteRetractEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                {
                 }
                 else
                 {

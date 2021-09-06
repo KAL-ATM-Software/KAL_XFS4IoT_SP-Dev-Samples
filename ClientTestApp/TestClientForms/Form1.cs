@@ -5,6 +5,8 @@
 \***********************************************************************************************/
 
 using System;
+using System.Collections.Generic;
+using System.Collections;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,16 +25,18 @@ namespace TestClientForms
             textBoxServiceURI.Text = "ws://localhost";
             DispenserServiceURI.Text = "ws://localhost";
             TextTerminalServiceURI.Text = "ws://localhost";
+            EncryptorServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
             CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
+            EncryptorDev = new("Encryptor", EncryptorCmdBox, EncryptorRspBox, EncryptorEvtBox, EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
         }
         
         private DispenserDevice DispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
         private TextTerminalDevice TextTerminalDev { get; init; }
-
+        private EncryptorDevice EncryptorDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
@@ -245,6 +249,97 @@ namespace TestClientForms
         private async void TextTerminalSetResolution_Click(object sender, EventArgs e)
         {
             await TextTerminalDev.SetResolution();
+        }
+
+        #endregion
+
+        #region Encryptor Tab
+
+        private async void EncryptorServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await EncryptorDev.DoServiceDiscovery();
+        }
+
+        private async void EncryptorStatus_Click(object sender, EventArgs e)
+        {
+            var result = await EncryptorDev.GetStatus();
+            if (result is not null)
+                EncryptorStDevice.Text = result.Payload?.Common?.Device?.ToString();
+
+        }
+
+        private async void EncryptorCapabilities_Click(object sender, EventArgs e)
+        {
+            var result = await EncryptorDev.GetCapabilities();
+            if (result is not null)
+                EncryptorDeviceType.Text = result.Payload?.KeyManagement?.KeyNum?.ToString();
+        }
+
+        private async void EncryptorGetKeyNames_Click(object sender, EventArgs e)
+        {
+            EncryptorKeyNamelistBox.Items.Clear();
+
+            var result = await EncryptorDev.GetKeyNames();
+            if (result is not null)
+            {
+                foreach (var keyName in result.Payload.KeyDetails)
+                {
+                    EncryptorKeyNamelistBox.Items.Add(keyName.Key);
+                }
+            }
+        }
+
+        private async void EncryptorInitialization_Click(object sender, EventArgs e)
+        {
+            await EncryptorDev.Initialization();
+        }
+
+        private async void EncryptorImportKey_Click(object sender, EventArgs e)
+        {
+            List<byte> data = new() { 0xb1, 0x88, 0x68, 0x12, 0x3c, 0x16, 0x57, 0x9f, 0x52, 0x78, 0x3f, 0x2e, 0x5a, 0x00, 0x1f, 0xfe };
+            await EncryptorDev.LoadKey("CryptKey", "D0", "E", data); 
+            await EncryptorDev.LoadKey("MACKey", "M0", "G", data); 
+        }
+        private async void EncryptorReset_Click(object sender, EventArgs e)
+        {
+            await EncryptorDev.Reset(); 
+        }
+
+        private async void EncryptorEncrypt_Click(object sender, EventArgs e)
+        {
+            List<byte> data = new() { 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 };
+            await EncryptorDev.Encrypt("CryptKey", data); 
+        }
+
+        private async void EncryptorDeleteKey_Click(object sender, EventArgs e)
+        {
+            int index = EncryptorKeyNamelistBox.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Select key name to delete.");
+                return;
+            }
+
+            string keyName = (string)EncryptorKeyNamelistBox.Items[index];
+            if (keyName != "CryptKey" &&
+                keyName != "MACKey")
+            {
+                MessageBox.Show("Only CryptKey or MACKey can be deleted.");
+                return;
+            }
+
+            await EncryptorDev.DeleteKey(keyName); 
+        }
+
+        private async void EncryptorGenerateMAC_Click(object sender, EventArgs e)
+        {
+            List<byte> data = new() { 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 };
+            await EncryptorDev.GenerateMAC("MACKey", data); 
+        }
+
+        private async void EncryptorGenerateRandom_Click(object sender, EventArgs e)
+        {
+            await EncryptorDev.GenerateRandom(); 
         }
 
         #endregion

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT;
 using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
 
@@ -77,6 +78,9 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = insertCardEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -123,6 +127,9 @@ namespace TestClientForms.Devices
                         EvtBox.Text += removedEv.Serialise();
                         return;
 
+                    case Acknowledge ack:
+                        break;
+
                     default:
                         EvtBox.Text += "<Unknown Event>";
                         break;
@@ -163,6 +170,8 @@ namespace TestClientForms.Devices
                         return;
                     case XFS4IoT.CardReader.Events.MediaRetainedEvent retainedEv:
                         EvtBox.Text += retainedEv.Serialise();
+                        break;
+                    case Acknowledge ack:
                         break;
                     default:
                         EvtBox.Text += "<Unknown Event>";

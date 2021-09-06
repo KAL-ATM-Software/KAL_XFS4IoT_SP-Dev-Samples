@@ -25,6 +25,7 @@ namespace Server
                 var Publisher = new ServicePublisher(Logger);
                 var EndpointDetails = Publisher.EndpointDetails;
 
+                /// CardReader Service Provider
                 var simCardReaderDevice = new KAL.XFS4IoTSP.CardReader.Sample.CardReaderSample(Logger);
                 var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
                                                                    ServiceName: "SimCardReader",
@@ -33,15 +34,17 @@ namespace Server
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
 
+                /// CashDispenser Service Provider
                 var simCashDispenserrDevice = new KAL.XFS4IoTSP.CashDispenser.Sample.CashDispenserSample(Logger);
-                var cashDispenserService = new DispenserServiceProvider(EndpointDetails,
-                                                                        ServiceName: "SimCashDispenser",
-                                                                        simCashDispenserrDevice,
-                                                                        Logger,
-                                                                        new FilePersistentData(Logger));
+                var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
+                                                                            ServiceName: "SimCashDispenser",
+                                                                            simCashDispenserrDevice,
+                                                                            Logger,
+                                                                            new FilePersistentData(Logger));
                 simCashDispenserrDevice.SetServiceProvider = cashDispenserService;
                 Publisher.Add(cashDispenserService);
 
+                /// Text Terminal Unit Service Provider
                 var simTextTerminalDevice = new TextTerminalSample.TextTerminalSample(Logger);
                 var textTerminalService = new TextTerminalProvider.TextTerminalServiceProvider(EndpointDetails,
                                                                                                ServiceName: "SimTextTerminal",
@@ -49,6 +52,17 @@ namespace Server
                                                                                                Logger);
                 simTextTerminalDevice.SetServiceProvider = textTerminalService;
                 Publisher.Add(textTerminalService);
+
+                /// Encryptor Service Provider
+                var simEncryptorDevice = new KAL.XFS4IoTSP.Encryptor.Sample.EncryptorSample(Logger);
+                var encryptorService = new CryptoServiceProvider(EndpointDetails,
+                                                                 ServiceName: "SimEncryptor",
+                                                                 simEncryptorDevice,
+                                                                 Logger,
+                                                                 new FilePersistentData(Logger));
+
+                simEncryptorDevice.SetServiceProvider = encryptorService;
+                Publisher.Add(encryptorService);
 
                 // TODO: adding other services
 

@@ -39,12 +39,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = clearScreenCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(clearScreenCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, clearScreenCmd);
             if (cmdResponse is ClearScreenCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -73,12 +71,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = writeCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(writeCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, writeCmd);
             if (cmdResponse is WriteCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -108,8 +104,8 @@ namespace TestClientForms.Devices
                                                                                           false,
                                                                                           true,
                                                                                           "1234567890",
-                                                                                          new() { "ckEnter", "ckCancel", "ckClear", "ckFDK01", "ckFDK02", "ckFDK03", "ckFDK04", "ckFDK05", "ckFDK06", "ckFDK07", "ckFDK08", },
-                                                                                          new() { "ckEnter", "ckCancel" }));
+                                                                                          new() { "enter", "cancel", "clear", "fdk01", "fdk02", "fdk03", "fdk04", "fdk05", "fdk06", "fdk07", "fdk08", },
+                                                                                          new() { "enter", "cancel" }));
 
             CmdBox.Text = writeCmd.Serialise();
 
@@ -151,12 +147,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = keyDetailCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(keyDetailCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, keyDetailCmd);
             if (cmdResponse is GetKeyDetailCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -180,12 +174,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = beepCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(beepCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, beepCmd);
             if (cmdResponse is BeepCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -210,12 +202,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = setLEDCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(setLEDCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setLEDCmd);
             if (cmdResponse is SetLedCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -239,12 +229,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = setLEDCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(setLEDCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setLEDCmd);
             if (cmdResponse is SetLedCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -264,16 +252,14 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var setDispLight = new DispLightCommand(RequestId.NewID(), new DispLightCommand.PayloadData(CommandTimeout, on));
+            var setDispLightCmd = new DispLightCommand(RequestId.NewID(), new DispLightCommand.PayloadData(CommandTimeout, on));
 
-            CmdBox.Text = setDispLight.Serialise();
-
-            await textTerminal.SendCommandAsync(setDispLight);
+            CmdBox.Text = setDispLightCmd.Serialise();
 
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setDispLightCmd);
             if (cmdResponse is DispLightCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -297,12 +283,10 @@ namespace TestClientForms.Devices
 
             CmdBox.Text = resetCmd.Serialise();
 
-            await textTerminal.SendCommandAsync(resetCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, resetCmd);
             if (cmdResponse is ResetCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -322,16 +306,14 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var resetCmd = new SetResolutionCommand(RequestId.NewID(), new SetResolutionCommand.PayloadData(CommandTimeout, new(16, 16)));
+            var setResolutionCmd = new SetResolutionCommand(RequestId.NewID(), new SetResolutionCommand.PayloadData(CommandTimeout, new(16, 16)));
 
-            CmdBox.Text = resetCmd.Serialise();
-
-            await textTerminal.SendCommandAsync(resetCmd);
+            CmdBox.Text = setResolutionCmd.Serialise();
 
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setResolutionCmd);
             if (cmdResponse is SetResolutionCompletion response)
             {
                 RspBox.Text = response.Serialise();

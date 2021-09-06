@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.TextTerminal" Version="0.0.2-alpha.2" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.TextTerminal" Version="0.0.3-alpha.1" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerHostSample", "SampleS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashDispenserSample", "SampleCashDispenser\CashDispenserSample.csproj", "{0FD5CA11-864E-46EA-85C2-41F43D5ABD41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextTerminalSample", "TextTerminalSample\TextTerminalSample.csproj", "{41A47965-FA37-4BDF-9468-1A4C5788A4EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextTerminalSample", "TextTerminalSample\TextTerminalSample.csproj", "{41A47965-FA37-4BDF-9468-1A4C5788A4EC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EncryptorSample", "SampleEncryptor\EncryptorSample.csproj", "{45C3A89D-B09C-4833-88FD-6266107FB409}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{41A47965-FA37-4BDF-9468-1A4C5788A4EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41A47965-FA37-4BDF-9468-1A4C5788A4EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41A47965-FA37-4BDF-9468-1A4C5788A4EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45C3A89D-B09C-4833-88FD-6266107FB409}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45C3A89D-B09C-4833-88FD-6266107FB409}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45C3A89D-B09C-4833-88FD-6266107FB409}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45C3A89D-B09C-4833-88FD-6266107FB409}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

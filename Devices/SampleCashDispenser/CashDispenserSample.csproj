@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="0.0.2-alpha.2" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="0.0.2-alpha.2" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="0.0.3-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="0.0.3-alpha.1" />
   </ItemGroup>
 
 </Project>

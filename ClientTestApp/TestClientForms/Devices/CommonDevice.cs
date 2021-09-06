@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 
@@ -108,9 +109,9 @@ namespace TestClientForms.Devices
 
                         var getServiceCommand = new GetServicesCommand(RequestId.NewID(), new GetServicesCommand.PayloadData(CommandTimeout));
                         commandString = getServiceCommand.Serialise();
-                        await Discovery.SendCommandAsync(getServiceCommand);
 
-                        object cmdResponse = await Discovery.ReceiveMessageAsync();
+                        object cmdResponse = await SendAndWaitForCompletionAsync(Discovery, getServiceCommand);
+
                         if (cmdResponse is GetServicesCompletion response)
                         {
                             responseString = response.Serialise();
@@ -164,12 +165,10 @@ namespace TestClientForms.Devices
             var statusCmd = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(CommandTimeout));
             CmdBox.Text = statusCmd.Serialise();
 
-            await device.SendCommandAsync(statusCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await device.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(device, statusCmd);
             if (cmdResponse is StatusCompletion response)
             {
                 RspBox.Text = response.Serialise();
@@ -194,18 +193,26 @@ namespace TestClientForms.Devices
             var capabilitiesCmd = new CapabilitiesCommand(RequestId.NewID(), new CapabilitiesCommand.PayloadData(CommandTimeout));
             CmdBox.Text = capabilitiesCmd.Serialise();
 
-            await device.SendCommandAsync(capabilitiesCmd);
-
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await device.ReceiveMessageAsync();
+            object cmdResponse = await SendAndWaitForCompletionAsync(device, capabilitiesCmd);
             if (cmdResponse is CapabilitiesCompletion response)
             {
                 RspBox.Text = response.Serialise();
                 return response;
             }
             return null;
+        }
+
+        public async Task<object> SendAndWaitForCompletionAsync(XFS4IoTClient.ClientConnection device, object command)
+        {
+            await device.SendCommandAsync(command);
+
+            object cmdResponse = await device.ReceiveMessageAsync();
+            if (cmdResponse is Acknowledge)
+                cmdResponse = await device.ReceiveMessageAsync();
+            return cmdResponse;
         }
     }
 

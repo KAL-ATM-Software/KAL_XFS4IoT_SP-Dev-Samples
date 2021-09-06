@@ -67,14 +67,14 @@ namespace TextTerminalSample
         /// </summary>
         public GetKeyDetailCompletion.PayloadData GetKeyDetail()
         {
-            return new GetKeyDetailCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success, null, "0123456789", new()
-            {
-                new(true, true, true,
-                    CkFDK01: true, CkFDK02: true,
-                    CkFDK03: true, CkFDK04: true,
-                    CkFDK05: true, CkFDK06: true,
-                    CkFDK07: true, CkFDK08: true)
-            });
+            return new GetKeyDetailCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success, 
+                                                          null, 
+                                                          "0123456789", 
+                                                          new(Enter: true, Cancel: true, Clear: true,
+                                                              Fdk01: true, Fdk02: true,
+                                                              Fdk03: true, Fdk04: true,
+                                                              Fdk05: true, Fdk06: true,
+                                                              Fdk07: true, Fdk08: true));
         }
 
         /// <summary>
@@ -222,8 +222,8 @@ namespace TextTerminalSample
                     await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(new(null, key));
                     switch (key)
                     {
-                        //Sample SP only supports "ckClear". Clear the buffered keys.
-                        case "ckClear":
+                        //Sample SP only supports "clear". Clear the buffered keys.
+                        case "clear":
                             TextTerminalUI.WriteAt(readInfo.PositionX, readInfo.PositionY, new string(' ', buffer.Length));
                             buffer.Clear();
                             break;
@@ -273,17 +273,17 @@ namespace TextTerminalSample
         public StatusCompletion.PayloadData Status()
         {
             StatusPropertiesClass common = new(
-                StatusPropertiesClass.DeviceEnum.Online,
-                new List<string>(),
-                new List<StatusPropertiesClass.GuideLightsClass>(){ new StatusPropertiesClass.GuideLightsClass(
-                    StatusPropertiesClass.GuideLightsClass.FlashRateEnum.Off,
-                    StatusPropertiesClass.GuideLightsClass.ColorEnum.Green,
-                    StatusPropertiesClass.GuideLightsClass.DirectionEnum.Off) },
-                PositionStatusEnum.Inposition,
-                0,
-                StatusPropertiesClass.AntiFraudModuleEnum.Ok);
+                Device: StatusPropertiesClass.DeviceEnum.Online,
+                DevicePosition: PositionStatusEnum.InPosition,
+                PowerSaveRecoveryTime: 0,
+                AntiFraudModule: StatusPropertiesClass.AntiFraudModuleEnum.Ok);
 
-            StatusClass textTerminal = new(TextTerminalUI.GetReading() ? StatusClass.KeyboardEnum.On : StatusClass.KeyboardEnum.Off, StatusClass.KeyLockEnum.Off, CurrentWidth, CurrentHeight, LEDStatus);
+            StatusClass textTerminal = new(
+                    Keyboard: TextTerminalUI.GetReading() ? StatusClass.KeyboardEnum.On : StatusClass.KeyboardEnum.Off, 
+                    KeyLock: StatusClass.KeyLockEnum.Off, 
+                    DisplaySizeX: CurrentWidth, 
+                    DisplaySizeY: CurrentHeight, 
+                    Leds: LEDStatus);
 
             return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
                                                     null,
@@ -293,98 +293,129 @@ namespace TextTerminalSample
 
         public CapabilitiesCompletion.PayloadData Capabilities()
         {
-            List<CapabilityPropertiesClass.GuideLightsClass> guideLights = new()
-            {
-                new(new CapabilityPropertiesClass.GuideLightsClass.FlashRateClass(true, true, true, true),
-                new CapabilityPropertiesClass.GuideLightsClass.ColorClass(true, true, true, true, true, true, true),
-                new CapabilityPropertiesClass.GuideLightsClass.DirectionClass(false, false))
-            };
-
             CapabilityPropertiesClass common = new(
-                "1.0",
-                new List<DeviceInformationClass>() { new DeviceInformationClass(
-                    "Simulator",
-                    "123456-78900001",
-                    "1.0",
-                    "KAL simualtor",
-                    new List<FirmwareClass>() {new FirmwareClass(
-                    "XFS4 SP",
-                    "1.0",
-                    "1.0") },
-                    new List<SoftwareClass>(){ new SoftwareClass(
-                    "XFS4 SP",
-                    "1.0") }) },
-                new VendorModeInfoClass(
-                    true,
-                    new List<string>()
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<DeviceInformationClass>() { new DeviceInformationClass(
+                    ModelName: "Simulator",
+                    SerialNumber: "123456-78900001",
+                    RevisionNumber: "1.0",
+                    ModelDescription: "KAL simualtor",
+                    Firmware: new List<FirmwareClass>() {new FirmwareClass(
+                                                                           FirmwareName: "XFS4 SP",
+                                                                           FirmwareVersion: "1.0",
+                                                                           HardwareRevision: "1.0") },
+                    Software: new List<SoftwareClass>(){ new SoftwareClass(
+                                                                           SoftwareName: "XFS4 SP",
+                                                                           SoftwareVersion: "1.0") }) },
+                VendorModeIformation: new VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>()
                     {
-                        "TextTerminal.Beep",
-                        "TextTerminal.ClearScreen"
+                        "Beep",
+                        "ClearScreen",
+                        //"DefineKeys",
+                        "DispLight",
+                        //"GetFormList",
+                        "GetKeyDetail",
+                        //"GetQueryField",
+                        //"GetQueryForm",
+                        "Read",
+                        //"ReadForm",
+                        "Reset",
+                        "SetLed",
+                        "SetResolution",
+                        "Write",
+                        //"TextTerminal.WriteForm"
                     }),
-                new List<string>(),
-                guideLights,
-                false,
-                false,
-                new List<string>(),
-                false,
-                false,
-                false);
+                PowerSaveControl: false,
+                AntiFraudModule: false,
+                SynchronizableCommands: new List<string>(),
+                EndToEndSecurity: false,
+                HardwareSecurityElement: false,
+                ResponseSecurityEnabled: false);
 
-            CapabilitiesClass textTerminal = new(CapabilitiesClass.TypeEnum.Fixed, new() { new(32, 16), new(16, 16) }, false, true, false, false, 
-                new List<CapabilitiesClass.LedsClass>()
-            {
-                new CapabilitiesClass.LedsClass(true, true, true, true, true, true, true),
-                new CapabilitiesClass.LedsClass(true, true, true, true, true, false, true, true),
-                new CapabilitiesClass.LedsClass(true, true, true, true, true, false, true, false, true),
-            });
+            CapabilitiesClass textTerminal = new(Type: CapabilitiesClass.TypeEnum.Fixed, 
+                                                 Resolutions: new() { new(32, 16), new(16, 16) }, 
+                                                 KeyLock: false, 
+                                                 DisplayLight: true, 
+                                                 Cursor: false, 
+                                                 Forms: false, 
+                                                 new List<CapabilitiesClass.LedsClass>()
+                                                 {
+                                                     new CapabilitiesClass.LedsClass(
+                                                           Off: true, 
+                                                           SlowFlash: true, 
+                                                           MediumFlash: true, 
+                                                           QuickFlash: true, 
+                                                           Continuous: true, 
+                                                           Red: true, 
+                                                           Green: true),
+                                                     new CapabilitiesClass.LedsClass(
+                                                           Off: true, 
+                                                           SlowFlash: true, 
+                                                           MediumFlash: true, 
+                                                           QuickFlash: true, 
+                                                           Continuous: true, 
+                                                           Red: false, 
+                                                           Green: true, 
+                                                           Yellow: true),
+                                                     new CapabilitiesClass.LedsClass(
+                                                           Off: true, 
+                                                           SlowFlash: true, 
+                                                           MediumFlash: true, 
+                                                           QuickFlash: true, 
+                                                           Continuous: true, 
+                                                           Red:false, 
+                                                           Green: true, 
+                                                           Yellow: false, 
+                                                           Blue: true),
+                                                 });
 
 
             List<InterfaceClass> interfaces = new()
             {
                 new InterfaceClass(
-                    InterfaceClass.NameEnum.Common,
-                    new List<string>()
+                    Name: InterfaceClass.NameEnum.Common,
+                    Commands: new List<string>()
                     {
                         "Common.Status",
                         "Common.Capabilities"
                     },
-                    new List<string>(),
-                    1000,
-                    new List<string>()),
+                    Events: new List<string>(),
+                    MaximumRequests: 1000),
                 new InterfaceClass(
-                    InterfaceClass.NameEnum.TextTerminal,
-                    new List<string>
+                    Name: InterfaceClass.NameEnum.TextTerminal,
+                    Commands: new List<string>
                     {
-                        "TextTerminal.Beep",
-                        "TextTerminal.ClearScreen",
-                        //"TextTerminal.DefineKeys",
-                        "TextTerminal.DispLight",
-                        //"TextTerminal.GetFormList",
-                        "TextTerminal.GetKeyDetail",
-                        //"TextTerminal.GetQueryField",
-                        //"TextTerminal.GetQueryForm",
-                        "TextTerminal.Read",
-                        //"TextTerminal.ReadForm",
-                        "TextTerminal.Reset",
-                        "TextTerminal.SetLed",
-                        "TextTerminal.SetResolution",
-                        "TextTerminal.Write",
+                        "Beep",
+                        "ClearScreen",
+                        //"DefineKeys",
+                        "DispLight",
+                        //"GetFormList",
+                        "GetKeyDetail",
+                        //"GetQueryField",
+                        //"GetQueryForm",
+                        "Read",
+                        //"ReadForm",
+                        "Reset",
+                        "SetLed",
+                        "SetResolution",
+                        "Write",
                         //"TextTerminal.WriteForm"
                     },
-                    new List<string>
+                    Events: new List<string>
                     {
-                        "TextTerminal.FieldErrorEvent",
-                        "TextTerminal.FieldWarningEvent",
-                        "TextTerminal.KeyEvent",
+                        "FieldErrorEvent",
+                        "FieldWarningEvent",
+                        "KeyEvent",
                     },
-                    1000,
-                    new List<string>())
+                    MaximumRequests: 1000)
             };
 
             return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
                                                           null,
-                                                          interfaces,
-                                                          common,
+                                                          Interfaces: interfaces,
+                                                          Common: common,
                                                           TextTerminal: textTerminal);
         }
 

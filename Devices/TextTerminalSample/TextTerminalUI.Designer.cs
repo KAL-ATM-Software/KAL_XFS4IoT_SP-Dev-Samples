@@ -58,20 +58,18 @@ namespace TextTerminalSample
             // 
             // OperatorTextBox
             // 
-            this.OperatorTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.OperatorTextBox.Location = new System.Drawing.Point(321, 107);
-            this.OperatorTextBox.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.OperatorTextBox.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.OperatorTextBox.Location = new System.Drawing.Point(132, 39);
             this.OperatorTextBox.Name = "OperatorTextBox";
-            this.OperatorTextBox.Size = new System.Drawing.Size(701, 810);
+            this.OperatorTextBox.Size = new System.Drawing.Size(291, 299);
             this.OperatorTextBox.TabIndex = 0;
             this.OperatorTextBox.Text = "";
             // 
             // FDK1Btn
             // 
-            this.FDK1Btn.Location = new System.Drawing.Point(78, 238);
-            this.FDK1Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK1Btn.Location = new System.Drawing.Point(32, 87);
             this.FDK1Btn.Name = "FDK1Btn";
-            this.FDK1Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK1Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK1Btn.TabIndex = 1;
             this.FDK1Btn.Text = ">";
             this.FDK1Btn.UseVisualStyleBackColor = true;
@@ -79,10 +77,9 @@ namespace TextTerminalSample
             // 
             // FDK2Btn
             // 
-            this.FDK2Btn.Location = new System.Drawing.Point(78, 402);
-            this.FDK2Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK2Btn.Location = new System.Drawing.Point(32, 147);
             this.FDK2Btn.Name = "FDK2Btn";
-            this.FDK2Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK2Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK2Btn.TabIndex = 2;
             this.FDK2Btn.Text = ">";
             this.FDK2Btn.UseVisualStyleBackColor = true;
@@ -90,10 +87,9 @@ namespace TextTerminalSample
             // 
             // FDK3Btn
             // 
-            this.FDK3Btn.Location = new System.Drawing.Point(78, 569);
-            this.FDK3Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK3Btn.Location = new System.Drawing.Point(32, 208);
             this.FDK3Btn.Name = "FDK3Btn";
-            this.FDK3Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK3Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK3Btn.TabIndex = 3;
             this.FDK3Btn.Text = ">";
             this.FDK3Btn.UseVisualStyleBackColor = true;
@@ -101,10 +97,9 @@ namespace TextTerminalSample
             // 
             // FDK4Btn
             // 
-            this.FDK4Btn.Location = new System.Drawing.Point(78, 724);
-            this.FDK4Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK4Btn.Location = new System.Drawing.Point(32, 265);
             this.FDK4Btn.Name = "FDK4Btn";
-            this.FDK4Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK4Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK4Btn.TabIndex = 4;
             this.FDK4Btn.Text = ">";
             this.FDK4Btn.UseVisualStyleBackColor = true;
@@ -112,10 +107,9 @@ namespace TextTerminalSample
             // 
             // FDK8Btn
             // 
-            this.FDK8Btn.Location = new System.Drawing.Point(1098, 724);
-            this.FDK8Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK8Btn.Location = new System.Drawing.Point(452, 265);
             this.FDK8Btn.Name = "FDK8Btn";
-            this.FDK8Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK8Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK8Btn.TabIndex = 8;
             this.FDK8Btn.Text = "<";
             this.FDK8Btn.UseVisualStyleBackColor = true;
@@ -123,10 +117,9 @@ namespace TextTerminalSample
             // 
             // FDK7Btn
             // 
-            this.FDK7Btn.Location = new System.Drawing.Point(1098, 569);
-            this.FDK7Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK7Btn.Location = new System.Drawing.Point(452, 208);
             this.FDK7Btn.Name = "FDK7Btn";
-            this.FDK7Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK7Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK7Btn.TabIndex = 7;
             this.FDK7Btn.Text = "<";
             this.FDK7Btn.UseVisualStyleBackColor = true;
@@ -134,10 +127,9 @@ namespace TextTerminalSample
             // 
             // FDK6Btn
             // 
-            this.FDK6Btn.Location = new System.Drawing.Point(1098, 402);
-            this.FDK6Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK6Btn.Location = new System.Drawing.Point(452, 147);
             this.FDK6Btn.Name = "FDK6Btn";
-            this.FDK6Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK6Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK6Btn.TabIndex = 6;
             this.FDK6Btn.Text = "<";
             this.FDK6Btn.UseVisualStyleBackColor = true;
@@ -145,10 +137,9 @@ namespace TextTerminalSample
             // 
             // FDK5Btn
             // 
-            this.FDK5Btn.Location = new System.Drawing.Point(1098, 238);
-            this.FDK5Btn.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.FDK5Btn.Location = new System.Drawing.Point(452, 87);
             this.FDK5Btn.Name = "FDK5Btn";
-            this.FDK5Btn.Size = new System.Drawing.Size(182, 63);
+            this.FDK5Btn.Size = new System.Drawing.Size(75, 23);
             this.FDK5Btn.TabIndex = 5;
             this.FDK5Btn.Text = "<";
             this.FDK5Btn.UseVisualStyleBackColor = true;
@@ -156,10 +147,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn1
             // 
-            this.KEYBtn1.Location = new System.Drawing.Point(362, 1039);
-            this.KEYBtn1.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn1.Location = new System.Drawing.Point(149, 380);
             this.KEYBtn1.Name = "KEYBtn1";
-            this.KEYBtn1.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn1.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn1.TabIndex = 9;
             this.KEYBtn1.Text = "1";
             this.KEYBtn1.UseVisualStyleBackColor = true;
@@ -167,10 +157,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn2
             // 
-            this.KEYBtn2.Location = new System.Drawing.Point(483, 1039);
-            this.KEYBtn2.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn2.Location = new System.Drawing.Point(199, 380);
             this.KEYBtn2.Name = "KEYBtn2";
-            this.KEYBtn2.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn2.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn2.TabIndex = 10;
             this.KEYBtn2.Text = "2";
             this.KEYBtn2.UseVisualStyleBackColor = true;
@@ -178,10 +167,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn3
             // 
-            this.KEYBtn3.Location = new System.Drawing.Point(605, 1039);
-            this.KEYBtn3.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn3.Location = new System.Drawing.Point(249, 380);
             this.KEYBtn3.Name = "KEYBtn3";
-            this.KEYBtn3.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn3.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn3.TabIndex = 11;
             this.KEYBtn3.Text = "3";
             this.KEYBtn3.UseVisualStyleBackColor = true;
@@ -189,10 +177,9 @@ namespace TextTerminalSample
             // 
             // KEYBtnClear
             // 
-            this.KEYBtnClear.Location = new System.Drawing.Point(726, 1039);
-            this.KEYBtnClear.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtnClear.Location = new System.Drawing.Point(299, 380);
             this.KEYBtnClear.Name = "KEYBtnClear";
-            this.KEYBtnClear.Size = new System.Drawing.Size(250, 82);
+            this.KEYBtnClear.Size = new System.Drawing.Size(103, 30);
             this.KEYBtnClear.TabIndex = 12;
             this.KEYBtnClear.Text = "Clear";
             this.KEYBtnClear.UseVisualStyleBackColor = true;
@@ -200,10 +187,9 @@ namespace TextTerminalSample
             // 
             // KEYBtnCancel
             // 
-            this.KEYBtnCancel.Location = new System.Drawing.Point(726, 1137);
-            this.KEYBtnCancel.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtnCancel.Location = new System.Drawing.Point(299, 416);
             this.KEYBtnCancel.Name = "KEYBtnCancel";
-            this.KEYBtnCancel.Size = new System.Drawing.Size(250, 82);
+            this.KEYBtnCancel.Size = new System.Drawing.Size(103, 30);
             this.KEYBtnCancel.TabIndex = 16;
             this.KEYBtnCancel.Text = "Cancel";
             this.KEYBtnCancel.UseVisualStyleBackColor = true;
@@ -211,10 +197,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn6
             // 
-            this.KEYBtn6.Location = new System.Drawing.Point(605, 1137);
-            this.KEYBtn6.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn6.Location = new System.Drawing.Point(249, 416);
             this.KEYBtn6.Name = "KEYBtn6";
-            this.KEYBtn6.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn6.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn6.TabIndex = 15;
             this.KEYBtn6.Text = "6";
             this.KEYBtn6.UseVisualStyleBackColor = true;
@@ -222,10 +207,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn5
             // 
-            this.KEYBtn5.Location = new System.Drawing.Point(483, 1137);
-            this.KEYBtn5.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn5.Location = new System.Drawing.Point(199, 416);
             this.KEYBtn5.Name = "KEYBtn5";
-            this.KEYBtn5.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn5.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn5.TabIndex = 14;
             this.KEYBtn5.Text = "5";
             this.KEYBtn5.UseVisualStyleBackColor = true;
@@ -233,10 +217,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn4
             // 
-            this.KEYBtn4.Location = new System.Drawing.Point(362, 1137);
-            this.KEYBtn4.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn4.Location = new System.Drawing.Point(149, 416);
             this.KEYBtn4.Name = "KEYBtn4";
-            this.KEYBtn4.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn4.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn4.TabIndex = 13;
             this.KEYBtn4.Text = "4";
             this.KEYBtn4.UseVisualStyleBackColor = true;
@@ -244,10 +227,9 @@ namespace TextTerminalSample
             // 
             // KEYBtnEnter
             // 
-            this.KEYBtnEnter.Location = new System.Drawing.Point(726, 1235);
-            this.KEYBtnEnter.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtnEnter.Location = new System.Drawing.Point(299, 452);
             this.KEYBtnEnter.Name = "KEYBtnEnter";
-            this.KEYBtnEnter.Size = new System.Drawing.Size(250, 82);
+            this.KEYBtnEnter.Size = new System.Drawing.Size(103, 30);
             this.KEYBtnEnter.TabIndex = 20;
             this.KEYBtnEnter.Text = "Enter";
             this.KEYBtnEnter.UseVisualStyleBackColor = true;
@@ -255,10 +237,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn9
             // 
-            this.KEYBtn9.Location = new System.Drawing.Point(605, 1235);
-            this.KEYBtn9.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn9.Location = new System.Drawing.Point(249, 452);
             this.KEYBtn9.Name = "KEYBtn9";
-            this.KEYBtn9.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn9.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn9.TabIndex = 19;
             this.KEYBtn9.Text = "9";
             this.KEYBtn9.UseVisualStyleBackColor = true;
@@ -266,10 +247,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn8
             // 
-            this.KEYBtn8.Location = new System.Drawing.Point(483, 1235);
-            this.KEYBtn8.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn8.Location = new System.Drawing.Point(199, 452);
             this.KEYBtn8.Name = "KEYBtn8";
-            this.KEYBtn8.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn8.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn8.TabIndex = 18;
             this.KEYBtn8.Text = "8";
             this.KEYBtn8.UseVisualStyleBackColor = true;
@@ -277,10 +257,9 @@ namespace TextTerminalSample
             // 
             // KEYBtn7
             // 
-            this.KEYBtn7.Location = new System.Drawing.Point(362, 1235);
-            this.KEYBtn7.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn7.Location = new System.Drawing.Point(149, 452);
             this.KEYBtn7.Name = "KEYBtn7";
-            this.KEYBtn7.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn7.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn7.TabIndex = 17;
             this.KEYBtn7.Text = "7";
             this.KEYBtn7.UseVisualStyleBackColor = true;
@@ -289,10 +268,9 @@ namespace TextTerminalSample
             // button12
             // 
             this.button12.Enabled = false;
-            this.button12.Location = new System.Drawing.Point(726, 1334);
-            this.button12.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.button12.Location = new System.Drawing.Point(299, 488);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(250, 82);
+            this.button12.Size = new System.Drawing.Size(103, 30);
             this.button12.TabIndex = 24;
             this.button12.UseMnemonic = false;
             this.button12.UseVisualStyleBackColor = true;
@@ -300,20 +278,18 @@ namespace TextTerminalSample
             // button13
             // 
             this.button13.Enabled = false;
-            this.button13.Location = new System.Drawing.Point(605, 1334);
-            this.button13.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.button13.Location = new System.Drawing.Point(249, 488);
             this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(107, 82);
+            this.button13.Size = new System.Drawing.Size(44, 30);
             this.button13.TabIndex = 23;
             this.button13.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.button13.UseVisualStyleBackColor = true;
             // 
             // KEYBtn0
             // 
-            this.KEYBtn0.Location = new System.Drawing.Point(483, 1334);
-            this.KEYBtn0.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.KEYBtn0.Location = new System.Drawing.Point(199, 488);
             this.KEYBtn0.Name = "KEYBtn0";
-            this.KEYBtn0.Size = new System.Drawing.Size(107, 82);
+            this.KEYBtn0.Size = new System.Drawing.Size(44, 30);
             this.KEYBtn0.TabIndex = 22;
             this.KEYBtn0.Text = "0";
             this.KEYBtn0.UseVisualStyleBackColor = true;
@@ -322,18 +298,17 @@ namespace TextTerminalSample
             // button15
             // 
             this.button15.Enabled = false;
-            this.button15.Location = new System.Drawing.Point(362, 1334);
-            this.button15.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
+            this.button15.Location = new System.Drawing.Point(149, 488);
             this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(107, 82);
+            this.button15.Size = new System.Drawing.Size(44, 30);
             this.button15.TabIndex = 21;
             this.button15.UseVisualStyleBackColor = true;
             // 
             // TextTerminalUI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(17F, 41F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1394, 1711);
+            this.ClientSize = new System.Drawing.Size(574, 520);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.button13);
             this.Controls.Add(this.KEYBtn0);
@@ -359,7 +334,6 @@ namespace TextTerminalSample
             this.Controls.Add(this.FDK2Btn);
             this.Controls.Add(this.FDK1Btn);
             this.Controls.Add(this.OperatorTextBox);
-            this.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
             this.Name = "TextTerminalUI";
             this.Text = "Form1";
             this.ResumeLayout(false);

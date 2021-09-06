@@ -122,8 +122,13 @@ namespace TextTerminalSample
             var key = btn.Text;
             if (string.IsNullOrWhiteSpace(key)) return;
 
+            // Check for FDK key press
             if (btn.Name.Contains("FDK"))
-                key = btn.Name.Replace("FDK", "ckFDK0").Replace("Btn", ""); //CkFDK01
+                key = btn.Name.Replace("FDK", "fdk0").Replace("Btn", ""); // fdk01
+
+            // Check for command key press
+            else if (!int.TryParse(key, out _))
+                key = char.ToLower(key[0]) + key[1..]; // Enter -> enter
 
             if (GetReading())
             {

@@ -458,12 +458,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             StatusPropertiesClass common = new(
                 StatusPropertiesClass.DeviceEnum.Online,
-                new List<string>(), 
-                new List<StatusPropertiesClass.GuideLightsClass>(){ new StatusPropertiesClass.GuideLightsClass(
-                    StatusPropertiesClass.GuideLightsClass.FlashRateEnum.Off,
-                    StatusPropertiesClass.GuideLightsClass.ColorEnum.Green,
-                    StatusPropertiesClass.GuideLightsClass.DirectionEnum.Off) },
-                PositionStatusEnum.Inposition,
+                PositionStatusEnum.InPosition,
                 0,
                 StatusPropertiesClass.AntiFraudModuleEnum.Ok);
 
@@ -497,42 +492,38 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
         public CapabilitiesCompletion.PayloadData Capabilities()
         {
-            List<CapabilityPropertiesClass.GuideLightsClass> guideLights = new()
-            {
-                new(new CapabilityPropertiesClass.GuideLightsClass.FlashRateClass(true, true, true, true),
-                new CapabilityPropertiesClass.GuideLightsClass.ColorClass(true, true, true, true, true, true, true),
-                new CapabilityPropertiesClass.GuideLightsClass.DirectionClass(false, false))
-            };
-
             CapabilityPropertiesClass common = new(
-                "1.0",
-                new List<DeviceInformationClass>() { new DeviceInformationClass(
-                    "Simulator",
-                    "123456-78900001",
-                    "1.0",
-                    "KAL simualtor",
-                    new List<FirmwareClass>() {new FirmwareClass(
-                    "XFS4 SP",
-                    "1.0",
-                    "1.0") },
-                    new List<SoftwareClass>(){ new SoftwareClass(
-                    "XFS4 SP",
-                    "1.0") }) },
-                new VendorModeInfoClass(
-                    true,
-                    new List<string>() 
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<DeviceInformationClass>() 
+                { 
+                    new DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<FirmwareClass>() 
+                            {
+                                new FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0") 
+                            },
+                            Software: new List<SoftwareClass>()
+                            {
+                                new SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            }) 
+                },
+                VendorModeIformation: new VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>() 
                     { 
-                        "CardReader.ReadRawData",
-                        "CardReader.EjectCard"
+                        "ReadRawData",
+                        "EjectCard"
                     }),
-                new List<string>(),
-                guideLights,
-                false,
-                false,
-                new List<string>(),
-                false,
-                false,
-                false);
+                PowerSaveControl: false,
+                AntiFraudModule: false);
 
             CapabilitiesClass cardReader = new(
                 DeviceType switch
@@ -546,64 +537,95 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                     DeviceTypeEnum.Permanent => CapabilitiesClass.TypeEnum.Permanent,
                     _ => null
                 },
-                new CapabilitiesClass.ReadTracksClass(true, true, true, false, false, false, false, false, false, false),
-                new CapabilitiesClass.WriteTracksClass(true, true, true, false, false, false),
-                new CapabilitiesClass.ChipProtocolsClass(true, true, false, false, false, false, false),
-                CpMaxCaptureCount,
+                new CapabilitiesClass.ReadTracksClass(
+                    Track1: true,
+                    Track2: true,
+                    Track3: true,
+                    Watermark: false,
+                    FrontTrack1: false,
+                    FrontImage: false,
+                    BackImage: false,
+                    Track1JIS: false,
+                    Track3JIS: false,
+                    Ddi: false),
+                new CapabilitiesClass.WriteTracksClass(
+                        Track1: true, 
+                        Track2: true, 
+                        Track3: true, 
+                        FrontTrack1: false, 
+                        Track1JIS: false, 
+                        Track3JIS: false),
+                new CapabilitiesClass.ChipProtocolsClass(
+                        ChipT0: true, 
+                        ChipT1: true, 
+                        ChipProtocolNotRequired: false, 
+                        ChipTypeAPart3: false, 
+                        ChipTypeAPart4: false, 
+                        ChipTypeB: false, 
+                        ChipTypeNFC: false),
+                MaxCardCount: CpMaxCaptureCount,
                 CapabilitiesClass.SecurityTypeEnum.NotSupported,
                 CapabilitiesClass.PowerOnOptionEnum.NoAction,
                 CapabilitiesClass.PowerOffOptionEnum.NoAction,
-                false, false, 
-                new CapabilitiesClass.WriteModeClass(false, true, false, true),
-                new CapabilitiesClass.ChipPowerClass(false, true, true, true),
-                new CapabilitiesClass.MemoryChipProtocolsClass(false, false),
-                new CapabilitiesClass.EjectPositionClass(true, false),
-                0);
+                FluxSensorProgrammable: false, 
+                ReadWriteAccessFollowingEject: false,
+                new CapabilitiesClass.WriteModeClass(
+                        Loco: true, 
+                        Hico: false, 
+                        Auto: true),
+                new CapabilitiesClass.ChipPowerClass(
+                        Cold: true, 
+                        Warm: true, 
+                        Off: true),
+                new CapabilitiesClass.MemoryChipProtocolsClass(
+                        Siemens4442: false, 
+                        Gpm896: false),
+                new CapabilitiesClass.EjectPositionClass(
+                        Exit: true, 
+                        Transport: false));
 
 
             List<InterfaceClass> interfaces = new()
             {
                 new InterfaceClass(
-                    InterfaceClass.NameEnum.Common,
-                    new List<string>()
+                    Name: InterfaceClass.NameEnum.Common,
+                    Commands: new List<string>()
                     { 
-                        "Common.Status", 
-                        "Common.Capabilities" 
+                        "Status", 
+                        "Capabilities" 
                     },
-                    new List<string>(),
-                    1000,
-                    new List<string>()),
+                    Events: new List<string>(),
+                    MaximumRequests: 1000),
                 new InterfaceClass(
-                    InterfaceClass.NameEnum.CardReader,
-                    new List<string>
+                    Name: InterfaceClass.NameEnum.CardReader,
+                    Commands: new List<string>
                     { 
-                        "CardReader.ReadRawData", 
-                        "CardReader.EjectCard", 
-                        "CardReader.Reset", 
-                        "CardReader.WriteRawData",
-                        "CardReader.ChipIO",
-                        "CardReader.ChipPower",
-                        "CardReader.EMVClessConfigure",
-                        "CardReader.EMVClessIssuerUpdate",
-                        "CardReader.EMVClessPerformTransaction",
-                        "CardReader.EMVClessQueryApplications",
-                        "CardReader.ParkCard",
-                        "CardReader.QueryIFMIdentifier",
-                        "CardReader.ResetCount",
-                        "CardReader.RetainCard",
-                        "CardReader.SetKey"
+                        "ReadRawData", 
+                        "EjectCard", 
+                        "Reset", 
+                        "WriteRawData",
+                        "ChipIO",
+                        "ChipPower",
+                        "EMVClessConfigure",
+                        "EMVClessIssuerUpdate",
+                        "EMVClessPerformTransaction",
+                        "EMVClessQueryApplications",
+                        "ParkCard",
+                        "QueryIFMIdentifier",
+                        "ResetCount",
+                        "RetainCard",
+                        "SetKey"
                     },
-                    new List<string>
+                    Events: new List<string>
                     {
-                        "CardReader.MediaDetectedEvent",
-                        "CardReader.MediaInsertedEvent",
-                        "CardReader.MediaRemovedEvent",
-                        "CardReader.MediaRetainedEvent",
-                        "CardReader.InvalidMediaEvent",
-                        "CardReader.EMVClessReadStatusEvent"
+                        "MediaDetectedEvent",
+                        "MediaInsertedEvent",
+                        "MediaRemovedEvent",
+                        "MediaRetainedEvent",
+                        "InvalidMediaEvent",
+                        "EMVClessReadStatusEvent"
                     },
-                    1000,
-                    new List<string>())
+                    MaximumRequests: 1000)
             };
 
             return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
