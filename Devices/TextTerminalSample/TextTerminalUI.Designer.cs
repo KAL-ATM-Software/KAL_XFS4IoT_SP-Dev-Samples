@@ -335,7 +335,7 @@ namespace TextTerminalSample
             this.Controls.Add(this.FDK1Btn);
             this.Controls.Add(this.OperatorTextBox);
             this.Name = "TextTerminalUI";
-            this.Text = "Form1";
+            this.Text = "TextTerminalUI";
             this.ResumeLayout(false);
 
         }

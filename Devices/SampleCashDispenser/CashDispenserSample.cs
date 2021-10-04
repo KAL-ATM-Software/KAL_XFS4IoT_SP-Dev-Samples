@@ -127,9 +127,10 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 SynchronizableCommands: new List<string>(),
-                EndToEndSecurity: false,
-                HardwareSecurityElement: false,
-                ResponseSecurityEnabled: false);
+                EndToEndSecurity: true,
+                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
+                );
 
             CapabilitiesClass cashDispenser = new(
                 Type: CapabilitiesClass.TypeEnum.SelfServiceBill,
@@ -232,6 +233,15 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
         public async Task<DispenseResult> DispenseAsync(IDispenseEvents events, DispenseRequest dispenseInfo, CancellationToken cancellation)
 		{
+            if (dispenseInfo.E2EToken is null)
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
+
+            if ( !Firmware.VerifyAndDispense(dispenseInfo.E2EToken) )
+            { 
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
+            }
+
+            // Simulate some mechanical delay. 
             await Task.Delay(1000, cancellation);
             
             StackerStatus = StatusClass.IntermediateStackerEnum.NotEmpty;
@@ -258,6 +268,11 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
         public async Task<PresentCashResult> PresentCashAsync(IPresentEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
 		{
+            // When we present cash we want to cancel any existing tokens so that they can't be used twice. 
+            // We can do this by clearing the nonce - if there's no nonce then it can't match any tokens. 
+            // We do this before we present the cash to avoid any race conditions. 
+            Firmware.ClearCommandNonce(); 
+
             await Task.Delay(1000, cancellation);
 
             if (StackerStatus == StatusClass.IntermediateStackerEnum.Empty || LastDispenseResult.Count == 0)
@@ -808,7 +823,24 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
         public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandRandomNumberResult> GetCommandRandomNumber() => throw new NotImplementedException();
+        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce()
+        {
+            string nonce = Firmware.GetCommandNonce();
+
+            return Task.FromResult(
+                        new GetCommandNonceCompletion.PayloadData(CompletionCode: MessagePayload.CompletionCodeEnum.Success, ErrorDescription: "",
+                                                  nonce )
+                        );
+
+        }
+        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce()
+        {
+            Firmware.ClearCommandNonce();
+
+            return Task.FromResult(
+                        new ClearCommandNonceCompletion.PayloadData(CompletionCode: MessagePayload.CompletionCodeEnum.Success, ErrorDescription: "" )
+                        );
+        }
 
         public StatusPropertiesClass.DeviceEnum DeviceStatus { get; private set; } = StatusPropertiesClass.DeviceEnum.Online; 
         public StatusClass.IntermediateStackerEnum StackerStatus { get; private set; } = StatusClass.IntermediateStackerEnum.Empty;
@@ -835,5 +867,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         private ILogger Logger { get; }
 
         private readonly SemaphoreSlim cashTakenSignal = new(0, 1);
+
+        private readonly Firmware Firmware = new(); 
     }
 }

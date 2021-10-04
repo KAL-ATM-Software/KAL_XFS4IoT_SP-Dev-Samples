@@ -67,14 +67,16 @@ namespace TextTerminalSample
         /// </summary>
         public GetKeyDetailCompletion.PayloadData GetKeyDetail()
         {
-            return new GetKeyDetailCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success, 
-                                                          null, 
-                                                          "0123456789", 
-                                                          new(Enter: true, Cancel: true, Clear: true,
-                                                              Fdk01: true, Fdk02: true,
-                                                              Fdk03: true, Fdk04: true,
-                                                              Fdk05: true, Fdk06: true,
-                                                              Fdk07: true, Fdk08: true));
+            return new GetKeyDetailCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
+                                                          null,
+                                                          "0123456789",
+                                                          new()
+                                                          {
+                                                              "enter", "cancel", "clear",
+                                                              "fdk01", "fdk02", "fdk03", 
+                                                              "fdk04", "fdk05", "fdk06", 
+                                                              "fdk07", "fdk08", 
+                                                          });
         }
 
         /// <summary>
@@ -92,84 +94,6 @@ namespace TextTerminalSample
         public Task<DeviceResult> ClearScreenAsync(ClearScreenRequest request, CancellationToken cancellation)
         {
             TextTerminalUI.ClearArea(request.PositionX, request.PositionY, request.Width, request.Height);
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
-        }
-
-        /// <summary>
-        /// Command to turn on the display light.
-        /// </summary>
-        public Task<DeviceResult> DispLightOnAsync(CancellationToken cancellation)
-        {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
-        }
-
-        /// <summary>
-        /// Command to turn off the display light.
-        /// </summary>
-        public Task<DeviceResult> DispLightOffAsync(CancellationToken cancellation)
-        {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
-        }
-        
-        /// <summary>
-        /// Command to turn on an LED.
-        /// The framework will check for valid LED and supported commands/colours.
-        /// </summary>
-        public Task<DeviceResult> LEDOnAsync(LEDOnRequest ledInfo, CancellationToken cancellation)
-        {
-            bool? SlowFlash = null, MediumFlash = null, QuickFlash = null, Continuous = null, Red = null, Green = null, Yellow = null, Blue = null, Cyan = null, Magenta = null, White = null;
-
-            switch (ledInfo.Command)
-            {
-                case LEDOnRequest.LEDCommandEnum.SlowFlash:
-                    SlowFlash = true;
-                    break;
-                case LEDOnRequest.LEDCommandEnum.MediumFlash:
-                    MediumFlash = true;
-                    break;
-                case LEDOnRequest.LEDCommandEnum.QuickFlash:
-                    QuickFlash = true;
-                    break;
-                case LEDOnRequest.LEDCommandEnum.Continuous:
-                    Continuous = true;
-                    break;
-            }
-
-            switch (ledInfo.Colour)
-            {
-                case LEDOnRequest.LEDColorEnum.Red:
-                    Red = true;
-                    break;
-                case LEDOnRequest.LEDColorEnum.Yellow:
-                    Yellow = true;
-                    break;
-                case LEDOnRequest.LEDColorEnum.Blue:
-                    Blue = true;
-                    break;
-                case LEDOnRequest.LEDColorEnum.Cyan:
-                    Cyan = true;
-                    break;
-                case LEDOnRequest.LEDColorEnum.Magenta:
-                    Magenta = true;
-                    break;
-                case LEDOnRequest.LEDColorEnum.White:
-                    White = true;
-                    break;
-                default:
-                    Green = true; //Green is default. All sample LEDs support green
-                    break;
-            }
-
-            LEDStatus[ledInfo.LEDNumber] = new(null, null, SlowFlash, MediumFlash, QuickFlash, Continuous, Red, Green, Yellow, Blue, Cyan, Magenta, White);
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
-        }
-
-        /// <summary>
-        /// Command to turn off an LED.
-        /// </summary>
-        public Task<DeviceResult> LEDOffAsync(int ledNum, CancellationToken cancellation)
-        {
-            LEDStatus[ledNum] = new(null, true);
             return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
         }
 
@@ -282,8 +206,7 @@ namespace TextTerminalSample
                     Keyboard: TextTerminalUI.GetReading() ? StatusClass.KeyboardEnum.On : StatusClass.KeyboardEnum.Off, 
                     KeyLock: StatusClass.KeyLockEnum.Off, 
                     DisplaySizeX: CurrentWidth, 
-                    DisplaySizeY: CurrentHeight, 
-                    Leds: LEDStatus);
+                    DisplaySizeY: CurrentHeight);
 
             return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
                                                     null,
@@ -337,39 +260,8 @@ namespace TextTerminalSample
             CapabilitiesClass textTerminal = new(Type: CapabilitiesClass.TypeEnum.Fixed, 
                                                  Resolutions: new() { new(32, 16), new(16, 16) }, 
                                                  KeyLock: false, 
-                                                 DisplayLight: true, 
                                                  Cursor: false, 
-                                                 Forms: false, 
-                                                 new List<CapabilitiesClass.LedsClass>()
-                                                 {
-                                                     new CapabilitiesClass.LedsClass(
-                                                           Off: true, 
-                                                           SlowFlash: true, 
-                                                           MediumFlash: true, 
-                                                           QuickFlash: true, 
-                                                           Continuous: true, 
-                                                           Red: true, 
-                                                           Green: true),
-                                                     new CapabilitiesClass.LedsClass(
-                                                           Off: true, 
-                                                           SlowFlash: true, 
-                                                           MediumFlash: true, 
-                                                           QuickFlash: true, 
-                                                           Continuous: true, 
-                                                           Red: false, 
-                                                           Green: true, 
-                                                           Yellow: true),
-                                                     new CapabilitiesClass.LedsClass(
-                                                           Off: true, 
-                                                           SlowFlash: true, 
-                                                           MediumFlash: true, 
-                                                           QuickFlash: true, 
-                                                           Continuous: true, 
-                                                           Red:false, 
-                                                           Green: true, 
-                                                           Yellow: false, 
-                                                           Blue: true),
-                                                 });
+                                                 Forms: false);
 
 
             List<InterfaceClass> interfaces = new()
@@ -423,7 +315,8 @@ namespace TextTerminalSample
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
         public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandRandomNumberResult> GetCommandRandomNumber() => throw new NotImplementedException();
+        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
+        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
 
 
         #endregion
@@ -466,14 +359,5 @@ namespace TextTerminalSample
         /// </summary>
         public bool ScrollingSupported => true;
 
-        /// <summary>
-        /// Current LED status.
-        /// </summary>
-        private readonly List<StatusClass.LedsClass> LEDStatus = new List<StatusClass.LedsClass>()
-        {
-            new StatusClass.LedsClass(Off: true),
-            new StatusClass.LedsClass(Off: true),
-            new StatusClass.LedsClass(Off: true),
-        };
     }
 }

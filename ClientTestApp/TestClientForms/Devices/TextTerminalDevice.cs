@@ -104,8 +104,7 @@ namespace TestClientForms.Devices
                                                                                           false,
                                                                                           true,
                                                                                           "1234567890",
-                                                                                          new() { "enter", "cancel", "clear", "fdk01", "fdk02", "fdk03", "fdk04", "fdk05", "fdk06", "fdk07", "fdk08", },
-                                                                                          new() { "enter", "cancel" }));
+                                                                                          new() { { "enter", new(true) }, { "cancel", new(true) }, { "clear", new() }, { "fdk01", new() }, { "fdk02", new() }, { "fdk03", new() }, { "fdk04", new() }, { "fdk05", new() }, { "fdk06", new() }, { "fdk07", new() }, { "fdk08", new() }, }));
 
             CmdBox.Text = writeCmd.Serialise();
 
@@ -179,88 +178,6 @@ namespace TestClientForms.Devices
 
             object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, beepCmd);
             if (cmdResponse is BeepCompletion response)
-            {
-                RspBox.Text = response.Serialise();
-            }            
-        }
-
-        public async Task TurnOnLED()
-        {
-            var textTerminal = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
-
-            try
-            {
-                await textTerminal.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var setLEDCmd
-                = new SetLedCommand(RequestId.NewID(), new SetLedCommand.PayloadData(CommandTimeout, 1, new(SlowFlash: true, Yellow: true)));
-
-            CmdBox.Text = setLEDCmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setLEDCmd);
-            if (cmdResponse is SetLedCompletion response)
-            {
-                RspBox.Text = response.Serialise();
-            }            
-        }
-
-        public async Task TurnOffLED()
-        {
-            var textTerminal = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
-
-            try
-            {
-                await textTerminal.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var setLEDCmd = new SetLedCommand(RequestId.NewID(), new SetLedCommand.PayloadData(CommandTimeout, 1, new(Off: true)));
-
-            CmdBox.Text = setLEDCmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setLEDCmd);
-            if (cmdResponse is SetLedCompletion response)
-            {
-                RspBox.Text = response.Serialise();
-            }            
-        }
-
-        public async Task SetDispLight(bool on)
-        {
-            var textTerminal = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
-
-            try
-            {
-                await textTerminal.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var setDispLightCmd = new DispLightCommand(RequestId.NewID(), new DispLightCommand.PayloadData(CommandTimeout, on));
-
-            CmdBox.Text = setDispLightCmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setDispLightCmd);
-            if (cmdResponse is DispLightCompletion response)
             {
                 RspBox.Text = response.Serialise();
             }            

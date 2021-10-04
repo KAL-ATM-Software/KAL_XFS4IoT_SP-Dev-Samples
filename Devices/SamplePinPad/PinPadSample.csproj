@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>XFS4IoT.SP.Encryptor</AssemblyName>
-    <RootNamespace>KAL.XFS4IoTSP.Encryptor.Sample</RootNamespace>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>XFS4IoT.SP.PinPad</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.PinPad.Sample</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -17,7 +18,9 @@
 
   <ItemGroup>
     <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="0.0.4-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="0.0.4-alpha.1" />
     <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="0.0.4-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="0.0.4-alpha.1" />
   </ItemGroup>
 
 </Project>

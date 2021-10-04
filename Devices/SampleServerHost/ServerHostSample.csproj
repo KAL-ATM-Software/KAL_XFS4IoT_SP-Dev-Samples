@@ -16,6 +16,7 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <OutputPath>..\bin\Debug\</OutputPath>
       <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+      <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -30,6 +31,7 @@
       <ProjectReference Include="..\SampleCardReader\CardReaderSample.csproj" />
       <ProjectReference Include="..\SampleCashDispenser\CashDispenserSample.csproj" />
       <ProjectReference Include="..\SampleEncryptor\EncryptorSample.csproj" />
+      <ProjectReference Include="..\SamplePinPad\PinPadSample.csproj" />
       <ProjectReference Include="..\TextTerminalSample\TextTerminalSample.csproj" />
     </ItemGroup>
 

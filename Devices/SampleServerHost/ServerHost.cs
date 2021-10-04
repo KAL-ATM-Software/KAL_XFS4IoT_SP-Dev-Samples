@@ -63,6 +63,17 @@ namespace Server
 
                 simEncryptorDevice.SetServiceProvider = encryptorService;
                 Publisher.Add(encryptorService);
+  
+                /// PinPad Service Provider
+                var simPinPadDevice = new KAL.XFS4IoTSP.PinPad.Sample.PinPadSample(Logger);
+                var pinPadService = new PinPadServiceProvider(EndpointDetails,
+                                                              ServiceName: "SimPinPad",
+                                                              simPinPadDevice,
+                                                              Logger,
+                                                              new FilePersistentData(Logger));
+
+                simPinPadDevice.SetServiceProvider = pinPadService;
+                Publisher.Add(pinPadService);
 
                 // TODO: adding other services
 

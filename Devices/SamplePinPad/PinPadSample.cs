@@ -15,6 +15,8 @@ using System.Text;
 using System.Linq;
 using System.IO;
 using XFS4IoT;
+using XFS4IoTFramework.PinPad;
+using XFS4IoTFramework.Keyboard;
 using XFS4IoTFramework.Crypto;
 using XFS4IoTFramework.KeyManagement;
 using XFS4IoTFramework.Common;
@@ -25,28 +27,332 @@ using XFS4IoT.KeyManagement.Events;
 using XFS4IoT.KeyManagement;
 using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.Crypto.Completions;
+using XFS4IoT.PinPad.Completions;
+using XFS4IoT.Keyboard;
+using XFS4IoT.Keyboard.Completions;
+using XFS4IoT.Keyboard.Events;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
 
-namespace KAL.XFS4IoTSP.Encryptor.Sample
+namespace KAL.XFS4IoTSP.PinPad.Sample
 {
     /// <summary>
-    /// Sample Encryptor device class to implement
+    /// Sample PinPad device class to implement
     /// </summary>
-    public class EncryptorSample : ICryptoDevice, IKeyManagementDevice, ICommonDevice
+    public class PinPadSample : IPinPadDevice, IKeyboardDevice, ICryptoDevice, IKeyManagementDevice, ICommonDevice
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="Logger"></param>
-        public EncryptorSample(ILogger Logger)
+        public PinPadSample(ILogger Logger)
         {
-            Logger.IsNotNull($"Invalid parameter received in the {nameof(EncryptorSample)} constructor. {nameof(Logger)}");
+            Logger.IsNotNull($"Invalid parameter received in the {nameof(PinPadSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
         }
 
-        /// KeyManagement interface
+        #region Keyboard Interface
+        /// <summary>
+        /// This command allows an application to retrieve layout information for any device. 
+        /// Either one layout or all defined layouts can be retrieved with a single request of this command. 
+        /// There can be a layout for each of the different types of keyboard entry modes, if the vendor and the hardware support these different methods. The types of keyboard entry modes are: (1) Data Entry mode which corresponds to the [Keyboard.DataEntry](#keyboard.dataentry) command,(2) PIN Entry mode which corresponds to the [Keyboard.PinEntry](#keyboard.pinentry) command, (3) Secure Key Entry mode which corresponds to the [Keyboard.SecureKeyEntry](#keyboard.securekeyentry) command. The layouts can be preloaded into the device, if the device supports this, or a single layout can be loaded into the device immediately prior to the keyboard command being requested.
+        /// </summary>
+        public Dictionary<EntryModeEnum, List<FrameClass>> GetLayoutInfo()
+        {
+            return keyLayouts;
+        }
 
+        /// <summary>
+        /// This function stores the pin entry via the Keyboard device. From the point this function is invoked, pin digit entries are not passed to the application. 
+        /// For each pin digit, or any other active key entered, an execute notification event KeyEvent is sent in order to allow an application to perform the appropriate display action (i.e. when the pin pad has no integrated display). 
+        /// The application is not informed of the value entered. 
+        /// The execute notification only informs that a key has been depressed. The EnterDataEvent will be generated when the Keyboard is ready for the user to start entering data.
+        /// Some Keyboard devices do not inform the application as each PIN digit is entered, but locally process the PIN entry based upon minimum pin length and maximum PIN length input parameters. 
+        /// When the maximum number of pin digits is entered and the flag autoEnd is true, or a terminating key is pressed after the minimum number of pin digits is entered, the command completes.
+        /// If the Cancel key is a terminator key and is pressed, then the command will complete successfully even if the minimum number of pin digits has not been entered. 
+        /// Terminating FDKs can have the functionality of Enter (terminates only if minimum length has been reached) or Cancel (can terminate before minimum length is reached). 
+        /// The configuration of this functionality is vendor specific.If maxLen is zero, the Service Provider does not terminate the command unless the application sets terminateKeys or terminateFDKs. 
+        /// In the event that terminateKeys or terminateFDKs are not set and maxLen is zero, the command will not terminate and the application must issue a Cancel command. 
+        /// If active the fkCancel and fkClear keys will cause the PIN buffer to be cleared. 
+        /// The fkBackspace key will cause the last key in the PIN buffer to be removed. 
+        /// Terminating keys have to be active keys to operate. 
+        /// If this command is canceled by a CancelAsyncRequest the PIN buffer is not cleared. 
+        /// If maxLen has been met and autoEnd is set to False, then all numeric keys will automatically be disabled. 
+        /// If the clear or backspace key is pressed to reduce the number of entered keys, the numeric keys will be re-enabled. 
+        /// If the enter key (or FDK representing the enter key - note that the association of an FDK to enter functionality is vendor specific) is pressed prior to minLen being met, 
+        /// then the enter key or FDK is ignored. In some cases the Keyboard device cannot ignore the enter key then the command will complete normally.
+        /// To handle these types of devices the application should use the output parameter digits property to check that sufficient digits have been entered.  
+        /// The application should then get the user to re-enter their PIN with the correct number of digits. 
+        /// If the application makes a call to [PinPad.GetPinblock](#pinpad.getpinblock) or a local verification command without the minimum PIN digits having been entered, 
+        /// either the command will fail or the PIN verification will fail. It is the responsibility of the application to identify the mapping between the FDK code and the physical location of the FDK.
+        /// </summary>
+        public async Task<PinEntryResult> PinEntry(IPinEntryEvents events, PinEntryRequest request, CancellationToken cancellation)
+        {
+            await events.EnterDataEvent();
+
+            int pinMax = request.MaxLen;
+            if (pinMax == 0)
+                pinMax = 4;
+
+            //Clear key press channel.
+            while (PinPadUI.KeyPressChannel.Reader.TryRead(out _)) ;
+
+            int keysPressed = 0;
+            EntryCompletionEnum? EntryCompletion = null;
+            while (keysPressed < pinMax || !request.AutoEnd)
+            {
+                var key = await PinPadUI.KeyPressChannel.Reader.ReadAsync(cancellation);
+                var keyClass = request.ActiveKeys.Find(c => c.KeyName == key);
+                if (keyClass == null) continue;
+
+                if (keyClass.Terminate)
+                {
+                    EntryCompletion = keyClass.KeyName switch
+                    {
+                        "cancel" => EntryCompletionEnum.Cancel,
+                        "clear" => EntryCompletionEnum.Clear,
+                        "backspace" => EntryCompletionEnum.Backspace,
+                        _ => EntryCompletionEnum.Enter
+                    };
+
+                    await events.KeyEvent(new(EntryCompletion.Value, keyClass.KeyName));
+                    break;
+                }
+                else if (key == "clear") keysPressed = 0;
+                else if (key == "backspace") keysPressed = keysPressed <= 0 ? 0 : keysPressed - 1;
+                else if (keysPressed < pinMax)
+                {
+                    ++keysPressed;
+                    await events.KeyEvent(new KeyEvent.PayloadData());
+                }
+            }
+            return new PinEntryResult(MessagePayload.CompletionCodeEnum.Success,
+                                      keysPressed,
+                                      EntryCompletion is null ? EntryCompletionEnum.Auto : EntryCompletion);
+        }
+
+        /// <summary>
+        /// This function enables keyboard insercure mode and report entered key in clear text with solicited events. 
+        /// For Keyboard device, this command will clear the pin unless the application has requested that the pin be maintained through the MaintainPin command.
+        /// </summary>
+        public async Task<DataEntryResult> DataEntry(IDataEntryEvents events, DataEntryRequest request, CancellationToken cancellation)
+        {
+            await events.EnterDataEvent();
+
+            int keyMax = request.MaxLen;
+            if (keyMax == 0)
+                keyMax = 4;
+
+            //Clear key press channel.
+            while (PinPadUI.KeyPressChannel.Reader.TryRead(out _)) ;
+
+            int keysPressed = 0;
+            List<DataEntryResult.EnteredKey> keys = new();
+            EntryCompletionEnum? EntryCompletion = null;
+            while (keysPressed < keyMax || !request.AutoEnd)
+            {
+                var key = await PinPadUI.KeyPressChannel.Reader.ReadAsync(cancellation);
+                var keyClass = request.ActiveKeys.Find(c => c.KeyName == key);
+                if (keyClass == null) continue;
+
+                if (keyClass.Terminate)
+                {
+                    EntryCompletion = keyClass.KeyName switch
+                    {
+                        "cancel" => EntryCompletionEnum.Cancel,
+                        "clear" => EntryCompletionEnum.Clear,
+                        "backspace" => EntryCompletionEnum.Backspace,
+                        _ => EntryCompletionEnum.Enter
+                    };
+
+                    await events.KeyEvent(new(EntryCompletion.Value, keyClass.KeyName));
+                    break;
+                }
+                else if (key == "clear")
+                {
+                    keysPressed = 0;
+                    keys.Clear();
+                }
+                else if (key == "backspace")
+                {
+                    keysPressed = keysPressed <= 0 ? 0 : keysPressed - 1;
+                    if (keys.Count > 1) keys.Remove(keys[^1]);
+                }
+                else if (keysPressed < keyMax)
+                {
+                    keys.Add(new(key));
+                    ++keysPressed;
+                }
+                await events.KeyEvent(new KeyEvent.PayloadData(Digit: key));
+            }
+
+            return new DataEntryResult(MessagePayload.CompletionCodeEnum.Success,
+                                       keysPressed,
+                                       keys,
+                                       EntryCompletion is null ? EntryCompletionEnum.Auto : EntryCompletion);
+        }
+
+        /// <summary>
+        /// This command allows a full length symmetric encryption key part to be entered directly into the device without being exposed outside of the device.
+        /// From the point this function is invoked, encryption key digits (zero to nine and a to f) are not passed to the application. For each encryption key digit, 
+        /// or any other active key entered (except for shift), an execute notification event KeyEvent is sent in order to allow an application to perform the appropriate display action 
+        /// (i.e. when the device has no integrated display). 
+        /// When an encryption key digit is entered the application is not informed of the value entered, instead zero is returned. 
+        /// The EnterDataEvent will be generated when the device is ready for the user to start entering data. 
+        /// The keys that can be enabled by this command are defined by the FuncKeyDetail parameter of the SecureKeyEntry command. 
+        /// Function keys which are not associated with an encryption key digit may be enabled but will not contribute to the secure entry buffer (unless they are Cancel, Clear or Backspace) and will not count towards the length of the key entry.
+        /// The Cancel and Clear keys will cause the encryption key buffer to be cleared. 
+        /// The Backspace key will cause the last encryption key digit in the encryption key buffer to be removed.
+        /// If autoEnd is TRUE the command will automatically complete when the required number of encryption key digits have been added to the buffer. 
+        /// If autoEnd is FALSE then the command will not automatically complete and Enter, Cancel or any terminating key must be pressed. 
+        /// When keyLen hex encryption key digits have been entered then all encryption key digits keys are disabled. 
+        /// If the Clear or Backspace key is pressed to reduce the number of entered encryption key digits below usKeyLen, the same keys will be reenabled. 
+        /// Terminating keys have to be active keys to operate.If an FDK is associated with Enter, Cancel, Clear or Backspace then the FDK must be activated to operate. 
+        /// The Enter and Cancel FDKs must also be marked as a terminator if they are to terminate entry. 
+        /// These FDKs are reported as normal FDKs within the KeyEvent, applications must be aware of those FDKs associated with Cancel, Clear, Backspace and Enter and handle any user interaction as required. 
+        /// For example, if the fdk01 is associated with Clear, then the application must include the fdk01 FDK code in the activeFDKs parameter (if the clear functionality is required). 
+        /// In addition when this FDK is pressed the [Keyboard.KeyEvent](#keyboard.keyevent) will contain the fdk01 mask value in the digit property. 
+        /// The application must update the user interface to reflect the effect of the clear on the encryption key digits entered so far. 
+        /// On some devices that are configured as either regularUnique or irregularUnique all the function keys on the device will be associated with hex digits and there may be no FDKs available either. 
+        /// On these devices there may be no way to correct mistakes or cancel the key encryption entry before all the encryption key digits are entered, so the application must set the autoEnd flag to TRUE and wait for the command to auto-complete. 
+        /// Applications should check the KCV to avoid storing an incorrect key component. 
+        /// Encryption key parts entered with this command are stored through either the ImportKey. 
+        /// Each key part can only be stored once after which the secure key buffer will be cleared automatically.
+        /// </summary>
+        public async Task<SecureKeyEntryResult> SecureKeyEntry(ISecureKeyEntryEvents events, SecureKeyEntryRequest request, CancellationToken cancellation)
+        {
+            await events.EnterDataEvent();
+
+            for (int i = 0; i < request.KeyLen; i++)
+            {
+                await Task.Delay(300, cancellation);
+
+                await events.KeyEvent(new KeyEvent.PayloadData());
+            }
+
+            if (!request.AutoEnd)
+            {
+                await events.KeyEvent(new KeyEvent.PayloadData(EntryCompletionEnum.Enter, "enter"));
+            }
+
+            return new SecureKeyEntryResult(MessagePayload.CompletionCodeEnum.Success,
+                                            request.KeyLen,
+                                            request.AutoEnd ? EntryCompletionEnum.Auto : EntryCompletionEnum.Enter,
+                                            new() { 0x76, 0xf6, 0x3e });
+        }
+
+        /// <summary>
+        /// This command is used to enable or disable the device from emitting a beep tone on subsequent key presses of active or in-active keys.
+        /// This command is valid only on devices which have the capability to support application control of automatic beeping. 
+        /// </summary>
+        public async Task<DeviceResult> SetKeypressBeep(KeyboardBeepEnum Beep, CancellationToken cancellation)
+        {
+            await Task.Delay(200, cancellation);
+            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+        }
+
+        /// <summary>
+        /// This command allows an application to configure a layout for any device. One or more layouts can be defined with a single request of this command.
+        /// There can be a layout for each of the different types of keyboard entry modes, if the vendor and the hardware supports these different methods.
+        /// The types of keyboard entry modes are (1) Mouse mode,(2) Data mode which corresponds to the DataEntry] command,
+        /// (3) PIN mode which corresponds to the PinEntry command,
+        /// (4) Secure mode which corresponds to the SecureKeyEntry command. 
+        /// One or more layouts can be preloaded into the device, if the device supports this, or a single layout can be loaded into the device immediately prior to the keyboard command being requested. If a [Keyboard.DataEntry](#keyboard.dataentry), [Keyboard.PinEntry](#keyboard.pinentry), or [Keyboard.SecureKeyEntry](#keyboard.securekeyentry) command is already in progress (or queued), then this command is rejected with a command result of SequenceError. Layouts defined with this command are persistent.
+        /// </summary>
+        public async Task<DefineLayoutResult> DefineLayout(Dictionary<EntryModeEnum, List<FrameClass>> request, CancellationToken cancellation)
+        {
+            await Task.Delay(200, cancellation);
+
+            foreach (var entryMode in request)
+                keyLayouts[entryMode.Key] = entryMode.Value;
+
+            return new DefineLayoutResult(MessagePayload.CompletionCodeEnum.Success, null);
+        }
+
+        #endregion
+
+        #region PinPad Interface
+        /// <summary>
+        /// This command is used to report information in order to verify the PCI Security Standards Council PIN transaction security (PTS) certification held by the PIN device. 
+        /// The command provides detailed information in order to verify the certification level of the device. 
+        /// Support of this command by the Service Provider does not imply in anyway the certification level achieved by the device
+        /// </summary>
+        public PCIPTSDeviceIdClass GetPCIPTSDeviceId()
+        {
+            return new PCIPTSDeviceIdClass("KAL",
+                                           "EPP-V5",
+                                           "131-659-4900",
+                                           "EH7-4HG",
+                                           "XFS4IoTSP_Dev");
+        }
+
+        /// <summary>
+        /// The PIN, which was entered with the GetPin command, is combined with the requisite data specified by the DES validation algorithm and locally verified for correctness. The result of the verification is returned to the application. This command will clear the PIN unless the application has requested that the PIN be maintained through the [PinPad.MaintinPin](#pinpad.maintainpin) command.
+        /// </summary>
+        public async Task<VerifyPINLocalResult> VerifyPINLocalDES(VerifyPINLocalDESRequest request, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new VerifyPINLocalResult(MessagePayload.CompletionCodeEnum.Success, true);
+        }
+
+        /// <summary>
+        /// The PIN, which was entered with the GetPin command, is combined with the requisite data specified by the VISA validation algorithm and locally verified for correctness. The result of the verification is returned to the application. This command will clear the PIN unless the application has requested that the PIN be maintained through the [PinPad.MaintinPin](#pinpad.maintainpin) command.
+        /// </summary>
+        public async Task<VerifyPINLocalResult> VerifyPINLocalVISA(VerifyPINLocalVISARequest request, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new VerifyPINLocalResult(MessagePayload.CompletionCodeEnum.Success, true);
+        }
+
+        /// <summary>
+        /// This command is used to control if the PIN is maintained after a PIN processing command for subsequent use by other PIN processing commands. 
+        /// This command is also used to clear the PIN buffer when the PIN is no longer required.
+        /// </summary>
+        public async Task<DeviceResult> MaintainPin(bool MaintainPIN, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+        }
+
+        /// <summary>
+        /// This function should be used for devices which need to know the data for the PIN block before the PIN is entered by the user. 
+        /// keyboard interface GetPin and GetPinBlock should be called after this command.
+        /// For all other devices Unsupported will be returned here. If this command is required and it is not called, the Keyboard.GetPin command will fail with the generic error SequenceError. If the input parameters passed to this commad and [PinPad.GetPinBlock](#pinpad.getpinblock) are not identical, the [PinPad.GetPinBlock](#pinpad.getpinblock) command will fail with the generic error InvalidData. The data associated with this command will be cleared on a [PinPad.GetPinBlock](#pinpad.getpinblock) command.
+        /// </summary>
+        public async Task<DeviceResult> SetPinBlockData(PINBlockRequest request, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+        }
+
+        /// <summary>
+        /// This function takes the account information and a PIN entered by the user to build a formatted PIN.Encrypting this formatted PIN once or twice returns a PIN block which can be written on a magnetic card or sent to a host. 
+        /// The PIN block can be calculated using one of the algorithms specified in the device capabilities.
+        /// This command will clear the PIN unless the application has requested that the PIN be maintained through the MaintinPin command enabled.
+        /// </summary>
+        public async Task<PINBlockResult> GetPinBlock(IGetPinBlockEvents events, PINBlockRequest request, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new PINBlockResult(MessagePayload.CompletionCodeEnum.Success,
+                                      PINBlock: new() { 0x37, 0x0f, 0xa6, 0x85, 0x72, 0x3d, 0xcc, 0xb5 });
+        }
+
+        /// <summary>
+        /// The PIN, which was entered with the EnterPin command, is combined with the requisite data specified by the IDC presentation algorithm and presented to the smartcard contained in the ID card unit.
+        /// The result of the presentation is returned to the application. 
+        /// This command will clear the PIN unless the application has requested that the PIN be maintained through the MaintainPin command.
+        /// </summary>
+        public async Task<PresentIDCResult> PresentIDC(PresentIDCRequest request,
+                                          CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new PresentIDCResult(MessagePayload.CompletionCodeEnum.Success,
+                                        request.ChipProtocol,
+                                        new List<byte>() { 0x90, 0x00 });
+        }
+        #endregion
+
+        #region KeyManagement Interface
         /// <summary>
         /// Importing key components temporarily while in secure key loading process 
         /// </summary>
@@ -54,8 +360,49 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                          CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            // Keyboard interface is not supported in the Encryptor SP
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+
+            // key data should be in the EPP but just set dummy here
+            List<byte> keyData = GenerateRandomNumber();
+            keyData.AddRange(GenerateRandomNumber());
+
+            TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
+            {
+                Mode = CipherMode.ECB,
+                Key = keyData.ToArray()
+            };
+
+            List<byte> keyCheckValue = null;
+            int keyLength = 0;
+            ImportKeyResult.VerifyAttributeClass verifyAttrib = null;
+
+            if (request.VerifyAttribute is null)
+            {
+                byte[] checkKey = new byte[keyData.Count];
+                for (int i = 0; i < checkKey.Length; i++)
+                    checkKey[i] = 0;
+
+                if (checkKey is not null)
+                {
+                    ICryptoTransform transForm = tDESEncrypt.CreateEncryptor();
+                    MemoryStream memStream = new();
+                    CryptoStream cryptoStream = new(memStream, transForm, CryptoStreamMode.Write);
+                    cryptoStream.Write(checkKey, 0, checkKey.Length);
+                    cryptoStream.FlushFinalBlock();
+
+                    verifyAttrib = new ImportKeyResult.VerifyAttributeClass("00", "T", "V", ImportKeyRequest.VerifyAttributeClass.VerifyMethodEnum.KCVZero);
+                    keyLength = keyData.Count;
+
+                    keyCheckValue = memStream.ToArray().ToList();
+                    keyCheckValue = keyCheckValue.GetRange(0, 3);
+                    keyLength *= 8;
+                }
+            }
+
+            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success,
+                                       new KeyInformationBase(), 
+                                       keyCheckValue,
+                                       verifyAttrib,
+                                       keyLength);
         }
 
 
@@ -66,8 +413,72 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                             CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            // Keyboard interface is not supported in the Encryptor SP
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+            
+            Dictionary<string, LoadedKeyInfo> loadedKeys = GetKeys();
+            if (loadedKeys.ContainsKey(request.KeyName))
+            {
+                Logger.Warning("DEVCLASS", $"Requested key name already exist and overwrite key data. {request.KeyName}");
+            }
+
+            if (request.KeyUsage != "K0")
+            {
+                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                                           $"Key usage should be K0 for this sample. {request.KeyUsage}",
+                                           ImportKeyCompletion.PayloadData.ErrorCodeEnum.UseViolation);
+            }
+
+            if (request.Algorithm != "T")
+            {
+                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                                           $"Specified algorithm is not supproted. {request.Algorithm}",
+                                           ImportKeyCompletion.PayloadData.ErrorCodeEnum.AlgorithmNotSupported);
+            }
+
+            // key data should be in the EPP but just set dummy here
+            List<byte> keyData = GenerateRandomNumber();
+            keyData.AddRange(GenerateRandomNumber());
+
+            loadedKeys.Add(request.KeyName, new(request.KeyName, LoadedKeyInfo.AlgorithmKeyEnum.TDES, keyData));
+            StoreKeys(loadedKeys);
+
+            TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
+            {
+                Mode = CipherMode.ECB,
+                Key = keyData.ToArray()
+            };
+
+            List<byte> keyCheckValue = null;
+            int keyLength = 0;
+            ImportKeyResult.VerifyAttributeClass verifyAttrib = null;
+
+            if (request.VerifyAttribute is null)
+            {
+                byte[] checkKey = new byte[keyData.Count];
+                for (int i = 0; i < checkKey.Length; i++)
+                    checkKey[i] = 0;
+
+                if (checkKey is not null)
+                {
+                    ICryptoTransform transForm = tDESEncrypt.CreateEncryptor();
+                    MemoryStream memStream = new();
+                    CryptoStream cryptoStream = new(memStream, transForm, CryptoStreamMode.Write);
+                    cryptoStream.Write(checkKey, 0, checkKey.Length);
+                    cryptoStream.FlushFinalBlock();
+
+                    verifyAttrib = new ImportKeyResult.VerifyAttributeClass("00", "T", "V", ImportKeyRequest.VerifyAttributeClass.VerifyMethodEnum.KCVZero);
+                    keyLength = keyData.Count;
+
+                    keyCheckValue = memStream.ToArray().ToList();
+                    keyCheckValue = keyCheckValue.GetRange(0, 3);
+                    keyLength *= 8;
+                }
+            }
+
+            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success, 
+                                       new KeyInformationBase(), 
+                                       keyCheckValue,
+                                       verifyAttrib,
+                                       keyLength);
         }
 
         /// <summary>
@@ -94,6 +505,17 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                            $"Specified algorithm is not supproted. {request.Algorithm}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.AlgorithmNotSupported);
             }
+
+            if (request.KeyData.Count != 16 &&
+                request.KeyData.Count != 24)
+            {
+                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                                        $"Specified key data length is not supproted. {request.KeyData.Count}",
+                                        ImportKeyCompletion.PayloadData.ErrorCodeEnum.InvalidKeyLength);
+            }
+
+            loadedKeys.Add(request.KeyName, new(request.KeyName, LoadedKeyInfo.AlgorithmKeyEnum.TDES, request.KeyData));
+            StoreKeys(loadedKeys);
 
             List<byte> keyCheckValue = null;
             int keyLength = 0;
@@ -268,9 +690,6 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             Dictionary<string, LoadedKeyInfo> keys = GetKeys();
             foreach (var key in keys)
             {
-                if (key.Key == Constants.MasterKeyName)
-                    continue;
-
                 keys.Remove(key.Key);
             }
             StoreKeys(keys);
@@ -414,8 +833,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public async Task<ExportCertificateResult> ExportCertificate(ExportCertificateRequest request,
                                                                      CancellationToken cancellation)
         {
-            if (certState == StatusClass.CertificateStateEnum.NotReady ||
-                certState == StatusClass.CertificateStateEnum.Unknown)
+            if (certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.NotReady ||
+                certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Unknown)
             {
                 return new ExportCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                                    $"Invalid certification state. {certState}",
@@ -496,8 +915,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public async Task<ReplaceCertificateResult> ReplaceCertificate(ReplaceCertificateRequest request,
                                                                        CancellationToken cancellation)
         {
-            if (certState == StatusClass.CertificateStateEnum.NotReady ||
-                certState == StatusClass.CertificateStateEnum.Unknown)
+            if (certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.NotReady ||
+                certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Unknown)
             {
                 return new ReplaceCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                                     $"Invalid certification state. {certState}",
@@ -544,7 +963,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
 
             bool validvalidOption = false;
-            foreach (var option in cryptoServiceProvider.KeyManagementCapabilities.LoadCertificationOptions)
+            foreach (var option in pinPadServiceProvider.KeyManagementCapabilities.LoadCertificationOptions)
             {
                 if (request.Signer == ImportCertificateRequest.SignerEnum.CA &&
                     option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA ||
@@ -580,8 +999,21 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                digest);
         }
 
-        /// Crypto interface
+        /// <summary>
+        /// This command is used to retrieve the data that needs to be signed and hence provided to the Authenticate command in order to perform an authenticated action on the device.
+        /// If this command returns data to be signed then the Authenticate command must be used to call the command referenced by the payload.
+        /// Any attempt to call the referenced command without using the Authenticate command, if authentication is required, 
+        /// shall result in AuthRequired. 
+        /// </summary>
+        public async Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, 
+                                                                     CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+            return new StartAuthenticateResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
+        }
+        #endregion
 
+        #region Crypto Interface
         /// <summary>
         /// This command is used to generate a random number. 
         /// </summary>
@@ -760,19 +1192,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             return new GenerateDigestResult(MessagePayload.CompletionCodeEnum.Success,
                                             new SHA256CryptoServiceProvider().ComputeHash(request.DataToHash.ToArray()).ToList());
         }
-
-        /// <summary>
-        /// This command is used to retrieve the data that needs to be signed and hence provided to the Authenticate command in order to perform an authenticated action on the device.
-        /// If this command returns data to be signed then the Authenticate command must be used to call the command referenced by the payload.
-        /// Any attempt to call the referenced command without using the Authenticate command, if authentication is required, 
-        /// shall result in AuthRequired. 
-        /// </summary>
-        public async Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, 
-                                                                     CancellationToken cancellation)
-        {
-            await Task.Delay(100, cancellation);
-            return new StartAuthenticateResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
-        }
+        #endregion
 
         /// <summary>
         /// RunAync
@@ -782,10 +1202,17 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// <returns></returns>
         public async Task RunAsync()
         {
+            _ = Task.Run(() =>
+            {
+                PinPadUI = new PinPadUI();
+                System.Windows.Forms.Application.EnableVisualStyles();
+                System.Windows.Forms.Application.Run(PinPadUI);
+            });
+
             for (; ; )
             {
                 await initializedSignal?.WaitAsync();
-                await cryptoServiceProvider.InitializedEvent();
+                await pinPadServiceProvider.InitializedEvent();
             }
         }
 
@@ -798,12 +1225,14 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                0,
                                                StatusPropertiesClass.AntiFraudModuleEnum.NotSupported);
 
-            StatusClass keyManagementStatus = new(encryptionState, certState);
+            XFS4IoT.KeyManagement.StatusClass keyManagementStatus = new(encryptionState, certState);
+            XFS4IoT.Keyboard.StatusClass keyboardStatus = new(XFS4IoT.Keyboard.StatusClass.AutoBeepModeEnum.Active);
 
             return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
                                                     null,
                                                     common,
-                                                    KeyManagement: keyManagementStatus);
+                                                    KeyManagement: keyManagementStatus,
+                                                    Keyboard: keyboardStatus);
         }
 
         public CapabilitiesCompletion.PayloadData Capabilities()
@@ -862,9 +1291,9 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                              authAttributes,
                                                              verifyAttributes);
 
-            List<CapabilitiesClass.LoadCertOptionsClass> certOptions = new() 
+            List<XFS4IoT.KeyManagement.CapabilitiesClass.LoadCertOptionsClass> certOptions = new() 
             { 
-                new(CapabilitiesClass.LoadCertOptionsClass.SignerEnum.Ca, new(NewHost: true)) 
+                new(XFS4IoT.KeyManagement.CapabilitiesClass.LoadCertOptionsClass.SignerEnum.Ca, new(NewHost: true)) 
             };
 
 
@@ -892,22 +1321,35 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             keyVerifyAttributes.Add("S1", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
             keyVerifyAttributes.Add("S2", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
 
-            CapabilitiesClass keyManagementCap = new(KeyNum: 100,
-                                                     KeyCheckModes: new(Self: true, Zero: true),
-                                                     RsaAuthenticationScheme: new(Number2partySig: true, Number3partyCert: true),
-                                                     RsaSignatureAlgorithm: new(Pkcs1V15: true),
-                                                     RsaCryptAlgorithm: new(Pkcs1V15:true),
-                                                     RsaKeyCheckMode: new(Sha1:true, Sha256:true),
-                                                     SignatureScheme: new(ExportEppId:true, EnhancedRkl:true),
-                                                     KeyBlockImportFormats: new(AnsTr31KeyBlock:true),
-                                                     KeyImportThroughParts: true,
-                                                     DesKeyLength: new(Double:true),
-                                                     CertificateTypes: new(EncKey:true, VerificationKey:true, HostKey:true),
-                                                     LoadCertOptions: certOptions,
-                                                     SymmetricKeyManagementMethods: new(FixedKey:true, MasterKey:true),
-                                                     KeyAttributes: keyAttributes,
-                                                     DecryptAttributes: decryptAttributes,
-                                                     VerifyAttributes: keyVerifyAttributes);
+            XFS4IoT.KeyManagement.CapabilitiesClass keyManagementCap = new(KeyNum: 100,
+                                                                           KeyCheckModes: new(Self: true, Zero: true),
+                                                                           RsaAuthenticationScheme: new(Number2partySig: true, Number3partyCert: true),
+                                                                           RsaSignatureAlgorithm: new(Pkcs1V15: true),
+                                                                           RsaCryptAlgorithm: new(Pkcs1V15:true),
+                                                                           RsaKeyCheckMode: new(Sha1:true, Sha256:true),
+                                                                           SignatureScheme: new(ExportEppId:true, EnhancedRkl:true),
+                                                                           KeyBlockImportFormats: new(AnsTr31KeyBlock:true),
+                                                                           KeyImportThroughParts: true,
+                                                                           DesKeyLength: new(Double:true),
+                                                                           CertificateTypes: new(EncKey:true, VerificationKey:true, HostKey:true),
+                                                                           LoadCertOptions: certOptions,
+                                                                           SymmetricKeyManagementMethods: new(FixedKey:true, MasterKey:true),
+                                                                           KeyAttributes: keyAttributes,
+                                                                           DecryptAttributes: decryptAttributes,
+                                                                           VerifyAttributes: keyVerifyAttributes);
+
+
+            XFS4IoT.Keyboard.CapabilitiesClass keyboardCap = new(AutoBeep: new (true, true, true, true));
+
+            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.PinPad.CapabilitiesClass.PinBlockAttributesClass>>> pinblockAttributes = new();
+            pinblockAttributes.Add("P0", new() { { "T", new() { { "E", null } } } });
+
+            XFS4IoT.PinPad.CapabilitiesClass pinPadCap = new(PinFormats: new(Ansi: true, Iso0: true),
+                                                             ValidationAlgorithms: new(true, true),
+                                                             PinCanPersistAfterUse: false,
+                                                             TypeCombined: false,
+                                                             SetPinblockDataRequired: false,
+                                                             PinBlockAttributes: pinblockAttributes);
 
             List <InterfaceClass> interfaces = new()
             {
@@ -961,7 +1403,45 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                     { 
                         "IllegalKeyAccessEvent"
                     }, 
-                    MaximumRequests:  1000)
+                    MaximumRequests:  1000),
+                new InterfaceClass(
+                    Name: InterfaceClass.NameEnum.PinPad,
+                    Commands: new List<string>
+                    {
+                        "GetPinblock",
+                        "GetQueryPCIPTSDeviceId",
+                        "LocalDES",
+                        "LocalVisa",
+                        "MaintainPin",
+                        "PresentIDC",
+                        "Reset",
+                        "SetPinblockData",
+                    },
+                    Events: new List<string>
+                    {
+                        "DUKPTKSNEvent",
+                        "IllegalKeyAccessEvent",
+                    },
+                    MaximumRequests: 1000),
+                new InterfaceClass(
+                    Name: InterfaceClass.NameEnum.Keyboard,
+                    Commands: new List<string>
+                    {
+                        "DataEntry",
+                        "DefineLayout",
+                        "GetLayout",
+                        "KeypressBeep",
+                        "PinEntry",
+                        "Reset",
+                        "SecureKeyEntry",
+                    },
+                    Events: new List<string>
+                    {
+                        "EnterDataEvent",
+                        "KeyEvent",
+                        "LayoutEvent"
+                    },
+                    MaximumRequests: 1000)
             };
 
             return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
@@ -969,7 +1449,9 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                           interfaces,
                                                           common,
                                                           Crypto: cryptoCap,
-                                                          KeyManagement: keyManagementCap);
+                                                          KeyManagement: keyManagementCap,
+                                                          Keyboard: keyboardCap,
+                                                          PinPad: pinPadCap);
         }
 
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
@@ -978,6 +1460,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
         public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
         public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+
 
         private static List<byte> GenerateRandomNumber()
         {
@@ -1022,7 +1505,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
             catch (Exception ex)
             {
-                Logger.Warning(nameof(EncryptorSample), $"Exception caught on serializing persistent data. {ex.Message}");
+                Logger.Warning(nameof(PinPadSample), $"Exception caught on serializing persistent data. {ex.Message}");
                 return false;
             }
 
@@ -1033,7 +1516,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
             catch (Exception ex)
             {
-                Logger.Warning(nameof(EncryptorSample), $"Exception caught on writing data. {Constants.PERSIT}, {ex.Message}");
+                Logger.Warning(nameof(PinPadSample), $"Exception caught on writing data. {Constants.PERSIT}, {ex.Message}");
                 return false;
             }
 
@@ -1050,7 +1533,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
             catch (Exception ex)
             {
-                Logger.Warning(nameof(EncryptorSample), $"Exception caught on reading persistent data. {Constants.PERSIT}, {ex.Message}");
+                Logger.Warning(nameof(PinPadSample), $"Exception caught on reading persistent data. {Constants.PERSIT}, {ex.Message}");
                 return new Dictionary<string, LoadedKeyInfo>();
             }
 
@@ -1062,7 +1545,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
             catch (Exception ex)
             {
-                Logger.Warning(nameof(EncryptorSample), $"Exception caught on unserializing persistent data. {ex.Message}");
+                Logger.Warning(nameof(PinPadSample), $"Exception caught on unserializing persistent data. {ex.Message}");
                 return null;
             }
 
@@ -1071,11 +1554,11 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider 
         { 
-            get { return cryptoServiceProvider;  } 
+            get { return pinPadServiceProvider;  } 
             set 
             {
-                value.IsA<CryptoServiceProvider>($"Unexpected type is set to the SetServiceProvider property.");
-                cryptoServiceProvider = value as CryptoServiceProvider;
+                value.IsA<PinPadServiceProvider>($"Unexpected type is set to the SetServiceProvider property.");
+                pinPadServiceProvider = value as PinPadServiceProvider;
                 if (serviceInitialized)
                     return;
 
@@ -1087,10 +1570,10 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                         KeyContainerName = keyName
                     });
 
-                    if (cryptoServiceProvider.GetKeyDetail(keyName) is null)
+                    if (pinPadServiceProvider.GetKeyDetail(keyName) is null)
                     {
-                        cryptoServiceProvider.AddKey(keyName,
-                                                     cryptoServiceProvider.FindKeySlot(keyName),
+                        pinPadServiceProvider.AddKey(keyName,
+                                                     pinPadServiceProvider.FindKeySlot(keyName),
                                                      "S0",
                                                      "R",
                                                      keyName switch
@@ -1111,25 +1594,6 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 keys.Clear();
                 StoreKeys(keys);
 
-                List<byte> keyData = new() { 0xa1, 0xbb, 0x92, 0x1f, 0xbc, 0x72, 0x88, 0x05, 0xf2, 0x18, 0x5f, 0x2a, 0x56, 0x10, 0x1d, 0x29 };
-                keys.Add(Constants.MasterKeyName, new(Constants.MasterKeyName, LoadedKeyInfo.AlgorithmKeyEnum.TDES, keyData));
-                StoreKeys(keys);
-
-                if (cryptoServiceProvider.GetKeyDetail(Constants.MasterKeyName) is null)
-                {
-                    cryptoServiceProvider.AddKey(Constants.MasterKeyName,
-                                                 cryptoServiceProvider.FindKeySlot(Constants.MasterKeyName),
-                                                 "K0",
-                                                 "T",
-                                                 "B",
-                                                 keyData.Count,
-                                                 KeyDetail.KeyStatusEnum.Loaded,
-                                                 true,
-                                                 string.Empty,
-                                                 "00",
-                                                 "S");
-                }
-
                 serviceInitialized = true;
             } 
         }
@@ -1137,11 +1601,114 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         private ILogger Logger { get; }
 
         private readonly SemaphoreSlim initializedSignal = new(0, 1);
-        private CryptoServiceProvider cryptoServiceProvider = null;
+        private PinPadServiceProvider pinPadServiceProvider = null;
         private bool serviceInitialized = false;
+        private PinPadUI PinPadUI;
 
-        private StatusClass.EncryptionStateEnum encryptionState = StatusClass.EncryptionStateEnum.NotInitialized;
-        private StatusClass.CertificateStateEnum certState = StatusClass.CertificateStateEnum.Primary;
+        private XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum encryptionState = XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum.NotInitialized;
+        private XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum certState = XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Primary;
+
+        private readonly Dictionary<EntryModeEnum, List<FrameClass>> keyLayouts = new()
+        {
+            {
+                EntryModeEnum.Data, 
+                new List<FrameClass>()
+                {
+                    {
+                        new FrameClass(0, 0, 0, 0, FrameClass.FloatEnum.NotSupported,
+                        new List<FrameClass.FunctionKeyClass>()
+                        {
+                            { new FrameClass.FunctionKeyClass(282, 204, 80, 80, "one", null) },
+                            { new FrameClass.FunctionKeyClass(282, 294, 80, 80, "four", null) },
+                            { new FrameClass.FunctionKeyClass(282, 384, 80, 80, "seven", null) },
+                            { new FrameClass.FunctionKeyClass(372, 204, 80, 80, "two", null) },
+                            { new FrameClass.FunctionKeyClass(372, 294, 80, 80, "five", null) },
+                            { new FrameClass.FunctionKeyClass(372, 384, 80, 80, "eight", null) },
+                            { new FrameClass.FunctionKeyClass(372, 474, 80, 80, "zero", null) },
+                            { new FrameClass.FunctionKeyClass(462, 204, 80, 80, "three", null) },
+                            { new FrameClass.FunctionKeyClass(462, 294, 80, 80, "six", null) },
+                            { new FrameClass.FunctionKeyClass(462, 384, 80, 80, "nine", null) },
+                            { new FrameClass.FunctionKeyClass(572, 209, 160, 80, "enter", null) },
+                            { new FrameClass.FunctionKeyClass(572, 299, 160, 80, "clear", null) },
+                            { new FrameClass.FunctionKeyClass(572, 389, 160, 80, "cancel", null) },
+                            { new FrameClass.FunctionKeyClass(572, 479, 160, 80,  "backspace", null) }
+                        })
+                    },
+                    {
+                        new FrameClass(0, 0, 0, 768, FrameClass.FloatEnum.NotSupported,
+                        new List<FrameClass.FunctionKeyClass>()
+                        {
+                            { new FrameClass.FunctionKeyClass(0, 0, 0, 187, "fdk01", null) },
+                            { new FrameClass.FunctionKeyClass(0, 187, 0, 187, "fdk02", null) },
+                            { new FrameClass.FunctionKeyClass(0, 374, 0, 187, "fdk03", null) },
+                            { new FrameClass.FunctionKeyClass(0, 561, 0, 187, "fdk04", null) }
+                        })
+                    },
+                    {
+                        new FrameClass(1024, 0, 0, 768, FrameClass.FloatEnum.NotSupported,
+                        new List<FrameClass.FunctionKeyClass>()
+                        {
+                            { new FrameClass.FunctionKeyClass(0, 0, 0, 187, "fdk05", null) },
+                            { new FrameClass.FunctionKeyClass(0, 187, 0, 187, "fdk06", null) },
+                            { new FrameClass.FunctionKeyClass(0, 374, 0, 187, "fdk07", null) },
+                            { new FrameClass.FunctionKeyClass(0, 561, 0, 187, "fdk08", null) },
+                        })
+                    }
+                }
+            },
+            {
+                EntryModeEnum.Pin,
+                new List<FrameClass>()
+                {
+                    {
+                        new FrameClass(0, 0, 0, 0, FrameClass.FloatEnum.NotSupported,
+                        new List<FrameClass.FunctionKeyClass>()
+                        {
+                            { new FrameClass.FunctionKeyClass(287, 209, 80, 80, "one", null) },
+                            { new FrameClass.FunctionKeyClass(287, 299, 80, 80, "four", null) },
+                            { new FrameClass.FunctionKeyClass(287, 389, 80, 80, "seven", null) },
+                            { new FrameClass.FunctionKeyClass(377, 209, 80, 80, "two", null) },
+                            { new FrameClass.FunctionKeyClass(377, 299, 80, 80, "five", null) },
+                            { new FrameClass.FunctionKeyClass(377, 389, 80, 80, "eight", null) },
+                            { new FrameClass.FunctionKeyClass(377, 479, 80, 80, "zero", null) },
+                            { new FrameClass.FunctionKeyClass(467, 209, 80, 80, "three", null) },
+                            { new FrameClass.FunctionKeyClass(467, 299, 80, 80, "six", null) },
+                            { new FrameClass.FunctionKeyClass(467, 389, 80, 80, "nine", null) },
+                            { new FrameClass.FunctionKeyClass(577, 209, 160, 80, "enter", null) },
+                            { new FrameClass.FunctionKeyClass(577, 299, 160, 80, "clear", null) },
+                            { new FrameClass.FunctionKeyClass(577, 389, 160, 80, "cancel", null) },
+                            { new FrameClass.FunctionKeyClass(577, 479, 160, 80, "backspace", null) }
+                        })
+                    }
+                }
+            },
+            {
+                EntryModeEnum.Secure,
+                new List<FrameClass>()
+                {
+                    {
+                        new FrameClass(0, 0, 0, 0, FrameClass.FloatEnum.NotSupported,
+                        new List<FrameClass.FunctionKeyClass>()
+                        {
+                            { new FrameClass.FunctionKeyClass(287, 209, 80, 80, "one", "a") },
+                            { new FrameClass.FunctionKeyClass(287, 299, 80, 80, "four", "d") },
+                            { new FrameClass.FunctionKeyClass(287, 389, 80, 80, "seven", null) },
+                            { new FrameClass.FunctionKeyClass(287, 479, 80, 80, "shift", null) },
+                            { new FrameClass.FunctionKeyClass(377, 209, 80, 80, "two", "b") },
+                            { new FrameClass.FunctionKeyClass(377, 299, 80, 80, "five", "e") },
+                            { new FrameClass.FunctionKeyClass(377, 389, 80, 80, "eight", null) },
+                            { new FrameClass.FunctionKeyClass(377, 479, 80, 80, "zero", null) },
+                            { new FrameClass.FunctionKeyClass(467, 209, 80, 80, "three", "c") },
+                            { new FrameClass.FunctionKeyClass(467, 299, 80, 80, "six", "f") },
+                            { new FrameClass.FunctionKeyClass(467, 389, 80, 80, "nine", null) },
+                            { new FrameClass.FunctionKeyClass(577, 209, 160, 80, "enter", null) },
+                            { new FrameClass.FunctionKeyClass(577, 299, 160, 80, "clear", null) },
+                            { new FrameClass.FunctionKeyClass(577, 389, 160, 80, "cancel", null) }
+                        })
+                    }
+                }
+            }
+        };
 
         private static class Constants
         {
@@ -1149,8 +1716,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             public const string EPPUID = "KAL18593";
             public const string EPPVendorKeyName = "EPPVendorVerify";
             public const string EPPVendorSigKeyName = "EPPVendorSign";
-            public const string MasterKeyName = "MASTERKEY";
-            public const string PERSIT = "PersistKeys";
+            public const string PERSIT = "PINPersistKeys";
         }
     }
 }

@@ -167,18 +167,35 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getPresentStatusCmd = new DispenseCommand(RequestId.NewID(), 
-                new(CommandTimeout, null, 1, DispenseCommand.PayloadData.PositionEnum.Default, 
-                new DispenseCommand.PayloadData.DenominationClass(new Dictionary<string, double>() {
-                    { "EUR", 50 }
-                })));
+            var getCommandNonce = new XFS4IoT.Common.Commands.GetCommandNonceCommand(RequestId.NewID(), new(CommandTimeout));
+            CmdBox.Text = getCommandNonce.Serialise();
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
 
-            CmdBox.Text = getPresentStatusCmd.Serialise();
+            object commandNonceResponse = await SendAndWaitForCompletionAsync(dispenser, getCommandNonce);
+            if (commandNonceResponse is not XFS4IoT.Common.Completions.GetCommandNonceCompletion nonceCompletion)
+            {
+                return;
+            }
+            RspBox.Text = nonceCompletion.Serialise();
+            await Task.Delay(1000);
+
+            var dispenseCommand = new DispenseCommand(RequestId.NewID(),
+                Payload: new(CommandTimeout, null, 1, DispenseCommand.PayloadData.PositionEnum.Default, 
+                    new DispenseCommand.PayloadData.DenominationClass(
+                        new Dictionary<string, double> 
+                            { { "EUR", 50 } }
+                    ),
+                    Token: $"NONCE={nonceCompletion.Payload.CommandNonce},TOKENFORMAT=1,TOKENLENGTH=0164,HMACSHA256=CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
+                    )
+                );
+
+            CmdBox.Text = dispenseCommand.Serialise();
 
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getPresentStatusCmd);
+            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, dispenseCommand);
             if (cmdResponse is DispenseCompletion response)
             {
                 RspBox.Text = response.Serialise();

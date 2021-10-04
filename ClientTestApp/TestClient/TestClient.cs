@@ -14,9 +14,10 @@ using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
-using XFS4IoT.CardReader.Events;
+using XFS4IoT.CashDispenser.Commands;
+using XFS4IoT.CashDispenser.Completions;
+using XFS4IoTClient;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 
 namespace TestClient
 {
@@ -31,6 +32,7 @@ namespace TestClient
 
                 bool ShowJSON = false;
                 int ParallelCount = 1;
+                bool waitForUnsolic = false; 
                 foreach (var (name, value) in from p in args
                                               let m = paramRegex.Match(p)
                                               select (m.Groups["name"].Value, m.Groups["value"].Value))
@@ -39,7 +41,7 @@ namespace TestClient
                     {
                         case "parallelcount" or "count"  : 
                             if( !int.TryParse(value, out ParallelCount ) ) 
-                                throw new Exception($"Invalid parallel count {value}"); ; 
+                                throw new Exception($"Invalid parallel count {value}");
                             break;
                         case "address"  : Address = value; break;
                         case "showjson" :
@@ -50,6 +52,8 @@ namespace TestClient
                             else 
                                 throw new Exception($"Invalid value {value}");
                             break;
+                        case "waitforunsolic": waitForUnsolic = true; break;
+
                         default: throw new Exception($"unknown parameter{name}");
                     }
                 }
@@ -57,8 +61,8 @@ namespace TestClient
                 Logger.WriteJSON = ShowJSON; 
 
                 Logger.LogLine("Doing service discovery.");
-                var CardReaderUri = await DoServiceDiscovery();
-                if( CardReaderUri == null )
+                await DoServiceDiscovery();
+                if( cardReader == null )
                 {
                     Logger.LogError("No card reader found");
                     return;
@@ -67,10 +71,7 @@ namespace TestClient
                 // The test sequence - may be run multiple times. 
                 async Task DoCardReader()
                 {
-                    Logger.LogLine("Connecting to the card reader");
-                    XFS4IoTClient.ClientConnection cardReader = await OpenService(CardReaderUri);
-
-                    Logger.LogLine("Get card reader status");
+                    Logger.LogLine("Doing card reader sequence");
                     await GetStatus(cardReader);
 
                     await DoAcceptCard(cardReader);
@@ -84,20 +85,60 @@ namespace TestClient
                     await DoQueryIFMIdentifier(cardReader);
                     await DoParkCard(cardReader);
                     await DoEjectCard(cardReader);
-
-                    //await cardReader.DisconnectAsync();
                 }
 
-                await Task.WhenAll(from i in Enumerable.Range(0, ParallelCount)
-                                   select DoCardReader());
+                async Task DoCashDispenser()
+                {
+                    Logger.LogLine("Doing cash dispenser sequence");
+
+                    await DoClearCommandNonce();
+
+                    string nonce = await DoGetCommandNonce();
+                    Logger.LogLine($"Nonce : {nonce}");
+                    nonce = await DoGetCommandNonce();
+                    Logger.LogLine($"Nonce : {nonce}");
+
+                    Logger.LogLine("Dispense (valid token)");
+                    string token = MakeToken(nonce, true);
+                    Logger.LogLine($"Token: {token}");
+                    await DoDispenseCash(100, "EUR", token);
+
+                    await DoPresentCash();
+
+                    Logger.LogLine("Dispense (Stale token)");
+                    token = MakeToken(nonce, true);
+                    Logger.LogLine($"Token: {token}");
+                    await DoDispenseCash(100, "EUR", token);
+
+                    Logger.LogLine("Dispense (Invalid HMAC)");
+                    token = MakeToken(nonce, false);
+                    Logger.LogLine($"Invalid HMAC: {token}");
+                    await DoDispenseCash(100, "EUR", token);
+
+                    Logger.LogLine("Dispense (Invalid nonce)");
+                    token = MakeToken("FFFF", true);
+                    Logger.LogLine($"Invalid nonce: {token}");
+                    await DoDispenseCash(100, "EUR", token);
+                }
+
+                async Task DoAll()
+                {
+                    await DoCardReader();
+                    await DoCashDispenser(); 
+                }
+
+                await Task.WhenAll(from i in Enumerable.Range(1, ParallelCount)
+                                   select DoAll() );
 
                 Logger.LogLine($"Done");
 
-                // Start listening for unsolicited messages. 
-                XFS4IoTClient.ClientConnection cardReader = await OpenService(CardReaderUri);
-                while (true)
+                if (waitForUnsolic)
                 {
-                    Logger.LogMessage(await cardReader.ReceiveMessageAsync());
+                    Logger.LogLine("Listening for unsolicited messages."); 
+                    while (true)
+                    {
+                        Logger.LogMessage(await cardReader.ReceiveMessageAsync());
+                    }
                 }
             }
             catch (WebSocketException e)
@@ -112,95 +153,117 @@ namespace TestClient
             }
         }
 
-        private static readonly Regex paramRegex = new("^[/-](?<name>.*?)(?:[=:](?<value>.*))?$");
+        private static string MakeToken(string nonce, bool valid)
+        {
+            // 'valid' or invalid HMAC. 
+            var HMAC = valid ? "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
+                             : "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F3";
 
-        /// <summary>
-        /// Messages that we expect to receive so that we can decode them. 
-        /// </summary>
-        private readonly MessageDecoder ResponseDecoder = new(MessageDecoder.AutoPopulateType.Response);
+            var tokenBuilder = new System.Text.StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,ANOTHERKEY=12345,HMACSHA256={HMAC}");
+
+            // The token length field is fix at four digits to make it easy to calculate. 
+            // Inject this into the string. 
+            var len = $"{tokenBuilder.Length:X4}";
+            tokenBuilder = tokenBuilder.Replace("$$$$", len);
+
+            string token = tokenBuilder.ToString();
+            return token;
+        }
+
+        private static readonly Regex paramRegex = new("^[/-](?<name>.*?)(?:[=:](?<value>.*))?$");
 
         private readonly ConsoleLogger Logger = new();
         private string Address { get; set; } = "localhost";
 
-        private async Task<Uri> DoServiceDiscovery()
+        private async Task DoServiceDiscovery()
         {
-            // Do service discovery on a single port. 
-            async Task<Uri> DoServiceDiscovery(int port)
+            // Do service discovery on all of the ports, in parallel.
+            // (Flatten this to an array, or we'll re-run the DoServiceDiscovery() every time we enumerate
+            var tasks = from port in XFSConstants.PortRanges select DoServiceDiscovery(port); 
+            await Task.WhenAll(tasks);
+        }
+        // Do service discovery on a single port. 
+        private async Task DoServiceDiscovery(int port)
+        {
+            var publisher = new ClientConnection(
+                    EndPoint: new Uri($"ws://{Address}:{port}/xfs4iot/v1.0")
+                    );
+
+            try
             {
-                var Discovery = new XFS4IoTClient.ClientConnection(
-                        EndPoint: new Uri($"ws://{Address}:{port}/xfs4iot/v1.0")
-                        );
-
-                try
-                {
-                    await Discovery.ConnectAsync();
-                }
-                catch( System.Net.WebSockets.WebSocketException e ) when (e.HResult == -0x7FFFBFFB)
-                {
-                    Logger.LogLine($"No responce on port {port}");
-                    return null;
-                }
-                catch (Exception e)
-                {
-                    Logger.LogLine($"Caught exception : {e}");
-                    throw;
-                }
-
-                Logger.LogLine($"Publisher responce on port {port}");
-
-                var command = new GetServicesCommand(RequestId.NewID(),
-                                                     new GetServicesCommand.PayloadData(60000));
-                Logger.LogMessage(command);
-                await Discovery.SendCommandAsync(command);
-                var response = await GetCompletionAsync<GetServicesCompletion>(Discovery);
-                Logger.LogMessage(response);
-                return await FindCardReader(response.Payload);
+                await publisher.ConnectAsync();
+            }
+            catch(WebSocketException e) when (e.HResult == -0x7FFFBFFB)
+            {
+                Logger.LogLine($"No responce on port {port}");
+                return;
+            }
+            catch (Exception e)
+            {
+                Logger.LogLine($"Caught exception : {e}");
+                throw;
             }
 
-            // Do service discovery on all of the ports, in parallel
-            var tasks = from port in XFSConstants.PortRanges select DoServiceDiscovery(port);
-            await Task.WhenAll(tasks);
+            Logger.LogLine($"Publisher responce on port {port}");
 
-            // Take the first card reader that was found, or null.
-            return (from task in tasks where task.Result != null select task.Result).FirstOrDefault();
+            var command = new GetServicesCommand(RequestId.NewID(),
+                                                    new GetServicesCommand.PayloadData(60000));
+            Logger.LogMessage(command);
+            await publisher.SendCommandAsync(command);
+            var response = await GetCompletionAsync<GetServicesCompletion>(publisher);
+            await FindServices(response.Payload);
         }
 
-        private async Task<Uri> FindCardReader(GetServicesCompletion.PayloadData endpointDetails)
+        private async Task FindServices(GetServicesCompletion.PayloadData endpointDetails)
         {
-            Logger.LogLine($"Got endpoint details {endpointDetails}");
             Logger.LogLine($"Services:\n{string.Join("\n", from ep in endpointDetails.Services select ep.ServiceURI)}");
 
-            async Task<bool> IsACardReader( Uri ServiceURI )
+            async Task<(CapabilitiesCompletion capabilities, ClientConnection connection, Uri Uri)> GetServiceDetails( Uri ServiceURI )
             {
-                var service = await OpenService(ServiceURI);
-                var caps = await GetCapabilities(service);
-                return caps.Payload.CardReader != null 
-                        && caps.Payload.CardReader.Type == XFS4IoT.CardReader.CapabilitiesClass.TypeEnum.Motor;
+                ClientConnection service = await OpenService(ServiceURI);
+                CapabilitiesCompletion caps = await GetCapabilities(service);
+                return (caps, service, ServiceURI); 
             }
-            
+
             // We want to do the query for the capabilities in parallel for each service to speed things up. 
-            // So we create all the async 'IsACardReader' tasks as a group and then wait for them all to finish.  
-            var services = from ep in endpointDetails.Services.Skip(1)
-                           let uri = new Uri(ep.ServiceURI)
-                           select (Uri:uri, task:IsACardReader(uri) );
+            // So we create all the async 'GetServiceDetails' tasks as a group and then wait for them all to finish.  
+            var services = (from ep in endpointDetails.Services.Skip(1)
+                            let uri = new Uri(ep.ServiceURI)
+                            select (Uri: uri, task: GetServiceDetails(uri))
+                          ).ToArray();
 
             await Task.WhenAll(from t in services select t.task );
 
-            // Once we've queried all the capabilities we can find which ones are actually card readers. 
-            var cardReaders = from x in services
-                              where x.task.Result == true
-                              select x.Uri;
+            // Once we've queried all the capabilities we can find which ones are actually each service class. 
+            var( cardService, cardUri ) = (
+                              from details in services
+                              let caps = details.task.Result.capabilities.Payload
+                              where caps.CardReader != null && caps.CardReader.Type == XFS4IoT.CardReader.CapabilitiesClass.TypeEnum.Motor
+                              select (details.task.Result.connection, details.task.Result.Uri )
+                              )
+                              .FirstOrDefault();
+            cardReader = cardService ?? throw new Exception($"Failed to find a card reader");
+            Logger.LogLine($"Found a card reader: {cardUri }");
 
-            // and return the card reader, or throw an error if we didn't find any. 
-            return cardReaders.FirstOrDefault() ?? throw new Exception($"Failed to find a card reader endpoint");
+            var (dispService, dispenserUri) = (
+                              from details in services
+                              let caps = details.task.Result.capabilities.Payload
+                              where caps.CashDispenser != null && caps.CashDispenser.Type == XFS4IoT.CashDispenser.CapabilitiesClass.TypeEnum.SelfServiceBill
+                              select (details.task.Result.connection, details.task.Result.Uri)
+                              )
+                              .FirstOrDefault();
+            cashDispenser = dispService ?? throw new Exception($"Failed to find a cash dispenser");
+            Logger.LogLine($"Found a cash dispenser: {dispenserUri}");
         }
 
+        private ClientConnection cardReader;
+        private ClientConnection cashDispenser; 
 
-        private static async Task<XFS4IoTClient.ClientConnection> OpenService(Uri service)
+        private static async Task<ClientConnection> OpenService(Uri service)
         {
             // Create the connection object. This doesn't start anything...  
-            XFS4IoTClient.ClientConnection connection
-                = new XFS4IoTClient.ClientConnection(
+            ClientConnection connection
+                = new ClientConnection(
                     EndPoint: service
                     );
 
@@ -212,7 +275,7 @@ namespace TestClient
             return connection; 
         }
 
-        private async Task<StatusCompletion> GetStatus(XFS4IoTClient.ClientConnection service)
+        private async Task<StatusCompletion> GetStatus(ClientConnection service)
         {
 
             // Create a new command and send it to the device
@@ -223,7 +286,7 @@ namespace TestClient
             return await GetCompletionAsync<StatusCompletion>(service);
         }
 
-        private async Task<CapabilitiesCompletion> GetCapabilities(XFS4IoTClient.ClientConnection service)
+        private async Task<CapabilitiesCompletion> GetCapabilities(ClientConnection service)
         {
 
             // Create a new command and send it to the device
@@ -235,7 +298,7 @@ namespace TestClient
         }
 
 
-        private async Task DoAcceptCard(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoAcceptCard(ClientConnection cardReader)
         {
 
             // Create a new command and send it to the device
@@ -260,12 +323,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<ReadRawDataCompletion>(cardReader);
         }
 
-        private async Task DoChipIO(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoChipIO(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new ChipIOCommand(RequestId.NewID(),
@@ -275,12 +336,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<ChipIOCompletion>(cardReader);
         }
 
-        private async Task DoChipPower(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoChipPower(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new ChipPowerCommand(RequestId.NewID(),
@@ -290,27 +349,30 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<ChipPowerCompletion>(cardReader);
         }
 
-        private async Task DoReset(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoReset(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new ResetCommand(RequestId.NewID(),
-                new ResetCommand.PayloadData(10_000, ResetCommand.PayloadData.ResetInEnum.Eject));
+            var command = new XFS4IoT.CardReader.Commands.ResetCommand
+                            (
+                            RequestId: RequestId.NewID(),
+                            Payload:    new 
+                                        (
+                                        Timeout: 10_000, 
+                                        ResetIn: XFS4IoT.CardReader.Commands.ResetCommand.PayloadData.ResetInEnum.Eject
+                                        )
+                            );
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
-            await GetCompletionAsync<ResetCompletion>(cardReader);
+            await GetCompletionAsync<XFS4IoT.CardReader.Completions.ResetCompletion>(cardReader);
         }
 
-        private async Task DoRetainCard(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoRetainCard(ClientConnection cardReader)
         {
             Logger.LogLine("Doing AcceptCard before RetainCard.");
             await DoAcceptCard(cardReader);
@@ -323,12 +385,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<RetainCardCompletion>(cardReader);
         }
 
-        private async Task DoResetCount(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoResetCount(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new ResetCountCommand(RequestId.NewID(),
@@ -338,12 +398,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<ResetCountCompletion>(cardReader);
         }
 
-        private async Task DoSetKey(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoSetKey(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new SetKeyCommand(RequestId.NewID(),
@@ -353,12 +411,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<SetKeyCompletion>(cardReader);
         }
 
-        private async Task DoWriteData(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoWriteData(ClientConnection cardReader)
         {
             Logger.LogLine("Doing AcceptCard before WriteData.");
             await DoAcceptCard(cardReader);
@@ -375,15 +431,13 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<WriteRawDataCompletion>(cardReader);
 
             Logger.LogLine("Ejecting card after WriteData.");
             await DoEjectCard(cardReader);
         }
 
-        private async Task DoQueryIFMIdentifier(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoQueryIFMIdentifier(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new QueryIFMIdentifierCommand(RequestId.NewID(),
@@ -393,12 +447,10 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<QueryIFMIdentifierCompletion>(cardReader);
         }
 
-        private async Task DoParkCard(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoParkCard(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new ParkCardCommand(RequestId.NewID(),
@@ -408,11 +460,9 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<ParkCardCompletion>(cardReader);
         }
-        private async Task DoEjectCard(XFS4IoTClient.ClientConnection cardReader)
+        private async Task DoEjectCard(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
             var command = new EjectCardCommand(RequestId.NewID(), 
@@ -422,12 +472,75 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            Logger.LogLine("Waiting for response... ");
-
             await GetCompletionAsync<EjectCardCompletion>(cardReader);
         }
 
-        private async Task<CompletionType> GetCompletionAsync<CompletionType>(XFS4IoTClient.ClientConnection cardReader)
+
+        private async Task<string> DoGetCommandNonce()
+        {
+            // Create a new command and send it to the device
+            var command = new GetCommandNonceCommand(RequestId.NewID(),
+                                                     Payload: new(10_000)
+                                                     );
+            Logger.LogMessage(command);
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var responce = await GetCompletionAsync<GetCommandNonceCompletion>(cashDispenser);
+            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                throw new Exception($"GetCommandNonce failed: {responce.Payload.CompletionCode}");
+
+            return responce.Payload.CommandNonce;
+        }
+
+        private async Task DoClearCommandNonce()
+        {
+            var command = new ClearCommandNonceCommand(RequestId.NewID(), Payload: new(10_000));
+
+            Logger.LogMessage(command);
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var responce = await GetCompletionAsync<ClearCommandNonceCompletion>(cashDispenser);
+            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                throw new Exception($"ClearCommandNonce failed: {responce.Payload.CompletionCode}");
+        }
+
+        private async Task DoDispenseCash(int Amount, string CurrencyID, string Token)
+        {
+            var command = new DispenseCommand(RequestId.NewID(),
+                                Payload: new(Timeout: 10_000,
+                                             Denomination: new(Currencies: new() { { CurrencyID, Amount } } ), 
+                                             MixNumber:1,
+                                             Token: Token
+                                             )
+                                );
+
+            Logger.LogMessage(command);
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var responce = await GetCompletionAsync<DispenseCompletion>(cashDispenser);
+            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Dispense failed: {responce.Payload.CompletionCode}");
+
+        }
+
+        private async Task DoPresentCash()
+        {
+            var command = new PresentCommand(RequestId.NewID(), Payload: new(Timeout: 10_000) );
+
+            Logger.LogMessage(command);
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var responce = await GetCompletionAsync<PresentCompletion>(cashDispenser);
+            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Present failed: {responce.Payload.CompletionCode}");
+
+        }
+
+        private async Task<CompletionType> GetCompletionAsync<CompletionType>(ClientConnection cardReader)
         {
             while (true)
             {
@@ -450,7 +563,7 @@ namespace TestClient
             {
                 lock (this)
                 {
-                        Console.ForegroundColor = colour ?? defaultColour;
+                    Console.ForegroundColor = colour ?? defaultColour;
                     Console.Write($"{DateTime.Now:hh:mm:ss.ffff} ({DateTime.Now - Start}): {v}");
                     Console.ForegroundColor = defaultColour;
                 }

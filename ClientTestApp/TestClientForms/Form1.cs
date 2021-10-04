@@ -26,17 +26,20 @@ namespace TestClientForms
             DispenserServiceURI.Text = "ws://localhost";
             TextTerminalServiceURI.Text = "ws://localhost";
             EncryptorServiceURI.Text = "ws://localhost";
+            PinPadServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
             CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
             EncryptorDev = new("Encryptor", EncryptorCmdBox, EncryptorRspBox, EncryptorEvtBox, EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
+            PinPadDev = new("PinPad", PinPadCmdBox, PinPadRspBox, PinPadEvtBox, PinPadServiceURI, PinPadPortNum, PinPadURI);
         }
         
         private DispenserDevice DispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
         private TextTerminalDevice TextTerminalDev { get; init; }
         private EncryptorDevice EncryptorDev { get; init; }
+        private PinPadDevice PinPadDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
@@ -221,29 +224,9 @@ namespace TestClientForms
             await TextTerminalDev.Beep();
         }
 
-        private async void TextTerminalTurnOffLED_Click(object sender, EventArgs e)
-        {
-            await TextTerminalDev.TurnOffLED();
-        }
-
-        private async void TextTerminalTurnOnLED_Click(object sender, EventArgs e)
-        {
-            await TextTerminalDev.TurnOnLED();
-        }
-
         private async void TextTerminalReset_Click(object sender, EventArgs e)
         {
             await TextTerminalDev.Reset();
-        }
-
-        private async void TextTerminalDispLightOn_Click(object sender, EventArgs e)
-        {
-            await TextTerminalDev.SetDispLight(true);
-        }
-
-        private async void TextTerminalDispLightOff_Click(object sender, EventArgs e)
-        {
-            await TextTerminalDev.SetDispLight(false);
         }
 
         private async void TextTerminalSetResolution_Click(object sender, EventArgs e)
@@ -272,7 +255,7 @@ namespace TestClientForms
         {
             var result = await EncryptorDev.GetCapabilities();
             if (result is not null)
-                EncryptorDeviceType.Text = result.Payload?.KeyManagement?.KeyNum?.ToString();
+                EncryptorMaxKeyNum.Text = result.Payload?.KeyManagement?.KeyNum?.ToString();
         }
 
         private async void EncryptorGetKeyNames_Click(object sender, EventArgs e)
@@ -280,7 +263,9 @@ namespace TestClientForms
             EncryptorKeyNamelistBox.Items.Clear();
 
             var result = await EncryptorDev.GetKeyNames();
-            if (result is not null)
+            if (result is not null &&
+                result.Payload is not null &&
+                result.Payload.KeyDetails is not null)
             {
                 foreach (var keyName in result.Payload.KeyDetails)
                 {
@@ -343,5 +328,110 @@ namespace TestClientForms
         }
 
         #endregion
+
+        #region PinPad Tab
+        private async void PinPadServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.DoServiceDiscovery();
+        }
+
+        private async void PinPadStatus_Click(object sender, EventArgs e)
+        {
+            var result = await PinPadDev.GetStatus();
+            if (result is not null)
+                PinPadStDevice.Text = result.Payload?.Common?.Device?.ToString();
+        }
+
+        private async void PinPadCapabilities_Click(object sender, EventArgs e)
+        {
+            var result = await PinPadDev.GetCapabilities();
+            if (result is not null)
+                PinPadMaxKeyNum.Text = result.Payload?.KeyManagement?.KeyNum?.ToString();
+        }
+
+        private async void PinPadInitialization_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.Initialization();
+        }
+
+        private async void PinPadDeleteKey_Click(object sender, EventArgs e)
+        {
+            int index = PinPadKeyNamelistBox.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Select key name to delete.");
+                return;
+            }
+
+            string keyName = (string)PinPadKeyNamelistBox.Items[index];
+
+            await PinPadDev.DeleteKey(keyName); 
+        }
+
+        private async void PinPadReset_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.Reset(); 
+        }
+
+        private async void PinPadEnterData_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.GetData();
+        }
+
+        private async void PinPadGetKeyNames_Click(object sender, EventArgs e)
+        {
+            PinPadKeyNamelistBox.Items.Clear();
+
+            var result = await PinPadDev.GetKeyNames();
+            if (result is not null &&
+                result.Payload is not null &&
+                result.Payload.KeyDetails is not null)
+            {
+                foreach (var keyName in result.Payload.KeyDetails)
+                {
+                    PinPadKeyNamelistBox.Items.Add(keyName.Key);
+                }
+            }
+        }
+
+        private async void PinPadSecureKeyEntryPart1_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.SecureKeyEntryPart1();
+        }
+
+        private async void PinPadSecureKeyEntryPart2_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.SecureKeyEntryPart2();
+        }
+
+        private async void PinPadImportKey_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.ImportAssmblyKey();
+        }
+
+        private async void PinPadLoadPinKey_Click(object sender, EventArgs e)
+        {
+            List<byte> data = new() { 0xb1, 0x88, 0x68, 0x12, 0x3c, 0x16, 0x57, 0x9f, 0x52, 0x78, 0x3f, 0x2e, 0x5a, 0x00, 0x1f, 0xfe };
+            await PinPadDev.LoadKey("PinKey", "P0", "E", data); 
+        }
+
+        private async void PinPadEnterPin_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.PinEntry();
+        }
+
+        private async void PinPadFormatPin_Click(object senser, EventArgs e)
+        {
+            await PinPadDev.FormatPin();
+        }
+
+        private async void PinPadGetLayout_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.GetLayout();
+        }
+
+        #endregion
+
+        
     }
 }

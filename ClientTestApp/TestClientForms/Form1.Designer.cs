@@ -92,11 +92,7 @@ namespace TestClientForms
             this.label12 = new System.Windows.Forms.Label();
             this.TextTerminalTab = new System.Windows.Forms.TabPage();
             this.TextTerminalSetResolution = new System.Windows.Forms.Button();
-            this.TextTerminalDispLightOff = new System.Windows.Forms.Button();
-            this.TextTerminalDispLightOn = new System.Windows.Forms.Button();
             this.TextTerminalBeep = new System.Windows.Forms.Button();
-            this.TextTerminalTurnOffLED = new System.Windows.Forms.Button();
-            this.TextTerminalTurnOnLED = new System.Windows.Forms.Button();
             this.TextTerminalReset = new System.Windows.Forms.Button();
             this.TextTerminalGetKeyDetail = new System.Windows.Forms.Button();
             this.TextTerminalRead = new System.Windows.Forms.Button();
@@ -118,7 +114,12 @@ namespace TestClientForms
             this.TextTerminalURI = new System.Windows.Forms.TextBox();
             this.label18 = new System.Windows.Forms.Label();
             this.label19 = new System.Windows.Forms.Label();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.EncryptorTab = new System.Windows.Forms.TabPage();
+            this.EncryptorDeleteKey = new System.Windows.Forms.Button();
+            this.EncryptorGenerateMAC = new System.Windows.Forms.Button();
+            this.EncryptorEncrypt = new System.Windows.Forms.Button();
+            this.EncryptorGenerateRandom = new System.Windows.Forms.Button();
+            this.EncryptorReset = new System.Windows.Forms.Button();
             this.EncryptorImportKey = new System.Windows.Forms.Button();
             this.EncryptorInitialization = new System.Windows.Forms.Button();
             this.EncryptorGetKeyNames = new System.Windows.Forms.Button();
@@ -129,7 +130,7 @@ namespace TestClientForms
             this.EncryptorEvtBox = new System.Windows.Forms.TextBox();
             this.EncryptorRspBox = new System.Windows.Forms.TextBox();
             this.EncryptorCmdBox = new System.Windows.Forms.TextBox();
-            this.EncryptorDeviceType = new System.Windows.Forms.TextBox();
+            this.EncryptorMaxKeyNum = new System.Windows.Forms.TextBox();
             this.EncryptorStDevice = new System.Windows.Forms.TextBox();
             this.EncryptorCapabilities = new System.Windows.Forms.Button();
             this.EncryptorStatus = new System.Windows.Forms.Button();
@@ -140,16 +141,43 @@ namespace TestClientForms
             this.EncryptorURI = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.label22 = new System.Windows.Forms.Label();
-            this.EncryptorReset = new System.Windows.Forms.Button();
-            this.EncryptorGenerateRandom = new System.Windows.Forms.Button();
-            this.EncryptorEncrypt = new System.Windows.Forms.Button();
-            this.EncryptorGenerateMAC = new System.Windows.Forms.Button();
-            this.EncryptorDeleteKey = new System.Windows.Forms.Button();
+            this.PinPadTab = new System.Windows.Forms.TabPage();
+            this.PinPadEnterData = new System.Windows.Forms.Button();
+            this.PinPadFormatPin = new System.Windows.Forms.Button();
+            this.PinPadEnterPin = new System.Windows.Forms.Button();
+            this.PinPadLoadPinKey = new System.Windows.Forms.Button();
+            this.PinPadSecureKeyEntryPart2 = new System.Windows.Forms.Button();
+            this.PinPadSecureKeyEntryPart1 = new System.Windows.Forms.Button();
+            this.PinPadDeleteKey = new System.Windows.Forms.Button();
+            this.PinPadReset = new System.Windows.Forms.Button();
+            this.PinPadImportKey = new System.Windows.Forms.Button();
+            this.PinPadInitialization = new System.Windows.Forms.Button();
+            this.PinPadGetKeyNames = new System.Windows.Forms.Button();
+            this.label26 = new System.Windows.Forms.Label();
+            this.PinPadKeyNamelistBox = new System.Windows.Forms.ListBox();
+            this.label27 = new System.Windows.Forms.Label();
+            this.label28 = new System.Windows.Forms.Label();
+            this.PinPadEvtBox = new System.Windows.Forms.TextBox();
+            this.PinPadRspBox = new System.Windows.Forms.TextBox();
+            this.PinPadCmdBox = new System.Windows.Forms.TextBox();
+            this.PinPadMaxKeyNum = new System.Windows.Forms.TextBox();
+            this.PinPadStDevice = new System.Windows.Forms.TextBox();
+            this.PinPadCapabilities = new System.Windows.Forms.Button();
+            this.PinPadStatus = new System.Windows.Forms.Button();
+            this.PinPadServiceURI = new System.Windows.Forms.TextBox();
+            this.PinPadServiceDiscovery = new System.Windows.Forms.Button();
+            this.PinPadPortNum = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
+            this.PinPadURI = new System.Windows.Forms.TextBox();
+            this.label30 = new System.Windows.Forms.Label();
+            this.label31 = new System.Windows.Forms.Label();
+            this.PinPadGetLayout = new System.Windows.Forms.Button();
             this.testClientTabControl.SuspendLayout();
             this.CardReaderTab.SuspendLayout();
             this.DispenserTab.SuspendLayout();
             this.TextTerminalTab.SuspendLayout();
-            this.tabPage1.SuspendLayout();
+            this.EncryptorTab.SuspendLayout();
+            this.PinPadTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // AcceptCard
@@ -402,7 +430,8 @@ namespace TestClientForms
             this.testClientTabControl.Controls.Add(this.CardReaderTab);
             this.testClientTabControl.Controls.Add(this.DispenserTab);
             this.testClientTabControl.Controls.Add(this.TextTerminalTab);
-            this.testClientTabControl.Controls.Add(this.tabPage1);
+            this.testClientTabControl.Controls.Add(this.EncryptorTab);
+            this.testClientTabControl.Controls.Add(this.PinPadTab);
             this.testClientTabControl.Location = new System.Drawing.Point(17, 5);
             this.testClientTabControl.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
             this.testClientTabControl.Name = "testClientTabControl";
@@ -791,11 +820,7 @@ namespace TestClientForms
             // TextTerminalTab
             // 
             this.TextTerminalTab.Controls.Add(this.TextTerminalSetResolution);
-            this.TextTerminalTab.Controls.Add(this.TextTerminalDispLightOff);
-            this.TextTerminalTab.Controls.Add(this.TextTerminalDispLightOn);
             this.TextTerminalTab.Controls.Add(this.TextTerminalBeep);
-            this.TextTerminalTab.Controls.Add(this.TextTerminalTurnOffLED);
-            this.TextTerminalTab.Controls.Add(this.TextTerminalTurnOnLED);
             this.TextTerminalTab.Controls.Add(this.TextTerminalReset);
             this.TextTerminalTab.Controls.Add(this.TextTerminalGetKeyDetail);
             this.TextTerminalTab.Controls.Add(this.TextTerminalRead);
@@ -828,7 +853,7 @@ namespace TestClientForms
             // 
             // TextTerminalSetResolution
             // 
-            this.TextTerminalSetResolution.Location = new System.Drawing.Point(2555, 350);
+            this.TextTerminalSetResolution.Location = new System.Drawing.Point(2555, 219);
             this.TextTerminalSetResolution.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.TextTerminalSetResolution.Name = "TextTerminalSetResolution";
             this.TextTerminalSetResolution.Size = new System.Drawing.Size(270, 60);
@@ -836,28 +861,6 @@ namespace TestClientForms
             this.TextTerminalSetResolution.Text = "SetResolution";
             this.TextTerminalSetResolution.UseVisualStyleBackColor = true;
             this.TextTerminalSetResolution.Click += new System.EventHandler(this.TextTerminalSetResolution_Click);
-            // 
-            // TextTerminalDispLightOff
-            // 
-            this.TextTerminalDispLightOff.Location = new System.Drawing.Point(2280, 287);
-            this.TextTerminalDispLightOff.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.TextTerminalDispLightOff.Name = "TextTerminalDispLightOff";
-            this.TextTerminalDispLightOff.Size = new System.Drawing.Size(270, 60);
-            this.TextTerminalDispLightOff.TabIndex = 58;
-            this.TextTerminalDispLightOff.Text = "DispLightOff";
-            this.TextTerminalDispLightOff.UseVisualStyleBackColor = true;
-            this.TextTerminalDispLightOff.Click += new System.EventHandler(this.TextTerminalDispLightOff_Click);
-            // 
-            // TextTerminalDispLightOn
-            // 
-            this.TextTerminalDispLightOn.Location = new System.Drawing.Point(2280, 219);
-            this.TextTerminalDispLightOn.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.TextTerminalDispLightOn.Name = "TextTerminalDispLightOn";
-            this.TextTerminalDispLightOn.Size = new System.Drawing.Size(270, 60);
-            this.TextTerminalDispLightOn.TabIndex = 57;
-            this.TextTerminalDispLightOn.Text = "DispLightOn";
-            this.TextTerminalDispLightOn.UseVisualStyleBackColor = true;
-            this.TextTerminalDispLightOn.Click += new System.EventHandler(this.TextTerminalDispLightOn_Click);
             // 
             // TextTerminalBeep
             // 
@@ -869,28 +872,6 @@ namespace TestClientForms
             this.TextTerminalBeep.Text = "Beep";
             this.TextTerminalBeep.UseVisualStyleBackColor = true;
             this.TextTerminalBeep.Click += new System.EventHandler(this.TextTerminalBeep_Click);
-            // 
-            // TextTerminalTurnOffLED
-            // 
-            this.TextTerminalTurnOffLED.Location = new System.Drawing.Point(2555, 284);
-            this.TextTerminalTurnOffLED.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.TextTerminalTurnOffLED.Name = "TextTerminalTurnOffLED";
-            this.TextTerminalTurnOffLED.Size = new System.Drawing.Size(270, 60);
-            this.TextTerminalTurnOffLED.TabIndex = 55;
-            this.TextTerminalTurnOffLED.Text = "TurnOffLED";
-            this.TextTerminalTurnOffLED.UseVisualStyleBackColor = true;
-            this.TextTerminalTurnOffLED.Click += new System.EventHandler(this.TextTerminalTurnOffLED_Click);
-            // 
-            // TextTerminalTurnOnLED
-            // 
-            this.TextTerminalTurnOnLED.Location = new System.Drawing.Point(2555, 219);
-            this.TextTerminalTurnOnLED.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.TextTerminalTurnOnLED.Name = "TextTerminalTurnOnLED";
-            this.TextTerminalTurnOnLED.Size = new System.Drawing.Size(270, 60);
-            this.TextTerminalTurnOnLED.TabIndex = 54;
-            this.TextTerminalTurnOnLED.Text = "TurnOnLED";
-            this.TextTerminalTurnOnLED.UseVisualStyleBackColor = true;
-            this.TextTerminalTurnOnLED.Click += new System.EventHandler(this.TextTerminalTurnOnLED_Click);
             // 
             // TextTerminalReset
             // 
@@ -1110,41 +1091,91 @@ namespace TestClientForms
             this.label19.TabIndex = 41;
             this.label19.Text = "Service URI";
             // 
-            // tabPage1
+            // EncryptorTab
             // 
-            this.tabPage1.Controls.Add(this.EncryptorDeleteKey);
-            this.tabPage1.Controls.Add(this.EncryptorGenerateMAC);
-            this.tabPage1.Controls.Add(this.EncryptorEncrypt);
-            this.tabPage1.Controls.Add(this.EncryptorGenerateRandom);
-            this.tabPage1.Controls.Add(this.EncryptorReset);
-            this.tabPage1.Controls.Add(this.EncryptorImportKey);
-            this.tabPage1.Controls.Add(this.EncryptorInitialization);
-            this.tabPage1.Controls.Add(this.EncryptorGetKeyNames);
-            this.tabPage1.Controls.Add(this.label25);
-            this.tabPage1.Controls.Add(this.EncryptorKeyNamelistBox);
-            this.tabPage1.Controls.Add(this.label23);
-            this.tabPage1.Controls.Add(this.label24);
-            this.tabPage1.Controls.Add(this.EncryptorEvtBox);
-            this.tabPage1.Controls.Add(this.EncryptorRspBox);
-            this.tabPage1.Controls.Add(this.EncryptorCmdBox);
-            this.tabPage1.Controls.Add(this.EncryptorDeviceType);
-            this.tabPage1.Controls.Add(this.EncryptorStDevice);
-            this.tabPage1.Controls.Add(this.EncryptorCapabilities);
-            this.tabPage1.Controls.Add(this.EncryptorStatus);
-            this.tabPage1.Controls.Add(this.EncryptorServiceURI);
-            this.tabPage1.Controls.Add(this.EncryptorServiceDiscovery);
-            this.tabPage1.Controls.Add(this.EncryptorPortNum);
-            this.tabPage1.Controls.Add(this.label20);
-            this.tabPage1.Controls.Add(this.EncryptorURI);
-            this.tabPage1.Controls.Add(this.label21);
-            this.tabPage1.Controls.Add(this.label22);
-            this.tabPage1.Location = new System.Drawing.Point(10, 58);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(2858, 1416);
-            this.tabPage1.TabIndex = 3;
-            this.tabPage1.Text = "Encryptor";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.EncryptorTab.Controls.Add(this.EncryptorDeleteKey);
+            this.EncryptorTab.Controls.Add(this.EncryptorGenerateMAC);
+            this.EncryptorTab.Controls.Add(this.EncryptorEncrypt);
+            this.EncryptorTab.Controls.Add(this.EncryptorGenerateRandom);
+            this.EncryptorTab.Controls.Add(this.EncryptorReset);
+            this.EncryptorTab.Controls.Add(this.EncryptorImportKey);
+            this.EncryptorTab.Controls.Add(this.EncryptorInitialization);
+            this.EncryptorTab.Controls.Add(this.EncryptorGetKeyNames);
+            this.EncryptorTab.Controls.Add(this.label25);
+            this.EncryptorTab.Controls.Add(this.EncryptorKeyNamelistBox);
+            this.EncryptorTab.Controls.Add(this.label23);
+            this.EncryptorTab.Controls.Add(this.label24);
+            this.EncryptorTab.Controls.Add(this.EncryptorEvtBox);
+            this.EncryptorTab.Controls.Add(this.EncryptorRspBox);
+            this.EncryptorTab.Controls.Add(this.EncryptorCmdBox);
+            this.EncryptorTab.Controls.Add(this.EncryptorMaxKeyNum);
+            this.EncryptorTab.Controls.Add(this.EncryptorStDevice);
+            this.EncryptorTab.Controls.Add(this.EncryptorCapabilities);
+            this.EncryptorTab.Controls.Add(this.EncryptorStatus);
+            this.EncryptorTab.Controls.Add(this.EncryptorServiceURI);
+            this.EncryptorTab.Controls.Add(this.EncryptorServiceDiscovery);
+            this.EncryptorTab.Controls.Add(this.EncryptorPortNum);
+            this.EncryptorTab.Controls.Add(this.label20);
+            this.EncryptorTab.Controls.Add(this.EncryptorURI);
+            this.EncryptorTab.Controls.Add(this.label21);
+            this.EncryptorTab.Controls.Add(this.label22);
+            this.EncryptorTab.Location = new System.Drawing.Point(10, 58);
+            this.EncryptorTab.Name = "EncryptorTab";
+            this.EncryptorTab.Padding = new System.Windows.Forms.Padding(3);
+            this.EncryptorTab.Size = new System.Drawing.Size(2858, 1416);
+            this.EncryptorTab.TabIndex = 3;
+            this.EncryptorTab.Text = "Encryptor";
+            this.EncryptorTab.UseVisualStyleBackColor = true;
+            // 
+            // EncryptorDeleteKey
+            // 
+            this.EncryptorDeleteKey.Location = new System.Drawing.Point(2577, 112);
+            this.EncryptorDeleteKey.Name = "EncryptorDeleteKey";
+            this.EncryptorDeleteKey.Size = new System.Drawing.Size(206, 58);
+            this.EncryptorDeleteKey.TabIndex = 59;
+            this.EncryptorDeleteKey.Text = "DeleteKey";
+            this.EncryptorDeleteKey.UseVisualStyleBackColor = true;
+            this.EncryptorDeleteKey.Click += new System.EventHandler(this.EncryptorDeleteKey_Click);
+            // 
+            // EncryptorGenerateMAC
+            // 
+            this.EncryptorGenerateMAC.Location = new System.Drawing.Point(2329, 295);
+            this.EncryptorGenerateMAC.Name = "EncryptorGenerateMAC";
+            this.EncryptorGenerateMAC.Size = new System.Drawing.Size(226, 70);
+            this.EncryptorGenerateMAC.TabIndex = 58;
+            this.EncryptorGenerateMAC.Text = "GenerateMAC";
+            this.EncryptorGenerateMAC.UseVisualStyleBackColor = true;
+            this.EncryptorGenerateMAC.Click += new System.EventHandler(this.EncryptorGenerateMAC_Click);
+            // 
+            // EncryptorEncrypt
+            // 
+            this.EncryptorEncrypt.Location = new System.Drawing.Point(2329, 201);
+            this.EncryptorEncrypt.Name = "EncryptorEncrypt";
+            this.EncryptorEncrypt.Size = new System.Drawing.Size(226, 61);
+            this.EncryptorEncrypt.TabIndex = 57;
+            this.EncryptorEncrypt.Text = "Encrypt";
+            this.EncryptorEncrypt.UseVisualStyleBackColor = true;
+            this.EncryptorEncrypt.Click += new System.EventHandler(this.EncryptorEncrypt_Click);
+            // 
+            // EncryptorGenerateRandom
+            // 
+            this.EncryptorGenerateRandom.Location = new System.Drawing.Point(2329, 393);
+            this.EncryptorGenerateRandom.Name = "EncryptorGenerateRandom";
+            this.EncryptorGenerateRandom.Size = new System.Drawing.Size(277, 65);
+            this.EncryptorGenerateRandom.TabIndex = 56;
+            this.EncryptorGenerateRandom.Text = "GenerateRandom";
+            this.EncryptorGenerateRandom.UseVisualStyleBackColor = true;
+            this.EncryptorGenerateRandom.Click += new System.EventHandler(this.EncryptorGenerateRandom_Click);
+            // 
+            // EncryptorReset
+            // 
+            this.EncryptorReset.Location = new System.Drawing.Point(2577, 27);
+            this.EncryptorReset.Name = "EncryptorReset";
+            this.EncryptorReset.Size = new System.Drawing.Size(206, 60);
+            this.EncryptorReset.TabIndex = 55;
+            this.EncryptorReset.Text = "Reset";
+            this.EncryptorReset.UseVisualStyleBackColor = true;
+            this.EncryptorReset.Click += new System.EventHandler(this.EncryptorReset_Click);
             // 
             // EncryptorImportKey
             // 
@@ -1250,14 +1281,14 @@ namespace TestClientForms
             this.EncryptorCmdBox.Size = new System.Drawing.Size(951, 832);
             this.EncryptorCmdBox.TabIndex = 44;
             // 
-            // EncryptorDeviceType
+            // EncryptorMaxKeyNum
             // 
-            this.EncryptorDeviceType.Location = new System.Drawing.Point(1691, 123);
-            this.EncryptorDeviceType.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
-            this.EncryptorDeviceType.Name = "EncryptorDeviceType";
-            this.EncryptorDeviceType.ReadOnly = true;
-            this.EncryptorDeviceType.Size = new System.Drawing.Size(252, 47);
-            this.EncryptorDeviceType.TabIndex = 43;
+            this.EncryptorMaxKeyNum.Location = new System.Drawing.Point(1691, 123);
+            this.EncryptorMaxKeyNum.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.EncryptorMaxKeyNum.Name = "EncryptorMaxKeyNum";
+            this.EncryptorMaxKeyNum.ReadOnly = true;
+            this.EncryptorMaxKeyNum.Size = new System.Drawing.Size(252, 47);
+            this.EncryptorMaxKeyNum.TabIndex = 43;
             // 
             // EncryptorStDevice
             // 
@@ -1357,55 +1388,346 @@ namespace TestClientForms
             this.label22.TabIndex = 39;
             this.label22.Text = "Service URI";
             // 
-            // EncryptorReset
+            // PinPadTab
             // 
-            this.EncryptorReset.Location = new System.Drawing.Point(2577, 27);
-            this.EncryptorReset.Name = "EncryptorReset";
-            this.EncryptorReset.Size = new System.Drawing.Size(206, 60);
-            this.EncryptorReset.TabIndex = 55;
-            this.EncryptorReset.Text = "Reset";
-            this.EncryptorReset.UseVisualStyleBackColor = true;
-            this.EncryptorReset.Click += new System.EventHandler(this.EncryptorReset_Click);
+            this.PinPadTab.Controls.Add(this.PinPadGetLayout);
+            this.PinPadTab.Controls.Add(this.PinPadEnterData);
+            this.PinPadTab.Controls.Add(this.PinPadFormatPin);
+            this.PinPadTab.Controls.Add(this.PinPadEnterPin);
+            this.PinPadTab.Controls.Add(this.PinPadLoadPinKey);
+            this.PinPadTab.Controls.Add(this.PinPadSecureKeyEntryPart2);
+            this.PinPadTab.Controls.Add(this.PinPadSecureKeyEntryPart1);
+            this.PinPadTab.Controls.Add(this.PinPadDeleteKey);
+            this.PinPadTab.Controls.Add(this.PinPadReset);
+            this.PinPadTab.Controls.Add(this.PinPadImportKey);
+            this.PinPadTab.Controls.Add(this.PinPadInitialization);
+            this.PinPadTab.Controls.Add(this.PinPadGetKeyNames);
+            this.PinPadTab.Controls.Add(this.label26);
+            this.PinPadTab.Controls.Add(this.PinPadKeyNamelistBox);
+            this.PinPadTab.Controls.Add(this.label27);
+            this.PinPadTab.Controls.Add(this.label28);
+            this.PinPadTab.Controls.Add(this.PinPadEvtBox);
+            this.PinPadTab.Controls.Add(this.PinPadRspBox);
+            this.PinPadTab.Controls.Add(this.PinPadCmdBox);
+            this.PinPadTab.Controls.Add(this.PinPadMaxKeyNum);
+            this.PinPadTab.Controls.Add(this.PinPadStDevice);
+            this.PinPadTab.Controls.Add(this.PinPadCapabilities);
+            this.PinPadTab.Controls.Add(this.PinPadStatus);
+            this.PinPadTab.Controls.Add(this.PinPadServiceURI);
+            this.PinPadTab.Controls.Add(this.PinPadServiceDiscovery);
+            this.PinPadTab.Controls.Add(this.PinPadPortNum);
+            this.PinPadTab.Controls.Add(this.label29);
+            this.PinPadTab.Controls.Add(this.PinPadURI);
+            this.PinPadTab.Controls.Add(this.label30);
+            this.PinPadTab.Controls.Add(this.label31);
+            this.PinPadTab.Location = new System.Drawing.Point(10, 58);
+            this.PinPadTab.Name = "PinPadTab";
+            this.PinPadTab.Padding = new System.Windows.Forms.Padding(3);
+            this.PinPadTab.Size = new System.Drawing.Size(2858, 1416);
+            this.PinPadTab.TabIndex = 4;
+            this.PinPadTab.Text = "PinPad";
+            this.PinPadTab.UseVisualStyleBackColor = true;
             // 
-            // EncryptorGenerateRandom
+            // PinPadEnterData
             // 
-            this.EncryptorGenerateRandom.Location = new System.Drawing.Point(2329, 393);
-            this.EncryptorGenerateRandom.Name = "EncryptorGenerateRandom";
-            this.EncryptorGenerateRandom.Size = new System.Drawing.Size(277, 65);
-            this.EncryptorGenerateRandom.TabIndex = 56;
-            this.EncryptorGenerateRandom.Text = "GenerateRandom";
-            this.EncryptorGenerateRandom.UseVisualStyleBackColor = true;
-            this.EncryptorGenerateRandom.Click += new System.EventHandler(this.EncryptorGenerateRandom_Click);
+            this.PinPadEnterData.Location = new System.Drawing.Point(2464, 107);
+            this.PinPadEnterData.Name = "PinPadEnterData";
+            this.PinPadEnterData.Size = new System.Drawing.Size(206, 58);
+            this.PinPadEnterData.TabIndex = 91;
+            this.PinPadEnterData.Text = "Enter Data";
+            this.PinPadEnterData.UseVisualStyleBackColor = true;
+            this.PinPadEnterData.Click += new System.EventHandler(this.PinPadEnterData_Click);
             // 
-            // EncryptorEncrypt
+            // PinPadFormatPin
             // 
-            this.EncryptorEncrypt.Location = new System.Drawing.Point(2329, 201);
-            this.EncryptorEncrypt.Name = "EncryptorEncrypt";
-            this.EncryptorEncrypt.Size = new System.Drawing.Size(226, 61);
-            this.EncryptorEncrypt.TabIndex = 57;
-            this.EncryptorEncrypt.Text = "Encrypt";
-            this.EncryptorEncrypt.UseVisualStyleBackColor = true;
-            this.EncryptorEncrypt.Click += new System.EventHandler(this.EncryptorEncrypt_Click);
+            this.PinPadFormatPin.Location = new System.Drawing.Point(2664, 455);
+            this.PinPadFormatPin.Name = "PinPadFormatPin";
+            this.PinPadFormatPin.Size = new System.Drawing.Size(188, 58);
+            this.PinPadFormatPin.TabIndex = 90;
+            this.PinPadFormatPin.Text = "Format PIN";
+            this.PinPadFormatPin.UseVisualStyleBackColor = true;
+            this.PinPadFormatPin.Click += new System.EventHandler(this.PinPadFormatPin_Click);
             // 
-            // EncryptorGenerateMAC
+            // PinPadEnterPin
             // 
-            this.EncryptorGenerateMAC.Location = new System.Drawing.Point(2329, 295);
-            this.EncryptorGenerateMAC.Name = "EncryptorGenerateMAC";
-            this.EncryptorGenerateMAC.Size = new System.Drawing.Size(226, 70);
-            this.EncryptorGenerateMAC.TabIndex = 58;
-            this.EncryptorGenerateMAC.Text = "GenerateMAC";
-            this.EncryptorGenerateMAC.UseVisualStyleBackColor = true;
-            this.EncryptorGenerateMAC.Click += new System.EventHandler(this.EncryptorGenerateMAC_Click);
+            this.PinPadEnterPin.Location = new System.Drawing.Point(2461, 455);
+            this.PinPadEnterPin.Name = "PinPadEnterPin";
+            this.PinPadEnterPin.Size = new System.Drawing.Size(188, 58);
+            this.PinPadEnterPin.TabIndex = 89;
+            this.PinPadEnterPin.Text = "Enter PIN";
+            this.PinPadEnterPin.UseVisualStyleBackColor = true;
+            this.PinPadEnterPin.Click += new System.EventHandler(this.PinPadEnterPin_Click);
             // 
-            // EncryptorDeleteKey
+            // PinPadLoadPinKey
             // 
-            this.EncryptorDeleteKey.Location = new System.Drawing.Point(2577, 112);
-            this.EncryptorDeleteKey.Name = "EncryptorDeleteKey";
-            this.EncryptorDeleteKey.Size = new System.Drawing.Size(206, 58);
-            this.EncryptorDeleteKey.TabIndex = 59;
-            this.EncryptorDeleteKey.Text = "DeleteKey";
-            this.EncryptorDeleteKey.UseVisualStyleBackColor = true;
-            this.EncryptorDeleteKey.Click += new System.EventHandler(this.EncryptorDeleteKey_Click);
+            this.PinPadLoadPinKey.Location = new System.Drawing.Point(2217, 455);
+            this.PinPadLoadPinKey.Name = "PinPadLoadPinKey";
+            this.PinPadLoadPinKey.Size = new System.Drawing.Size(225, 58);
+            this.PinPadLoadPinKey.TabIndex = 88;
+            this.PinPadLoadPinKey.Text = "Load PIN Key";
+            this.PinPadLoadPinKey.UseVisualStyleBackColor = true;
+            this.PinPadLoadPinKey.Click += new System.EventHandler(this.PinPadLoadPinKey_Click);
+            // 
+            // PinPadSecureKeyEntryPart2
+            // 
+            this.PinPadSecureKeyEntryPart2.Location = new System.Drawing.Point(2220, 278);
+            this.PinPadSecureKeyEntryPart2.Name = "PinPadSecureKeyEntryPart2";
+            this.PinPadSecureKeyEntryPart2.Size = new System.Drawing.Size(357, 58);
+            this.PinPadSecureKeyEntryPart2.TabIndex = 87;
+            this.PinPadSecureKeyEntryPart2.Text = "SecureKeyEntry Part2";
+            this.PinPadSecureKeyEntryPart2.UseVisualStyleBackColor = true;
+            this.PinPadSecureKeyEntryPart2.Click += new System.EventHandler(this.PinPadSecureKeyEntryPart2_Click);
+            // 
+            // PinPadSecureKeyEntryPart1
+            // 
+            this.PinPadSecureKeyEntryPart1.Location = new System.Drawing.Point(2220, 206);
+            this.PinPadSecureKeyEntryPart1.Name = "PinPadSecureKeyEntryPart1";
+            this.PinPadSecureKeyEntryPart1.Size = new System.Drawing.Size(357, 58);
+            this.PinPadSecureKeyEntryPart1.TabIndex = 86;
+            this.PinPadSecureKeyEntryPart1.Text = "SecureKeyEntry Part1";
+            this.PinPadSecureKeyEntryPart1.UseVisualStyleBackColor = true;
+            this.PinPadSecureKeyEntryPart1.Click += new System.EventHandler(this.PinPadSecureKeyEntryPart1_Click);
+            // 
+            // PinPadDeleteKey
+            // 
+            this.PinPadDeleteKey.Location = new System.Drawing.Point(2220, 107);
+            this.PinPadDeleteKey.Name = "PinPadDeleteKey";
+            this.PinPadDeleteKey.Size = new System.Drawing.Size(225, 58);
+            this.PinPadDeleteKey.TabIndex = 85;
+            this.PinPadDeleteKey.Text = "DeleteKey";
+            this.PinPadDeleteKey.UseVisualStyleBackColor = true;
+            this.PinPadDeleteKey.Click += new System.EventHandler(this.PinPadDeleteKey_Click);
+            // 
+            // PinPadReset
+            // 
+            this.PinPadReset.Location = new System.Drawing.Point(2464, 26);
+            this.PinPadReset.Name = "PinPadReset";
+            this.PinPadReset.Size = new System.Drawing.Size(206, 60);
+            this.PinPadReset.TabIndex = 81;
+            this.PinPadReset.Text = "Reset";
+            this.PinPadReset.UseVisualStyleBackColor = true;
+            this.PinPadReset.Click += new System.EventHandler(this.PinPadReset_Click);
+            // 
+            // PinPadImportKey
+            // 
+            this.PinPadImportKey.Location = new System.Drawing.Point(2220, 354);
+            this.PinPadImportKey.Name = "PinPadImportKey";
+            this.PinPadImportKey.Size = new System.Drawing.Size(357, 58);
+            this.PinPadImportKey.TabIndex = 80;
+            this.PinPadImportKey.Text = "ImportKey (Secure)";
+            this.PinPadImportKey.UseVisualStyleBackColor = true;
+            this.PinPadImportKey.Click += new System.EventHandler(this.PinPadImportKey_Click);
+            // 
+            // PinPadInitialization
+            // 
+            this.PinPadInitialization.Location = new System.Drawing.Point(2220, 30);
+            this.PinPadInitialization.Name = "PinPadInitialization";
+            this.PinPadInitialization.Size = new System.Drawing.Size(223, 59);
+            this.PinPadInitialization.TabIndex = 79;
+            this.PinPadInitialization.Text = "Initialization";
+            this.PinPadInitialization.UseVisualStyleBackColor = true;
+            this.PinPadInitialization.Click += new System.EventHandler(this.PinPadInitialization_Click);
+            // 
+            // PinPadGetKeyNames
+            // 
+            this.PinPadGetKeyNames.Location = new System.Drawing.Point(1982, 304);
+            this.PinPadGetKeyNames.Name = "PinPadGetKeyNames";
+            this.PinPadGetKeyNames.Size = new System.Drawing.Size(219, 64);
+            this.PinPadGetKeyNames.TabIndex = 78;
+            this.PinPadGetKeyNames.Text = "GetKeyNames";
+            this.PinPadGetKeyNames.UseVisualStyleBackColor = true;
+            this.PinPadGetKeyNames.Click += new System.EventHandler(this.PinPadGetKeyNames_Click);
+            // 
+            // label26
+            // 
+            this.label26.AutoSize = true;
+            this.label26.Location = new System.Drawing.Point(1442, 246);
+            this.label26.Name = "label26";
+            this.label26.Size = new System.Drawing.Size(166, 41);
+            this.label26.TabIndex = 77;
+            this.label26.Text = "Key Names";
+            // 
+            // PinPadKeyNamelistBox
+            // 
+            this.PinPadKeyNamelistBox.FormattingEnabled = true;
+            this.PinPadKeyNamelistBox.ItemHeight = 41;
+            this.PinPadKeyNamelistBox.Location = new System.Drawing.Point(1442, 304);
+            this.PinPadKeyNamelistBox.Name = "PinPadKeyNamelistBox";
+            this.PinPadKeyNamelistBox.Size = new System.Drawing.Size(515, 209);
+            this.PinPadKeyNamelistBox.TabIndex = 76;
+            // 
+            // label27
+            // 
+            this.label27.AutoSize = true;
+            this.label27.Location = new System.Drawing.Point(1442, 131);
+            this.label27.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label27.Name = "label27";
+            this.label27.Size = new System.Drawing.Size(240, 41);
+            this.label27.TabIndex = 75;
+            this.label27.Text = "Max key number";
+            // 
+            // label28
+            // 
+            this.label28.AutoSize = true;
+            this.label28.Location = new System.Drawing.Point(1490, 40);
+            this.label28.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label28.Name = "label28";
+            this.label28.Size = new System.Drawing.Size(192, 41);
+            this.label28.TabIndex = 74;
+            this.label28.Text = "Device status";
+            // 
+            // PinPadEvtBox
+            // 
+            this.PinPadEvtBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PinPadEvtBox.Location = new System.Drawing.Point(1982, 555);
+            this.PinPadEvtBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadEvtBox.MaxLength = 1048576;
+            this.PinPadEvtBox.Multiline = true;
+            this.PinPadEvtBox.Name = "PinPadEvtBox";
+            this.PinPadEvtBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PinPadEvtBox.Size = new System.Drawing.Size(856, 832);
+            this.PinPadEvtBox.TabIndex = 73;
+            // 
+            // PinPadRspBox
+            // 
+            this.PinPadRspBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PinPadRspBox.Location = new System.Drawing.Point(1037, 555);
+            this.PinPadRspBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadRspBox.MaxLength = 1048576;
+            this.PinPadRspBox.Multiline = true;
+            this.PinPadRspBox.Name = "PinPadRspBox";
+            this.PinPadRspBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PinPadRspBox.Size = new System.Drawing.Size(895, 832);
+            this.PinPadRspBox.TabIndex = 72;
+            // 
+            // PinPadCmdBox
+            // 
+            this.PinPadCmdBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PinPadCmdBox.Location = new System.Drawing.Point(39, 555);
+            this.PinPadCmdBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadCmdBox.MaxLength = 1048576;
+            this.PinPadCmdBox.Multiline = true;
+            this.PinPadCmdBox.Name = "PinPadCmdBox";
+            this.PinPadCmdBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PinPadCmdBox.Size = new System.Drawing.Size(951, 832);
+            this.PinPadCmdBox.TabIndex = 71;
+            // 
+            // PinPadMaxKeyNum
+            // 
+            this.PinPadMaxKeyNum.Location = new System.Drawing.Point(1696, 125);
+            this.PinPadMaxKeyNum.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadMaxKeyNum.Name = "PinPadMaxKeyNum";
+            this.PinPadMaxKeyNum.ReadOnly = true;
+            this.PinPadMaxKeyNum.Size = new System.Drawing.Size(252, 47);
+            this.PinPadMaxKeyNum.TabIndex = 70;
+            // 
+            // PinPadStDevice
+            // 
+            this.PinPadStDevice.Location = new System.Drawing.Point(1696, 40);
+            this.PinPadStDevice.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadStDevice.Name = "PinPadStDevice";
+            this.PinPadStDevice.ReadOnly = true;
+            this.PinPadStDevice.Size = new System.Drawing.Size(252, 47);
+            this.PinPadStDevice.TabIndex = 69;
+            // 
+            // PinPadCapabilities
+            // 
+            this.PinPadCapabilities.Location = new System.Drawing.Point(1982, 105);
+            this.PinPadCapabilities.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadCapabilities.Name = "PinPadCapabilities";
+            this.PinPadCapabilities.Size = new System.Drawing.Size(219, 60);
+            this.PinPadCapabilities.TabIndex = 68;
+            this.PinPadCapabilities.Text = "Capabilities";
+            this.PinPadCapabilities.UseVisualStyleBackColor = true;
+            this.PinPadCapabilities.Click += new System.EventHandler(this.PinPadCapabilities_Click);
+            // 
+            // PinPadStatus
+            // 
+            this.PinPadStatus.Location = new System.Drawing.Point(1982, 29);
+            this.PinPadStatus.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadStatus.Name = "PinPadStatus";
+            this.PinPadStatus.Size = new System.Drawing.Size(219, 60);
+            this.PinPadStatus.TabIndex = 67;
+            this.PinPadStatus.Text = "Status";
+            this.PinPadStatus.UseVisualStyleBackColor = true;
+            this.PinPadStatus.Click += new System.EventHandler(this.PinPadStatus_Click);
+            // 
+            // PinPadServiceURI
+            // 
+            this.PinPadServiceURI.Location = new System.Drawing.Point(253, 36);
+            this.PinPadServiceURI.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadServiceURI.Name = "PinPadServiceURI";
+            this.PinPadServiceURI.Size = new System.Drawing.Size(1121, 47);
+            this.PinPadServiceURI.TabIndex = 65;
+            // 
+            // PinPadServiceDiscovery
+            // 
+            this.PinPadServiceDiscovery.Location = new System.Drawing.Point(1076, 263);
+            this.PinPadServiceDiscovery.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadServiceDiscovery.Name = "PinPadServiceDiscovery";
+            this.PinPadServiceDiscovery.Size = new System.Drawing.Size(282, 63);
+            this.PinPadServiceDiscovery.TabIndex = 60;
+            this.PinPadServiceDiscovery.Text = "Service Discovery";
+            this.PinPadServiceDiscovery.UseVisualStyleBackColor = true;
+            this.PinPadServiceDiscovery.Click += new System.EventHandler(this.PinPadServiceDiscovery_Click);
+            // 
+            // PinPadPortNum
+            // 
+            this.PinPadPortNum.Location = new System.Drawing.Point(253, 102);
+            this.PinPadPortNum.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadPortNum.Name = "PinPadPortNum";
+            this.PinPadPortNum.ReadOnly = true;
+            this.PinPadPortNum.Size = new System.Drawing.Size(252, 47);
+            this.PinPadPortNum.TabIndex = 61;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(20, 170);
+            this.label29.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(200, 41);
+            this.label29.TabIndex = 62;
+            this.label29.Text = "Encryptor URI";
+            // 
+            // PinPadURI
+            // 
+            this.PinPadURI.Location = new System.Drawing.Point(253, 164);
+            this.PinPadURI.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.PinPadURI.Name = "PinPadURI";
+            this.PinPadURI.ReadOnly = true;
+            this.PinPadURI.Size = new System.Drawing.Size(1121, 47);
+            this.PinPadURI.TabIndex = 63;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(25, 102);
+            this.label30.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(189, 41);
+            this.label30.TabIndex = 64;
+            this.label30.Text = "Port Number";
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(25, 36);
+            this.label31.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(166, 41);
+            this.label31.TabIndex = 66;
+            this.label31.Text = "Service URI";
+            // 
+            // PinPadGetLayout
+            // 
+            this.PinPadGetLayout.Location = new System.Drawing.Point(1982, 193);
+            this.PinPadGetLayout.Name = "PinPadGetLayout";
+            this.PinPadGetLayout.Size = new System.Drawing.Size(219, 58);
+            this.PinPadGetLayout.TabIndex = 92;
+            this.PinPadGetLayout.Text = "Get Layout";
+            this.PinPadGetLayout.UseVisualStyleBackColor = true;
+            this.PinPadGetLayout.Click += new System.EventHandler(this.PinPadGetLayout_Click);
             // 
             // Form1
             // 
@@ -1428,8 +1750,10 @@ namespace TestClientForms
             this.DispenserTab.PerformLayout();
             this.TextTerminalTab.ResumeLayout(false);
             this.TextTerminalTab.PerformLayout();
-            this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
+            this.EncryptorTab.ResumeLayout(false);
+            this.EncryptorTab.PerformLayout();
+            this.PinPadTab.ResumeLayout(false);
+            this.PinPadTab.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1514,15 +1838,11 @@ namespace TestClientForms
         private System.Windows.Forms.Button TextTerminalWrite;
         private System.Windows.Forms.Button TextTerminalRead;
         private System.Windows.Forms.Button TextTerminalGetKeyDetail;
-        private System.Windows.Forms.Button TextTerminalTurnOffLED;
-        private System.Windows.Forms.Button TextTerminalTurnOnLED;
         private System.Windows.Forms.Button TextTerminalReset;
         private System.Windows.Forms.Button TextTerminalBeep;
-        private System.Windows.Forms.Button TextTerminalDispLightOff;
-        private System.Windows.Forms.Button TextTerminalDispLightOn;
         private System.Windows.Forms.Button TextTerminalSetResolution;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TextBox EncryptorDeviceType;
+        private System.Windows.Forms.TabPage EncryptorTab;
+        private System.Windows.Forms.TextBox EncryptorMaxKeyNum;
         private System.Windows.Forms.TextBox EncryptorStDevice;
         private System.Windows.Forms.Button EncryptorCapabilities;
         private System.Windows.Forms.Button EncryptorStatus;
@@ -1548,6 +1868,37 @@ namespace TestClientForms
         private System.Windows.Forms.Button EncryptorGenerateMAC;
         private System.Windows.Forms.Button EncryptorEncrypt;
         private System.Windows.Forms.Button EncryptorGenerateRandom;
+        private System.Windows.Forms.TabPage PinPadTab;
+        private System.Windows.Forms.Button PinPadDeleteKey;
+        private System.Windows.Forms.Button PinPadReset;
+        private System.Windows.Forms.Button PinPadImportKey;
+        private System.Windows.Forms.Button PinPadInitialization;
+        private System.Windows.Forms.Button PinPadGetKeyNames;
+        private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.ListBox PinPadKeyNamelistBox;
+        private System.Windows.Forms.Label label27;
+        private System.Windows.Forms.Label label28;
+        private System.Windows.Forms.TextBox PinPadEvtBox;
+        private System.Windows.Forms.TextBox PinPadRspBox;
+        private System.Windows.Forms.TextBox PinPadCmdBox;
+        private System.Windows.Forms.TextBox PinPadMaxKeyNum;
+        private System.Windows.Forms.TextBox PinPadStDevice;
+        private System.Windows.Forms.Button PinPadCapabilities;
+        private System.Windows.Forms.Button PinPadStatus;
+        private System.Windows.Forms.TextBox PinPadServiceURI;
+        private System.Windows.Forms.Button PinPadServiceDiscovery;
+        private System.Windows.Forms.TextBox PinPadPortNum;
+        private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.TextBox PinPadURI;
+        private System.Windows.Forms.Label label30;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.Button PinPadFormatPin;
+        private System.Windows.Forms.Button PinPadEnterPin;
+        private System.Windows.Forms.Button PinPadLoadPinKey;
+        private System.Windows.Forms.Button PinPadSecureKeyEntryPart2;
+        private System.Windows.Forms.Button PinPadSecureKeyEntryPart1;
+        private System.Windows.Forms.Button PinPadEnterData;
+        private System.Windows.Forms.Button PinPadGetLayout;
     }
 }
 
