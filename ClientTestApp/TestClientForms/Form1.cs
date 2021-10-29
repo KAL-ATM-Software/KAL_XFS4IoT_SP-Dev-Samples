@@ -167,7 +167,7 @@ namespace TestClientForms
 
         private async void DispenserDispense_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Dispense();
+            await DispenserDev.Dispense(TokenTextBox.Text);
         }
 
         private async void DispenserOpenShutter_Click(object sender, EventArgs e)
@@ -193,6 +193,18 @@ namespace TestClientForms
         {
             await DispenserDev.SetCashUnitInfo();
         }
+
+        private async void DispenserGetCommandNonce_Click(object sender, EventArgs e)
+        {
+            string Nonce = await DispenserDev.GetCommandNonce();
+            TokenTextBox.Text = Nonce; 
+        }
+
+        private async void DispenserClearCommandNonce_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.ClearCommandNonce();
+        }
+
 
         #endregion
 
@@ -452,6 +464,5 @@ namespace TestClientForms
 
         #endregion
 
-        
     }
 }

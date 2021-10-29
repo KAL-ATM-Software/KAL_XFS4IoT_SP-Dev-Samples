@@ -156,7 +156,7 @@ namespace TestClientForms.Devices
                 }
             }
         }
-        public async Task Dispense()
+        public async Task Dispense( string token )
         {
             var dispenser = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
 
@@ -169,27 +169,14 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getCommandNonce = new XFS4IoT.Common.Commands.GetCommandNonceCommand(RequestId.NewID(), new(CommandTimeout));
-            CmdBox.Text = getCommandNonce.Serialise();
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
-
-            object commandNonceResponse = await SendAndWaitForCompletionAsync(dispenser, getCommandNonce);
-            if (commandNonceResponse is not XFS4IoT.Common.Completions.GetCommandNonceCompletion nonceCompletion)
-            {
-                return;
-            }
-            RspBox.Text = nonceCompletion.Serialise();
-            await Task.Delay(1000);
-
             var dispenseCommand = new DispenseCommand(RequestId.NewID(),
                                                       new(CommandTimeout,
                                                         new DenominateRequestClass(new(new Dictionary<string, double>() 
                                                         {
-                                                            { "EUR", 50 }
+                                                            { "EUR", 100 }
                                                         }),
                                                         "mix1"),
-                                                        Token: $"NONCE={nonceCompletion.Payload.CommandNonce},TOKENFORMAT=1,TOKENLENGTH=0164,HMACSHA256=CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
+                                                        Token: token
                                                         ));
 
             CmdBox.Text = dispenseCommand.Serialise();
@@ -214,6 +201,106 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
                     EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
+                else
+                {
+                    EvtBox.Text += "<Unknown Event>";
+                }
+            }
+        }
+
+        private static string MakeToken(string nonce, bool valid)
+        {
+            // 'valid' or invalid HMAC. 
+            var HMAC = valid ? "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
+                             : "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F3";
+
+            var tokenBuilder = new StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,DISPENSE1=100.00EUR,ANOTHERKEY=12345,HMACSHA256={HMAC}");
+
+            // The token length field is fix at four digits to make it easy to calculate. 
+            // Inject this into the string. 
+            var len = $"{tokenBuilder.Length:X4}";
+            tokenBuilder = tokenBuilder.Replace("$$$$", len);
+
+            string token = tokenBuilder.ToString();
+            return token;
+        }
+
+        internal async Task ClearCommandNonce()
+        {
+            var dispenser = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await dispenser.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            XFS4IoT.Common.Commands.ClearCommandNonceCommand clearNonceCommand = new(RequestId.NewID(), new(CommandTimeout));
+
+            CmdBox.Text = clearNonceCommand.Serialise();
+
+            await dispenser.SendCommandAsync(clearNonceCommand);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            for (; ; )
+            {
+                object cmdResponse = await dispenser.ReceiveMessageAsync();
+                if (cmdResponse is XFS4IoT.Common.Completions.ClearCommandNonceCompletion response)
+                {
+                    RspBox.Text = response.Serialise();
+
+                    if (response.Payload.CompletionCode == XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                        break;
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
+                else
+                {
+                    EvtBox.Text += "<Unknown Event>";
+                }
+            }
+        }
+
+        internal async Task<string> GetCommandNonce()
+        {
+            var dispenser = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await dispenser.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return "";
+            }
+
+            XFS4IoT.Common.Commands.GetCommandNonceCommand getNonceCommand = new(RequestId.NewID(), new(CommandTimeout));
+
+            CmdBox.Text = getNonceCommand.Serialise();
+
+            await dispenser.SendCommandAsync(getNonceCommand);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            for (; ; )
+            {
+                object cmdResponse = await dispenser.ReceiveMessageAsync();
+                if (cmdResponse is XFS4IoT.Common.Completions.GetCommandNonceCompletion response)
+                {
+                    RspBox.Text = response.Serialise();
+
+                    if (response.Payload.CompletionCode == XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                        return MakeToken(response.Payload.CommandNonce, true);
                 }
                 else if (cmdResponse is Acknowledge)
                 { }

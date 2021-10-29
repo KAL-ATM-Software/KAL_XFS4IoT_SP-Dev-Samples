@@ -5,7 +5,6 @@
 \***********************************************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
 using XFS4IoT;
@@ -17,10 +16,11 @@ using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
 using XFS4IoT.CashDispenser.Commands;
 using XFS4IoT.CashDispenser.Completions;
-using XFS4IoT.Storage.Commands;
-using XFS4IoT.Storage.Completions;
 using XFS4IoTClient;
 using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using XFS4IoT.Storage.Commands;
+using XFS4IoT.Storage.Completions;
 
 namespace TestClient
 {
@@ -74,55 +74,81 @@ namespace TestClient
                 // The test sequence - may be run multiple times. 
                 async Task DoCardReader()
                 {
-                    Logger.LogLine("Doing card reader sequence");
-                    await GetStatus(cardReader);
+                    var connection = ParallelCount==1 ? 
+                                        cardReader : 
+                                        new ClientConnection(
+                                            EndPoint: cardReaderURI
+                                            );
+                    if (!connection.IsConnected) await connection.ConnectAsync(); 
 
-                    await DoAcceptCard(cardReader);
-                    await DoChipIO(cardReader);
-                    await DoChipPower(cardReader);
-                    await DoReset(cardReader);
-                    await DoRetainCard(cardReader);
-                    await DoSetKey(cardReader);
-                    await DoWriteData(cardReader);
-                    await DoQueryIFMIdentifier(cardReader);
-                    await DoEjectCard(cardReader);
+                    Logger.LogLine("Doing card reader sequence");
+                    await GetStatus(connection);
+
+                    await DoAcceptCard(connection);
+                    await DoChipIO(connection);
+                    await DoChipPower(connection);
+                    await DoReset(connection);
+                    await DoRetainCard(connection);
+                    await DoSetKey(connection);
+                    await DoWriteData(connection);
+                    await DoQueryIFMIdentifier(connection);
+                    await DoEjectCard(connection);
                 }
 
                 async Task DoCashDispenser()
                 {
+                    var connection = ParallelCount == 1 ?
+                                        cashDispenser :
+                                        new ClientConnection(
+                                            EndPoint: cashDispenserURI
+                                            );
+                    if (!connection.IsConnected) await connection.ConnectAsync();
+
                     Logger.LogLine("Doing cash dispenser sequence");
 
-                    Logger.LogLine("Set counts to the cash units");
-                    await DoSetCashUnitInfo();
+                    await DoClearCommandNonce(connection);
 
-                    await DoClearCommandNonce();
+                    await DoSetCashUnitInfo(connection);
 
-                    string nonce = await DoGetCommandNonce();
+                    string nonce = await DoGetCommandNonce(connection);
                     Logger.LogLine($"Nonce : {nonce}");
-                    nonce = await DoGetCommandNonce();
+                    nonce = await DoGetCommandNonce(connection);
                     Logger.LogLine($"Nonce : {nonce}");
 
-                    Logger.LogLine("Dispense (valid token)");
+                    Logger.LogLine("Dispense 100EUR");
                     string token = MakeToken(nonce, true);
                     Logger.LogLine($"Token: {token}");
-                    await DoDispenseCash(100, "EUR", token);
+                    await DoDispenseCash(connection, 100, "EUR", token);
 
-                    await DoPresentCash();
+                    await DoPresentCash(connection);
 
-                    Logger.LogLine("Dispense (Stale token)");
+                    Logger.LogLine("Dispense : Stale token");
                     token = MakeToken(nonce, true);
                     Logger.LogLine($"Token: {token}");
-                    await DoDispenseCash(100, "EUR", token);
+                    await DoDispenseCash(connection, 100, "EUR", token);
 
-                    Logger.LogLine("Dispense (Invalid HMAC)");
+                    Logger.LogLine("Dispense : Invalid HMAC");
                     token = MakeToken(nonce, false);
                     Logger.LogLine($"Invalid HMAC: {token}");
-                    await DoDispenseCash(100, "EUR", token);
+                    await DoDispenseCash(connection, 100, "EUR", token);
 
-                    Logger.LogLine("Dispense (Invalid nonce)");
+                    Logger.LogLine("Dispense : Invalid nonce");
                     token = MakeToken("FFFF", true);
                     Logger.LogLine($"Invalid nonce: {token}");
-                    await DoDispenseCash(100, "EUR", token);
+                    await DoDispenseCash(connection, 100, "EUR", token);
+
+                    Logger.LogLine("Dispense : Value doesn't match token");
+                    token = MakeToken(await DoGetCommandNonce(connection), true);
+                    await DoDispenseCash(connection, 200, "EUR", token);
+
+                    Logger.LogLine("Dispense : Currency doesn't match token");
+                    token = MakeToken(await DoGetCommandNonce(connection), true);
+                    await DoDispenseCash(connection, 200, "EUR", token);
+
+                    Logger.LogLine("Dispense 100EUR");
+                    token = MakeToken(await DoGetCommandNonce(connection), true);
+                    await DoDispenseCash(connection, 100, "EUR", token);
+                    await DoPresentCash(connection);
                 }
 
                 async Task DoAll()
@@ -163,7 +189,7 @@ namespace TestClient
             var HMAC = valid ? "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
                              : "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F3";
 
-            var tokenBuilder = new System.Text.StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,ANOTHERKEY=12345,HMACSHA256={HMAC}");
+            var tokenBuilder = new System.Text.StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,DISPENSE1=100.00EUR,ANOTHERKEY=12345,HMACSHA256={HMAC}");
 
             // The token length field is fix at four digits to make it easy to calculate. 
             // Inject this into the string. 
@@ -199,7 +225,7 @@ namespace TestClient
             }
             catch(WebSocketException e) when (e.HResult == -0x7FFFBFFB)
             {
-                Logger.LogLine($"No responce on port {port}");
+                Logger.LogLine($"No response on port {port}");
                 return;
             }
             catch (Exception e)
@@ -208,19 +234,18 @@ namespace TestClient
                 throw;
             }
 
-            Logger.LogLine($"Publisher responce on port {port}");
+            Logger.LogLine($"Publisher response on port {port}");
 
             var command = new GetServicesCommand(RequestId.NewID(),
-                                                    new GetServicesCommand.PayloadData(60000));
+                                                 Payload: new(Timeout: 60000));
             Logger.LogMessage(command);
             await publisher.SendCommandAsync(command);
             var response = await GetCompletionAsync<GetServicesCompletion>(publisher);
-            await FindServices(response.Payload);
-        }
 
-        private async Task FindServices(GetServicesCompletion.PayloadData endpointDetails)
-        {
-            Logger.LogLine($"Services:\n{string.Join("\n", from ep in endpointDetails.Services select ep.ServiceURI)}");
+            var endpointDetails = response.Payload;
+            var services = response?.Payload.Services;
+
+            Logger.LogLine($"Services:\n{string.Join("\n", from ep in services select ep.ServiceURI)}");
 
             async Task<(CapabilitiesCompletion capabilities, ClientConnection connection, Uri Uri)> GetServiceDetails( Uri ServiceURI )
             {
@@ -231,37 +256,41 @@ namespace TestClient
 
             // We want to do the query for the capabilities in parallel for each service to speed things up. 
             // So we create all the async 'GetServiceDetails' tasks as a group and then wait for them all to finish.  
-            var services = (from ep in endpointDetails.Services.Skip(1)
-                            let uri = new Uri(ep.ServiceURI)
-                            select (Uri: uri, task: GetServiceDetails(uri))
-                          ).ToArray();
+            var servicesDetails = (from ep in services.Skip(1)
+                                   let uri = new Uri(ep.ServiceURI)
+                                   select (Uri: uri, task: GetServiceDetails(uri))
+                                  ).ToArray();
 
-            await Task.WhenAll(from t in services select t.task );
+            await Task.WhenAll(from t in servicesDetails select t.task );
 
             // Once we've queried all the capabilities we can find which ones are actually each service class. 
             var( cardService, cardUri ) = (
-                              from details in services
+                              from details in servicesDetails
                               let caps = details.task.Result.capabilities.Payload
                               where caps.CardReader != null && caps.CardReader.Type == XFS4IoT.CardReader.CapabilitiesClass.TypeEnum.Motor
                               select (details.task.Result.connection, details.task.Result.Uri )
                               )
                               .FirstOrDefault();
             cardReader = cardService ?? throw new Exception($"Failed to find a card reader");
+            cardReaderURI = cardUri;
             Logger.LogLine($"Found a card reader: {cardUri }");
 
             var (dispService, dispenserUri) = (
-                              from details in services
+                              from details in servicesDetails
                               let caps = details.task.Result.capabilities.Payload
                               where caps.CashDispenser != null && caps.CashDispenser.Type == XFS4IoT.CashDispenser.CapabilitiesClass.TypeEnum.SelfServiceBill
                               select (details.task.Result.connection, details.task.Result.Uri)
                               )
                               .FirstOrDefault();
             cashDispenser = dispService ?? throw new Exception($"Failed to find a cash dispenser");
+            cashDispenserURI = dispenserUri;
             Logger.LogLine($"Found a cash dispenser: {dispenserUri}");
         }
 
         private ClientConnection cardReader;
-        private ClientConnection cashDispenser; 
+        private Uri cardReaderURI;
+        private ClientConnection cashDispenser;
+        private Uri cashDispenserURI;
 
         private static async Task<ClientConnection> OpenService(Uri service)
         {
@@ -459,24 +488,24 @@ namespace TestClient
         }
 
 
-        private async Task<string> DoGetCommandNonce()
+        private async Task<string> DoGetCommandNonce(ClientConnection cashDispenser)
         {
             // Create a new command and send it to the device
             var command = new GetCommandNonceCommand(RequestId.NewID(),
-                                                     Payload: new(10_000)
+                                                     Payload: new(Timeout: 10_000)
                                                      );
             Logger.LogMessage(command);
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            var responce = await GetCompletionAsync<GetCommandNonceCompletion>(cashDispenser);
-            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                throw new Exception($"GetCommandNonce failed: {responce.Payload.CompletionCode}");
+            var response = await GetCompletionAsync<GetCommandNonceCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                throw new Exception($"GetCommandNonce failed: {response.Payload.CompletionCode}");
 
-            return responce.Payload.CommandNonce;
+            return response.Payload.CommandNonce;
         }
 
-        private async Task DoClearCommandNonce()
+        private async Task DoClearCommandNonce(ClientConnection cashDispenser)
         {
             var command = new ClearCommandNonceCommand(RequestId.NewID(), Payload: new(10_000));
 
@@ -484,12 +513,12 @@ namespace TestClient
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            var responce = await GetCompletionAsync<ClearCommandNonceCompletion>(cashDispenser);
-            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                throw new Exception($"ClearCommandNonce failed: {responce.Payload.CompletionCode}");
+            var response = await GetCompletionAsync<ClearCommandNonceCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                throw new Exception($"ClearCommandNonce failed: {response.Payload.CompletionCode}");
         }
 
-        private async Task DoDispenseCash(int Amount, string CurrencyID, string Token)
+        private async Task DoDispenseCash(ClientConnection cashDispenser, int Amount, string CurrencyID, string Token)
         {
             var command = new DispenseCommand(RequestId.NewID(),
                                 Payload: new(Timeout: 10_000,
@@ -503,13 +532,13 @@ namespace TestClient
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            var responce = await GetCompletionAsync<DispenseCompletion>(cashDispenser);
-            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"Dispense failed: {responce.Payload.CompletionCode}");
+            var response = await GetCompletionAsync<DispenseCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Dispense failed: {response.Payload.CompletionCode}");
 
         }
 
-        private async Task DoPresentCash()
+        private async Task DoPresentCash(ClientConnection cashDispenser)
         {
             var command = new PresentCommand(RequestId.NewID(), Payload: new(Timeout: 10_000) );
 
@@ -517,54 +546,53 @@ namespace TestClient
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            var responce = await GetCompletionAsync<PresentCompletion>(cashDispenser);
-            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"Present failed: {responce.Payload.CompletionCode}");
+            var response = await GetCompletionAsync<PresentCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Present failed: {response.Payload.CompletionCode}");
 
         }
 
-        private async Task DoSetCashUnitInfo()
+        public async Task DoSetCashUnitInfo(ClientConnection cashDispenser)
         {
+
             Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
             {
                 {
                     "PHP3",
-                    new (
-                    new (null,
-                         new (new (0, new() { { "EUR5", new (Fit: 1000) } }))),
+                    new XFS4IoT.Storage.SetStorageUnitClass(
+                    new XFS4IoT.CashManagement.StorageSetCashClass(null,
+                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR5", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
                     null)
                 },
                 {
                     "PHP4",
-                    new (
-                    new (null,
-                         new (new (0, new() { { "EUR10", new (Fit: 1000) } }))),
+                    new XFS4IoT.Storage.SetStorageUnitClass(
+                    new XFS4IoT.CashManagement.StorageSetCashClass(null,
+                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR10", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
                     null)
                 },
                 {
                     "PHP5",
-                    new (
-                    new (null,
-                         new (new (0, new() { { "EUR20", new (Fit: 1000) } }))),
+                    new XFS4IoT.Storage.SetStorageUnitClass(
+                    new XFS4IoT.CashManagement.StorageSetCashClass(null,
+                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR20", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
                     null)
                 },
             };
-            var command = new SetStorageCommand(RequestId.NewID(), new(Timeout: 10_000, storage));
-
+            var command = new SetStorageCommand(RequestId.NewID(), new(10_000, storage));
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            var responce = await GetCompletionAsync<SetStorageCompletion>(cashDispenser);
-            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"SetStorage failed: {responce.Payload.CompletionCode}");
+            var response = await GetCompletionAsync<SetStorageCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"SetStorage failed: {response.Payload.CompletionCode}");
         }
 
-
-        private async Task<CompletionType> GetCompletionAsync<CompletionType>(ClientConnection cardReader)
+        private async Task<CompletionType> GetCompletionAsync<CompletionType>(ClientConnection connection)
         {
             while (true)
             {
-                var Message = await cardReader.ReceiveMessageAsync();
+                var Message = await connection.ReceiveMessageAsync();
                 Logger.LogMessage(Message);
                 if (Message is CompletionType result ) return result;
             }

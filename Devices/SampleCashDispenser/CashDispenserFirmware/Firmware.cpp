@@ -39,30 +39,52 @@ string CurrentNonce = "";
 
 
 
-bool KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::VerifyAndDispense(System::String^ Token)
+bool KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::VerifyAndDispense(System::String^ Token, System::String^ Currency, int Value )
 {
     // Convert the .net UTF16 string into a native UTF8 string. 
     pin_ptr<const wchar_t> pinnedToken = PtrToStringChars(Token);
-    wstring wideToken = pinnedToken;
+    pin_ptr<const wchar_t> pinnedCurrency = PtrToStringChars(Currency);
 
     wstring_convert<codecvt_utf8<wchar_t>> utf8Converter;
     string utf8Token;
+    string utf8Currency;
     try 
     {
-        utf8Token = utf8Converter.to_bytes(wideToken);
+        utf8Token = utf8Converter.to_bytes(pinnedToken);
+        utf8Currency = utf8Converter.to_bytes(pinnedCurrency);
+
     }
     catch (range_error const &)
     {
-        cout << "Error: Invalid token. Conversion to UTF8 failed after " << dec << utf8Token.size() << " characters:\n";
+        cout << "Error: Conversion to UTF8 failed after " << dec << utf8Token.size() << " characters:\n";
         for (auto c : utf8Token)
             cout << hex << showbase << c << '\n';
     }
 
     // Check that the token is valid. 
     // Include null in token (buffer) size.
-    auto tokenValid = ValidateToken(utf8Token.c_str(), utf8Token.size()+1);
+    auto tokenValid = ValidateToken(utf8Token.c_str(), utf8Token.size() + 1);
     if (!tokenValid)
         return false; 
+
+    tokenValid = ParseDispenseToken(utf8Token.c_str(), utf8Token.size() + 1);
+    if (!tokenValid)
+        return false;
+
+    auto TokenValues = GetDispenseKeyValues();
+    cout << "Got dispense token values: Currency:" << string(TokenValues->Currency, 3) << " value:" << TokenValues->Value << " cents:" << TokenValues->Fraction << "\n";
+
+    if (string(TokenValues->Currency, 3) != utf8Currency)
+        return false;
+
+    if (TokenValues->Value != Value)
+        return false;
+
+    // Simulate the actual dispense 
+    cout << "dispensing: " << TokenValues->Value << "." << TokenValues->Fraction << string(TokenValues->Currency, 3) << "\n";
+    Sleep(1000);
+    cout << "dispensed\n";
+
 
     return true; 
 }
@@ -91,7 +113,7 @@ extern "C" void FatalError(char const* const Message)
 
 extern "C" void Log(char const* const Message)
 {
-    cout << Message;
+    cout << Message << "\n";
 };
 
 extern "C" void NewNonce(char const** outNonce)

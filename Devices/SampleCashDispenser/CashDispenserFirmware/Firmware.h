@@ -17,6 +17,6 @@ namespace KAL { namespace XFS4IoTSP { namespace CashDispenser{ namespace Sample
         System::String^ GetCommandNonce(); 
         void ClearCommandNonce(); 
 
-        bool VerifyAndDispense(System::String ^Token);
+        bool VerifyAndDispense(System::String^ Token, System::String^ Currency, int Value);
     };
 }}}}

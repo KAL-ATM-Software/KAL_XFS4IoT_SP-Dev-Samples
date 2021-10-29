@@ -18,7 +18,9 @@ using XFS4IoTFramework.Storage;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
+using XFS4IoT.CashDispenser.Events;
 using XFS4IoT.CashDispenser;
+using XFS4IoT.CashDispenser.Commands;
 using XFS4IoT.CashDispenser.Completions;
 using XFS4IoT.CashManagement.Completions;
 using XFS4IoT.Storage.Completions;
@@ -65,25 +67,65 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         public async Task<DispenseResult> DispenseAsync(IDispenseEvents events, DispenseRequest dispenseInfo, CancellationToken cancellation)
 		{
             if (dispenseInfo.E2EToken is null)
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, 
+                                          "An end to end security token is required to dispense");
 
-            if ( !Firmware.VerifyAndDispense(dispenseInfo.E2EToken) )
-            { 
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
-            }
-
-            // Simulate some mechanical delay. 
-            await Task.Delay(1000, cancellation);
-            
-            StackerStatus = StatusClass.IntermediateStackerEnum.NotEmpty;
-            
             if (dispenseInfo.Values is null ||
                 dispenseInfo.Values.Count == 0)
             {
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.Success,
                                           $"Empty denominate value received from the framework.",
                                           DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
             }
+
+            var currencies = from info in CashUnitInfo
+                             from dis in dispenseInfo.Values
+                             where info.Key == dis.Key
+                             select info.Value.CashUnitStorageConfig.Configuration.Currency;
+            if( currencies.Distinct().Count() > 1 )
+            {
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                                          $"Sample dispenser currencly only supports one currency at a time.",
+                                          DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
+            }
+            string currency = currencies.First();
+            
+            double totalDouble = (
+                             from info in CashUnitInfo
+                             from dis in dispenseInfo.Values
+                             where info.Key == dis.Key
+                             select (info.Value.CashUnitStorageConfig.Configuration.Value * dis.Value)
+                             )
+                             .Sum();
+            
+            if( totalDouble > Int32.MaxValue )
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                                          $"Requested dispense value is too large to handle",
+                                          DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
+            
+            int total = (Int32)Math.Floor(totalDouble);
+            if( totalDouble % 1 != 0 )
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                                          $"Cannot dispense fractional amounts",
+                                          DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
+
+            // The firmware should check the E2E token to make sure that the dispense has been authorised. 
+            // It should then actually do the dispense - the two things need to happen together in the firmware. 
+            // It's not sufficient to check the token and _then_ dispense, since an attacker could just skip the 
+            // varify and send a dispense command. 
+            // (Normally this command should take the dispense details
+            // Note that this MUST be async, either directly or through the thread pool. 
+            bool dispenseResult = await Task.Run(() =>
+            {
+                return Firmware.VerifyAndDispense(dispenseInfo.E2EToken, currency, total);
+            });
+            if (!dispenseResult)
+            {
+                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
+            }
+
+            // Record the new status. 
+            StackerStatus = StatusClass.IntermediateStackerEnum.NotEmpty;
 
             foreach (var item in dispenseInfo.Values)
             {

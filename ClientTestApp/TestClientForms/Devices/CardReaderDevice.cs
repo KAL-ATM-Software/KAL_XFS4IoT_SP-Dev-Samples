@@ -221,9 +221,7 @@ namespace TestClientForms.Devices
                 {
                     case ResetCompletion response:
                         RspBox.Text = response.Serialise();
-                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
-                            return;
-                        break;
+                        return;
 
                     case XFS4IoT.CardReader.Events.MediaRemovedEvent removedEv:
                         EvtBox.Text += removedEv.Serialise();
@@ -324,9 +322,7 @@ namespace TestClientForms.Devices
                 {
                     case SetStorageCompletion response:
                         RspBox.Text = response.Serialise();
-                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
-                            return;
-                        break;
+                        return;
 
                     case StorageChangedEvent storageChangedEv:
                         EvtBox.Text += storageChangedEv.Serialise();
