@@ -11,8 +11,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using XFS4IoT;
+using XFS4IoT.Completions;
 using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
+using XFS4IoT.Storage.Commands;
+using XFS4IoT.Storage.Completions;
+using XFS4IoT.Storage.Events;
 
 namespace TestClientForms.Devices
 {
@@ -101,10 +105,11 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var ejectCmd = new EjectCardCommand(
-                RequestId.NewID(), new EjectCardCommand.PayloadData(
+            var ejectCmd = new MoveCommand(
+                RequestId.NewID(), new MoveCommand.PayloadData(
                     Timeout: CommandTimeout,
-                    EjectPosition: EjectCardCommand.PayloadData.EjectPositionEnum.ExitPosition));
+                    From: "transport",
+                    To: "exit"));
 
             CmdBox.Text = ejectCmd.Serialise();
 
@@ -117,7 +122,7 @@ namespace TestClientForms.Devices
             {
                 switch (await cardReader.ReceiveMessageAsync())
                 {
-                    case EjectCardCompletion response:
+                    case MoveCompletion response:
                         RspBox.Text = response.Serialise();
                         if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
                             return;
@@ -150,9 +155,11 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var captureCmd = new RetainCardCommand(
-                RequestId.NewID(), new RetainCardCommand.PayloadData(
-                    Timeout: CommandTimeout));
+            var captureCmd = new MoveCommand(
+                RequestId.NewID(), new MoveCommand.PayloadData(
+                    Timeout: CommandTimeout,
+                    From: "transport",
+                    To: "BIN1"));
 
             CmdBox.Text = captureCmd.Serialise();
 
@@ -165,14 +172,173 @@ namespace TestClientForms.Devices
             {
                 switch (await cardReader.ReceiveMessageAsync())
                 {
-                    case RetainCardCompletion response:
+                    case MoveCompletion response:
                         RspBox.Text = response.Serialise();
                         return;
-                    case XFS4IoT.CardReader.Events.MediaRetainedEvent retainedEv:
-                        EvtBox.Text += retainedEv.Serialise();
+                    case XFS4IoT.Storage.Events.StorageChangedEvent storageChangedEv:
+                        EvtBox.Text += storageChangedEv.Serialise();
+                        break;
+
+                    case XFS4IoT.Storage.Events.StorageThresholdEvent storageThresholdEv:
+                        EvtBox.Text += storageThresholdEv.Serialise();
                         break;
                     case Acknowledge ack:
                         break;
+                    default:
+                        EvtBox.Text += "<Unknown Event>";
+                        break;
+                }
+            }
+        }
+
+        public async Task Reset()
+        {
+            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await cardReader.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            var ejectCmd = new ResetCommand(
+                RequestId.NewID(), new ResetCommand.PayloadData(
+                    Timeout: CommandTimeout));
+
+            CmdBox.Text = ejectCmd.Serialise();
+
+            await cardReader.SendCommandAsync(ejectCmd);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            while (true)
+            {
+                switch (await cardReader.ReceiveMessageAsync())
+                {
+                    case ResetCompletion response:
+                        RspBox.Text = response.Serialise();
+                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
+                            return;
+                        break;
+
+                    case XFS4IoT.CardReader.Events.MediaRemovedEvent removedEv:
+                        EvtBox.Text += removedEv.Serialise();
+                        break;
+
+                    case Acknowledge ack:
+                        break;
+
+                    default:
+                        EvtBox.Text += "<Unknown Event>";
+                        break;
+                }
+            }
+        }
+
+        public async Task GetStorage()
+        {
+            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await cardReader.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            var ejectCmd = new GetStorageCommand(
+                RequestId.NewID(), new GetStorageCommand.PayloadData(
+                    Timeout: CommandTimeout));
+
+            CmdBox.Text = ejectCmd.Serialise();
+
+            await cardReader.SendCommandAsync(ejectCmd);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            while (true)
+            {
+                switch (await cardReader.ReceiveMessageAsync())
+                {
+                    case GetStorageCompletion response:
+                        RspBox.Text = response.Serialise();
+                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
+                            return;
+                        break;
+
+                    case Acknowledge ack:
+                        break;
+
+                    default:
+                        EvtBox.Text += "<Unknown Event>";
+                        break;
+                }
+            }
+        }
+
+        public async Task ResetBinCount()
+        {
+            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await cardReader.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> setStorage = new()
+            {
+                {
+                    "BIN1",
+                    new XFS4IoT.Storage.SetStorageUnitClass(null,
+                                                            new XFS4IoT.CardReader.StorageSetClass(new XFS4IoT.CardReader.StorageConfigurationClass("BIN1", 45),
+                                                                                                   new XFS4IoT.CardReader.StorageStatusSetClass(0)))
+                }
+            };
+
+            var ejectCmd = new SetStorageCommand(
+                RequestId.NewID(), new SetStorageCommand.PayloadData(
+                    Timeout: CommandTimeout,
+                    Storage: setStorage));
+
+            CmdBox.Text = ejectCmd.Serialise();
+
+            await cardReader.SendCommandAsync(ejectCmd);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            while (true)
+            {
+                switch (await cardReader.ReceiveMessageAsync())
+                {
+                    case SetStorageCompletion response:
+                        RspBox.Text = response.Serialise();
+                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
+                            return;
+                        break;
+
+                    case StorageChangedEvent storageChangedEv:
+                        EvtBox.Text += storageChangedEv.Serialise();
+                        break;
+
+                    case StorageThresholdEvent storageThresholdEv:
+                        EvtBox.Text += storageThresholdEv.Serialise();
+                        break;
+
+                    case Acknowledge ack:
+                        break;
+
                     default:
                         EvtBox.Text += "<Unknown Event>";
                         break;

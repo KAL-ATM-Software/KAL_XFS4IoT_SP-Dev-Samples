@@ -10,12 +10,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT.CashManagement;
 using XFS4IoT.CashManagement.Commands;
 using XFS4IoT.CashManagement.Completions;
 using XFS4IoT.CashManagement.Events;
+using XFS4IoT.CashDispenser;
 using XFS4IoT.CashDispenser.Commands;
 using XFS4IoT.CashDispenser.Completions;
 using XFS4IoT.CashDispenser.Events;
+using XFS4IoT.Storage.Commands;
+using XFS4IoT.Storage.Completions;
+using XFS4IoT.Storage.Events;
 using XFS4IoT;
 
 namespace TestClientForms.Devices
@@ -40,7 +45,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getCashUnitInfoCmd = new GetCashUnitInfoCommand(RequestId.NewID(), new(CommandTimeout));
+            var getCashUnitInfoCmd = new GetStorageCommand(RequestId.NewID(), new(CommandTimeout));
 
             CmdBox.Text = getCashUnitInfoCmd.Serialise();
 
@@ -48,7 +53,7 @@ namespace TestClientForms.Devices
             EvtBox.Text = string.Empty;
 
             object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getCashUnitInfoCmd);
-            if (cmdResponse is GetCashUnitInfoCompletion response)
+            if (cmdResponse is GetStorageCompletion response)
             {
                 RspBox.Text = response.Serialise();
             }
@@ -94,7 +99,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(CommandTimeout, GetPresentStatusCommand.PayloadData.PositionEnum.Default));
+            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(CommandTimeout, OutputPositionEnum.OutDefault));
 
             CmdBox.Text = getPresentStatusCmd.Serialise();
 
@@ -121,10 +126,11 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var denominateCmd = new DenominateCommand(RequestId.NewID(), new(CommandTimeout, null, 1,
-                new DenominateCommand.PayloadData.DenominationClass(new Dictionary<string, double>() {
+            var denominateCmd = new DenominateCommand(RequestId.NewID(), new(CommandTimeout,
+                new DenominationClass(new Dictionary<string, double>() {
                     { "EUR", 50 }
-                })));
+                }),
+                "mix1"));
 
             CmdBox.Text = denominateCmd.Serialise();
 
@@ -140,10 +146,6 @@ namespace TestClientForms.Devices
                 {
                     RspBox.Text = response.Serialise();
                     break;
-                }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
-                {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
                 }
                 else if (cmdResponse is Acknowledge)
                 {
@@ -181,24 +183,44 @@ namespace TestClientForms.Devices
             await Task.Delay(1000);
 
             var dispenseCommand = new DispenseCommand(RequestId.NewID(),
-                Payload: new(CommandTimeout, null, 1, DispenseCommand.PayloadData.PositionEnum.Default, 
-                    new DispenseCommand.PayloadData.DenominationClass(
-                        new Dictionary<string, double> 
-                            { { "EUR", 50 } }
-                    ),
-                    Token: $"NONCE={nonceCompletion.Payload.CommandNonce},TOKENFORMAT=1,TOKENLENGTH=0164,HMACSHA256=CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
-                    )
-                );
+                                                      new(CommandTimeout,
+                                                        new DenominateRequestClass(new(new Dictionary<string, double>() 
+                                                        {
+                                                            { "EUR", 50 }
+                                                        }),
+                                                        "mix1"),
+                                                        Token: $"NONCE={nonceCompletion.Payload.CommandNonce},TOKENFORMAT=1,TOKENLENGTH=0164,HMACSHA256=CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
+                                                        ));
 
             CmdBox.Text = dispenseCommand.Serialise();
 
             RspBox.Text = string.Empty;
             EvtBox.Text = string.Empty;
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, dispenseCommand);
-            if (cmdResponse is DispenseCompletion response)
+            await dispenser.SendCommandAsync(dispenseCommand);
+
+            for (; ; )
             {
-                RspBox.Text = response.Serialise();
+                object cmdResponse = await dispenser.ReceiveMessageAsync();
+                if (cmdResponse is DispenseCompletion response)
+                {
+                    RspBox.Text = response.Serialise();
+                    break;
+                }
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
+                {
+                    EvtBox.Text = storageChangedEv.Serialise();
+                }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
+                else
+                {
+                    EvtBox.Text += "<Unknown Event>";
+                }
             }
         }
 
@@ -216,7 +238,7 @@ namespace TestClientForms.Devices
             }
 
             var startExchangeCmd = new StartExchangeCommand(RequestId.NewID(), 
-                                        new(CommandTimeout, StartExchangeCommand.PayloadData.ExchangeTypeEnum.ByHand, null, new() { "1", "2", "3"}));
+                                        new(CommandTimeout));
 
             CmdBox.Text = startExchangeCmd.Serialise();
 
@@ -233,10 +255,6 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
-                {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
-                }
                 else if (cmdResponse is NoteErrorEvent noteErrorEv)
                 {
                     EvtBox.Text = noteErrorEv.Serialise();
@@ -246,8 +264,7 @@ namespace TestClientForms.Devices
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
                 else if (cmdResponse is Acknowledge)
-                {
-                }
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -285,10 +302,6 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
-                {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
-                }
                 else if (cmdResponse is NoteErrorEvent noteErrorEv)
                 {
                     EvtBox.Text = noteErrorEv.Serialise();
@@ -298,8 +311,7 @@ namespace TestClientForms.Devices
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
                 else if (cmdResponse is Acknowledge)
-                {
-                }
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -349,9 +361,16 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
-                else if (cmdResponse is Acknowledge)
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
+                    EvtBox.Text = storageChangedEv.Serialise();
                 }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -371,7 +390,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var resetCmd = new ResetCommand(RequestId.NewID(), new(CommandTimeout, null, null, ResetCommand.PayloadData.OutputPositionEnum.Default));
+            var resetCmd = new ResetCommand(RequestId.NewID(), new(CommandTimeout, null, null, OutputPositionEnum.OutDefault));
 
             CmdBox.Text = resetCmd.Serialise();
 
@@ -388,10 +407,6 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
-                {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
-                }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
@@ -400,9 +415,16 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = incompleteRetractEv.Serialise();
                 }
-                else if (cmdResponse is Acknowledge)
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
+                    EvtBox.Text = storageChangedEv.Serialise();
                 }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -423,7 +445,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new OpenShutterCommand(RequestId.NewID(), new(CommandTimeout, OpenShutterCommand.PayloadData.PositionEnum.Default));
+            var cmd = new OpenShutterCommand(RequestId.NewID(), new(CommandTimeout, PositionEnum.OutDefault));
 
             CmdBox.Text = cmd.Serialise();
 
@@ -440,9 +462,12 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is Acknowledge)
+                if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
+                    EvtBox.Text = shutterEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -463,7 +488,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CloseShutterCommand(RequestId.NewID(), new(CommandTimeout, CloseShutterCommand.PayloadData.PositionEnum.Default));
+            var cmd = new CloseShutterCommand(RequestId.NewID(), new(CommandTimeout, PositionEnum.OutDefault));
 
             CmdBox.Text = cmd.Serialise();
 
@@ -480,9 +505,12 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is Acknowledge)
+                if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
+                    EvtBox.Text = shutterEv.Serialise();
                 }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -520,17 +548,20 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
-                {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
-                }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
                     EvtBox.Text = infoAvailableEv.Serialise();
                 }
-                else if (cmdResponse is Acknowledge)
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
+                    EvtBox.Text = storageChangedEv.Serialise();
                 }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";
@@ -551,7 +582,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new RetractCommand(RequestId.NewID(), new(CommandTimeout, null, RetractCommand.PayloadData.RetractAreaEnum.Retract, 1));
+            var cmd = new RetractCommand(RequestId.NewID(), new(CommandTimeout, null, RetractAreaEnum.Retract, 1));
 
             CmdBox.Text = cmd.Serialise();
 
@@ -568,9 +599,75 @@ namespace TestClientForms.Devices
                     RspBox.Text = response.Serialise();
                     break;
                 }
-                else if (cmdResponse is CashUnitErrorEvent cashUnitErrorEv)
+                else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = cashUnitErrorEv.Serialise();
+                    EvtBox.Text = infoAvailableEv.Serialise();
+                }
+                else if (cmdResponse is IncompleteRetractEvent incompleteRetractEv)
+                {
+                    EvtBox.Text = incompleteRetractEv.Serialise();
+                }
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
+                {
+                    EvtBox.Text = storageChangedEv.Serialise();
+                }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
+                else
+                {
+                    EvtBox.Text += "<Unknown Event>";
+                }
+            }
+        }
+
+        public async Task SetCashUnitInfo()
+        {
+            var dispenser = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await dispenser.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
+            {
+                { "PHP3", new XFS4IoT.Storage.SetStorageUnitClass(
+                    new StorageSetCashClass(null, 
+                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR5", new StorageCashCountClass(Fit: 1000) } }))),
+                    null) },
+                { "PHP4", new XFS4IoT.Storage.SetStorageUnitClass(
+                    new StorageSetCashClass(null,
+                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR10", new StorageCashCountClass(Fit: 1000) } }))),
+                    null) },
+                { "PHP5", new XFS4IoT.Storage.SetStorageUnitClass(
+                    new StorageSetCashClass(null,
+                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR20", new StorageCashCountClass(Fit: 1000) } }))),
+                    null) },
+            };
+            var cmd = new SetStorageCommand(RequestId.NewID(), new(CommandTimeout, storage));
+
+            CmdBox.Text = cmd.Serialise();
+
+            await dispenser.SendCommandAsync(cmd);
+
+            RspBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            for (; ; )
+            {
+                object cmdResponse = await dispenser.ReceiveMessageAsync();
+                if (cmdResponse is SetStorageCompletion response)
+                {
+                    RspBox.Text = response.Serialise();
+                    break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
@@ -580,9 +677,16 @@ namespace TestClientForms.Devices
                 {
                     EvtBox.Text = incompleteRetractEv.Serialise();
                 }
-                else if (cmdResponse is Acknowledge)
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
+                    EvtBox.Text = storageChangedEv.Serialise();
                 }
+                else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
+                {
+                    EvtBox.Text += storageThresholdEv.Serialise();
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     EvtBox.Text += "<Unknown Event>";

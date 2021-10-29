@@ -68,6 +68,11 @@ namespace TestClientForms
             
         }
 
+        private async void Reset_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.Reset();
+        }
+
         private async void button1_Click(object sender, EventArgs e)
         {
             var capabilities = await CardReaderDev.GetCapabilities();
@@ -89,6 +94,15 @@ namespace TestClientForms
             await CardReaderDev.CaptureCard();
         }
 
+        private async void GetStorage_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.GetStorage();
+        }
+
+        private async void ResetBinCount_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.ResetBinCount();
+        }
 
         #region Dispenser Tab
 
@@ -173,6 +187,11 @@ namespace TestClientForms
         private async void DispenserRetract_Click(object sender, EventArgs e)
         {
             await DispenserDev.Retract();
+        }
+
+        private async void SetCashUnitInfo_Click(object sender, EventArgs e)
+        {
+            await DispenserDev.SetCashUnitInfo();
         }
 
         #endregion
@@ -429,6 +448,7 @@ namespace TestClientForms
         {
             await PinPadDev.GetLayout();
         }
+
 
         #endregion
 

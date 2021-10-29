@@ -28,9 +28,11 @@ namespace Server
                 /// CardReader Service Provider
                 var simCardReaderDevice = new KAL.XFS4IoTSP.CardReader.Sample.CardReaderSample(Logger);
                 var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                   ServiceName: "SimCardReader",
-                                                                   simCardReaderDevice,
-                                                                   Logger);
+                                                                      ServiceName: "SimCardReader",
+                                                                      simCardReaderDevice,
+                                                                      Logger,
+                                                                      new FilePersistentData(Logger));
+
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
 

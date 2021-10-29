@@ -268,38 +268,36 @@ namespace TextTerminalSample
             {
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.Common,
-                    Commands: new List<string>()
+                    Commands: new ()
                     {
-                        "Common.Status",
-                        "Common.Capabilities"
+                        { "Common.Status", null },
+                        { "Common.Capabilities", null },
                     },
-                    Events: new List<string>(),
+                    Events: new (),
                     MaximumRequests: 1000),
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.TextTerminal,
-                    Commands: new List<string>
+                    Commands: new ()
                     {
-                        "Beep",
-                        "ClearScreen",
-                        //"DefineKeys",
-                        "DispLight",
-                        //"GetFormList",
-                        "GetKeyDetail",
-                        //"GetQueryField",
-                        //"GetQueryForm",
-                        "Read",
-                        //"ReadForm",
-                        "Reset",
-                        "SetLed",
-                        "SetResolution",
-                        "Write",
-                        //"TextTerminal.WriteForm"
+                        { "TextTerminal.Beep", null },
+                        { "TextTerminal.ClearScreen", null },
+                        //"TextTerminal.DefineKeys", null },
+                        //"TextTerminal.GetFormList", null },
+                        { "TextTerminal.GetKeyDetail", null },
+                        //"TextTerminal.GetQueryField", null },
+                        //"TextTerminal.GetQueryForm", null },
+                        { "TextTerminal.Read", null },
+                        //"TextTerminal.ReadForm", null },
+                        { "TextTerminal.Reset", null },
+                        { "TextTerminal.SetResolution", null },
+                        { "TextTerminal.Write", null },
+                        //"TextTerminal.WriteForm", null },
                     },
-                    Events: new List<string>
+                    Events: new ()
                     {
-                        "FieldErrorEvent",
-                        "FieldWarningEvent",
-                        "KeyEvent",
+                        { "TextTerminal.FieldErrorEvent", null },
+                        { "TextTerminal.FieldWarningEvent", null },
+                        { "TextTerminal.KeyEvent", null },
                     },
                     MaximumRequests: 1000)
             };

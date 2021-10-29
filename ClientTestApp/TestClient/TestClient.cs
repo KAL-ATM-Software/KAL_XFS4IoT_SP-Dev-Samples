@@ -5,6 +5,7 @@
 \***********************************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Net.WebSockets;
 using XFS4IoT;
@@ -16,6 +17,8 @@ using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
 using XFS4IoT.CashDispenser.Commands;
 using XFS4IoT.CashDispenser.Completions;
+using XFS4IoT.Storage.Commands;
+using XFS4IoT.Storage.Completions;
 using XFS4IoTClient;
 using System.Text.RegularExpressions;
 
@@ -79,17 +82,18 @@ namespace TestClient
                     await DoChipPower(cardReader);
                     await DoReset(cardReader);
                     await DoRetainCard(cardReader);
-                    await DoResetCount(cardReader);
                     await DoSetKey(cardReader);
                     await DoWriteData(cardReader);
                     await DoQueryIFMIdentifier(cardReader);
-                    await DoParkCard(cardReader);
                     await DoEjectCard(cardReader);
                 }
 
                 async Task DoCashDispenser()
                 {
                     Logger.LogLine("Doing cash dispenser sequence");
+
+                    Logger.LogLine("Set counts to the cash units");
+                    await DoSetCashUnitInfo();
 
                     await DoClearCommandNonce();
 
@@ -355,13 +359,13 @@ namespace TestClient
         private async Task DoReset(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new XFS4IoT.CardReader.Commands.ResetCommand
+            var command = new ResetCommand
                             (
                             RequestId: RequestId.NewID(),
                             Payload:    new 
                                         (
                                         Timeout: 10_000, 
-                                        ResetIn: XFS4IoT.CardReader.Commands.ResetCommand.PayloadData.ResetInEnum.Eject
+                                        To: ResetCommand.PayloadData.ToEnum.Transport
                                         )
                             );
 
@@ -369,7 +373,7 @@ namespace TestClient
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            await GetCompletionAsync<XFS4IoT.CardReader.Completions.ResetCompletion>(cardReader);
+            await GetCompletionAsync<ResetCompletion>(cardReader);
         }
 
         private async Task DoRetainCard(ClientConnection cardReader)
@@ -378,27 +382,16 @@ namespace TestClient
             await DoAcceptCard(cardReader);
 
             // Create a new command and send it to the device
-            var command = new RetainCardCommand(RequestId.NewID(),
-                new RetainCardCommand.PayloadData(10_000));
+            var command = new MoveCommand(RequestId.NewID(),
+                new MoveCommand.PayloadData(10_000,
+                                            From: "transport$",
+                                            To: "exit"));
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            await GetCompletionAsync<RetainCardCompletion>(cardReader);
-        }
-
-        private async Task DoResetCount(ClientConnection cardReader)
-        {
-            // Create a new command and send it to the device
-            var command = new ResetCountCommand(RequestId.NewID(),
-                new ResetCountCommand.PayloadData(10_000));
-
-            Logger.LogMessage(command);
-            await cardReader.SendCommandAsync(command);
-
-            // Wait for a response from the device. 
-            await GetCompletionAsync<ResetCountCompletion>(cardReader);
+            await GetCompletionAsync<MoveCompletion>(cardReader);
         }
 
         private async Task DoSetKey(ClientConnection cardReader)
@@ -450,29 +443,19 @@ namespace TestClient
             await GetCompletionAsync<QueryIFMIdentifierCompletion>(cardReader);
         }
 
-        private async Task DoParkCard(ClientConnection cardReader)
-        {
-            // Create a new command and send it to the device
-            var command = new ParkCardCommand(RequestId.NewID(),
-                new ParkCardCommand.PayloadData(10_000, ParkCardCommand.PayloadData.DirectionEnum.In, 0));
-
-            Logger.LogMessage(command);
-            await cardReader.SendCommandAsync(command);
-
-            // Wait for a response from the device. 
-            await GetCompletionAsync<ParkCardCompletion>(cardReader);
-        }
         private async Task DoEjectCard(ClientConnection cardReader)
         {
             // Create a new command and send it to the device
-            var command = new EjectCardCommand(RequestId.NewID(), 
-                                                new(10_000)
+            var command = new MoveCommand(RequestId.NewID(), 
+                                                new(10_000,
+                                                From: "transport$",
+                                                To: "exit")
                                                 );
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
 
             // Wait for a response from the device. 
-            await GetCompletionAsync<EjectCardCompletion>(cardReader);
+            await GetCompletionAsync<MoveCompletion>(cardReader);
         }
 
 
@@ -510,8 +493,8 @@ namespace TestClient
         {
             var command = new DispenseCommand(RequestId.NewID(),
                                 Payload: new(Timeout: 10_000,
-                                             Denomination: new(Currencies: new() { { CurrencyID, Amount } } ), 
-                                             MixNumber:1,
+                                             Denomination: new(Denomination: new(new() { { CurrencyID, Amount } }), "mix1"),
+                                             Position: null,
                                              Token: Token
                                              )
                                 );
@@ -539,6 +522,43 @@ namespace TestClient
                 Logger.LogWarning($"Present failed: {responce.Payload.CompletionCode}");
 
         }
+
+        private async Task DoSetCashUnitInfo()
+        {
+            Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
+            {
+                {
+                    "PHP3",
+                    new (
+                    new (null,
+                         new (new (0, new() { { "EUR5", new (Fit: 1000) } }))),
+                    null)
+                },
+                {
+                    "PHP4",
+                    new (
+                    new (null,
+                         new (new (0, new() { { "EUR10", new (Fit: 1000) } }))),
+                    null)
+                },
+                {
+                    "PHP5",
+                    new (
+                    new (null,
+                         new (new (0, new() { { "EUR20", new (Fit: 1000) } }))),
+                    null)
+                },
+            };
+            var command = new SetStorageCommand(RequestId.NewID(), new(Timeout: 10_000, storage));
+
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var responce = await GetCompletionAsync<SetStorageCompletion>(cashDispenser);
+            if (responce.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"SetStorage failed: {responce.Payload.CompletionCode}");
+        }
+
 
         private async Task<CompletionType> GetCompletionAsync<CompletionType>(ClientConnection cardReader)
         {

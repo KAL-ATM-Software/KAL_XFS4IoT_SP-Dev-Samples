@@ -151,7 +151,7 @@ namespace XFS4IoTClient
         /// <summary>
         /// maximum buffer size for recieving incomming messages. 
         /// </summary>
-        private const int MessageBufferSize = 8 * 1024;
+        private const int MessageBufferSize = 20 * 1024;
 
         /// <summary>
         /// Endpoint of this device to connect

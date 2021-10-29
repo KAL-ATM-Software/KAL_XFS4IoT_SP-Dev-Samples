@@ -16,7 +16,6 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
       <OutputPath>..\bin\Debug\</OutputPath>
       <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
-      <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

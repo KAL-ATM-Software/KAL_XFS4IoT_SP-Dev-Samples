@@ -899,7 +899,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                      RsaCryptAlgorithm: new(Pkcs1V15:true),
                                                      RsaKeyCheckMode: new(Sha1:true, Sha256:true),
                                                      SignatureScheme: new(ExportEppId:true, EnhancedRkl:true),
-                                                     KeyBlockImportFormats: new(AnsTr31KeyBlock:true),
+                                                     KeyBlockImportFormats: new(A:true, B:true, C:true),
                                                      KeyImportThroughParts: true,
                                                      DesKeyLength: new(Double:true),
                                                      CertificateTypes: new(EncKey:true, VerificationKey:true, HostKey:true),
@@ -913,53 +913,53 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             {
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.Common,
-                    Commands: new List<string>()
-                    { 
-                        "Common.Status", 
-                        "Common.Capabilities" 
+                    Commands: new ()
+                    {
+                        { "Common.Status", null },
+                        { "Common.Capabilities",  null },
                     },
-                    Events: new List<string>(),
+                    Events: new (),
                     MaximumRequests: 1000),
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.KeyManagement,
-                    Commands: new List<string>
+                    Commands: new ()
                     {
-                        "DeleteKey",
-                        "ExportRSAEPPSignedItem",
-                        "GenerateKCV",
-                        "GenerateRSAKeyPair",
-                        "GetCertificate",
-                        "ImportKey",
-                        "Initialization",
-                        "LoadCertificate",
-                        "ReplaceCertificate",
-                        "Reset",
-                        "StartAuthenticate",
-                        "GetKeyDetail",
+                        { "KeyManagement.DeleteKey", null },
+                        { "KeyManagement.ExportRSAEPPSignedItem", null },
+                        { "KeyManagement.GenerateKCV", null },
+                        { "KeyManagement.GenerateRSAKeyPair", null },
+                        { "KeyManagement.GetCertificate", null },
+                        { "KeyManagement.ImportKey", null },
+                        { "KeyManagement.Initialization", null },
+                        { "KeyManagement.LoadCertificate", null },
+                        { "KeyManagement.ReplaceCertificate", null },
+                        { "KeyManagement.Reset", null },
+                        { "KeyManagement.StartAuthenticate", null },
+                        { "KeyManagement.GetKeyDetail", null },
                     },
-                    Events: new List<string>
+                    Events: new ()
                     {
-                        "CertificateChangeEvent",
-                        "InitializedEvent",
+                        { "KeyManagement.CertificateChangeEvent", null },
+                        { "KeyManagement.InitializedEvent", null },
                     },
                     MaximumRequests: 1000,
-                    AuthenticationRequired: new List<string>
+                    AuthenticationRequired: new ()
                     {
-                        "Initialization"
+                        "KeyManagement.Initialization",
                     }),
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.Crypto,
-                    Commands: new List<string> 
-                    { 
-                        "CryptoData", 
-                        "Digest", 
-                        "GenerateAuthentication", 
-                        "GenerateRandom", 
-                        "VerifyAuthentication"
+                    Commands: new ()
+                    {
+                        { "Crypto.CryptoData", null },
+                        { "Crypto.Digest", null },
+                        { "Crypto.GenerateAuthentication", null },
+                        { "Crypto.GenerateRandom", null },
+                        { "Crypto.VerifyAuthentication", null },
                     }, 
-                    Events: new List<string> 
-                    { 
-                        "IllegalKeyAccessEvent"
+                    Events: new ()
+                    {
+                        { "Crypto.IllegalKeyAccessEvent", null },
                     }, 
                     MaximumRequests:  1000)
             };

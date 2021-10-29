@@ -13,12 +13,12 @@ using System.Linq;
 using XFS4IoT;
 using XFS4IoTFramework.CardReader;
 using XFS4IoTFramework.Common;
+using XFS4IoTFramework.Storage;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
 using XFS4IoT.CardReader.Events;
 using XFS4IoT.CardReader;
-using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
@@ -28,7 +28,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
     /// <summary>
     /// Sample CardReader device class to implement
     /// </summary>
-    public class CardReaderSample : ICardReaderDevice, ICommonDevice
+    public class CardReaderSample : ICardReaderDevice, ICommonDevice, IStorageDevice
     {
         /// <summary>
         /// Constructor
@@ -41,9 +41,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             MediaStatus = MediaStatusEnum.NotPresent;
         }
 
-        //
-        // CARDREADER interface
-        //
+        #region CardReader Interface
 
         /// <summary>
         /// For motor driven card readers, the card unit checks whether a card has been inserted. 
@@ -147,25 +145,6 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         }
 
         /// <summary>
-        /// This command is only applicable to motor driven card readers and latched dip card readers.
-        /// For motorized card readers the default operation is that the card is driven to the exit slot from where the usercan remove it.
-        /// The card remains in position for withdrawal until either it is taken or another command is issuedthat moves the card.
-        /// For latched dip readers, this command causes the card to be unlatched (if not already unlatched), enablingremoval.
-        /// After successful completion of this command, a CardReader.MediaRemovedEvent is generated to inform the application when the card is taken.
-        /// </summary>
-        public async Task<EjectCardResult> EjectCardAsync(EjectCardRequest ejectCardInfo,
-                                                          CancellationToken cancellation)
-        {
-            await Task.Delay(1000, cancellation);
-
-            MediaStatus = MediaStatusEnum.Entering;
-
-            new Thread(CardTakenThread).IsNotNull().Start();
-
-            return new EjectCardResult(MessagePayload.CompletionCodeEnum.Success);
-        }
-
-        /// <summary>
         /// Thread for simulate card taken event to be fired
         /// </summary>
         private void CardTakenThread()
@@ -224,21 +203,6 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             await Task.Delay(1000, cancellation);
             return new ChipPowerResult(MessagePayload.CompletionCodeEnum.Success);
-        }
-
-        /// <summary>
-        /// This command is used to move a card that is present in the reader to a parking station.
-        /// A parking station isdefined as an area in the ID card unit, which can be used to temporarily store the card while the device performs operations on another card. 
-        /// This command is also used to move a card from the parking station to the read/write,chip I/O or transport position. 
-        /// When a card is moved from the parking station to the read/write, chip I/O ortransport position parkOut, the read/write, chip I/O or transport position must not be occupied with anothercard, otherwise the error cardPresent will be returned.
-        /// After moving a card to a parking station, another card can be inserted and read by calling, e.g.,CardReader.ReadRawData.
-        /// Cards in parking stations will not be affected by any CardReader commands until they are removed from the parkingstation using this command, except for the CardReader.Reset command, which will move thecards in the parking stations as specified in its input as part of the reset action if possible.
-        /// </summary>
-        public async Task<ParkCardResult> ParkCardAsync(ParkCardRequest parkCardInfo,
-                                                  CancellationToken cancellation)
-        {
-            await Task.Delay(1000, cancellation);
-            return new ParkCardResult(MessagePayload.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -337,65 +301,6 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         }
 
         /// <summary>
-        /// The card is removed from its present position (card inserted into device, card entering, unknown position) and stored in the retain bin;
-        /// applicable to motor-driven card readers only.
-        /// The ID card unit sends a CardReader.RetainBinThresholdEvent if the storage capacity of the retainbin is reached.
-        /// If the storage capacity has already been reached, and the command cannot be executed, an error isreturned and the card remains in its present position.
-        /// </summary>
-        public async Task<CaptureCardResult> CaptureCardAsync(IRetainCardEvents events,
-                                                              CancellationToken cancellation)
-        {
-            await Task.Delay(1000, cancellation);
-
-            await events.MediaRetainedEvent();
-            
-            CapturedCount++;
-
-            CardReaderServiceProvider cardReaderServiceProvider = SetServiceProvider as CardReaderServiceProvider;
-            if (CapturedCount >= CpMaxCaptureCount)
-            {
-                // Send the threshold event only once when we reached the threshold
-                if (RetainBinStatus != StatusClass.RetainBinEnum.High)
-                {
-                    await cardReaderServiceProvider.IsNotNull().RetainBinThresholdEvent(new RetainBinThresholdEvent.PayloadData(RetainBinThresholdEvent.PayloadData.StateEnum.Full));
-                }
-
-                RetainBinStatus = StatusClass.RetainBinEnum.Full;
-            }
-            else if (CapturedCount >= (int)(((3 * CpMaxCaptureCount) / 4) + 0.5))
-            {
-                // Send the threshold event only once when we reached the threshold
-                if (RetainBinStatus != StatusClass.RetainBinEnum.High)
-                {
-                    // unsolic threadhold
-                    await cardReaderServiceProvider.IsNotNull().RetainBinThresholdEvent(new RetainBinThresholdEvent.PayloadData(RetainBinThresholdEvent.PayloadData.StateEnum.High));
-                }
-
-                RetainBinStatus = StatusClass.RetainBinEnum.High;
-            }
-            else
-            {
-                RetainBinStatus = StatusClass.RetainBinEnum.Ok;
-            }
-
-            return new CaptureCardResult(MessagePayload.CompletionCodeEnum.Success,
-                                         CapturedCount++,
-                                         RetainCardCompletion.PayloadData.PositionEnum.Present);
-        }
-
-        /// <summary>
-        /// This function resets the present value for number of cards retained to zero.
-        /// The function is possible formotor-driven card readers only.
-        /// The number of cards retained is controlled by the service.
-        /// </summary>
-        public Task<ResetCountResult> ResetBinCountAsync(CancellationToken cancellation)
-        {
-            // The device doesn't need to talk to the device and return captured count immediately works as a sync
-            CapturedCount = 0;
-            return Task.FromResult(new ResetCountResult(MessagePayload.CompletionCodeEnum.Success));
-        }
-
-        /// <summary>
         /// This command is used for setting the DES key that is necessary for operating a CIM86 module.
         /// The command must beexecuted before the first read command is issued to the card reader.
         /// </summary>
@@ -414,12 +319,16 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <returns></returns>
         public async Task RunAsync()
         {
+            CardReaderServiceProvider cardReaderServiceProvider = SetServiceProvider as CardReaderServiceProvider;
+
             for (; ; )
             {
                 await cardTakenSignal?.WaitAsync();
-                MediaStatus = MediaStatusEnum.NotPresent;
-                CardReaderServiceProvider cardReaderServiceProvider = SetServiceProvider as CardReaderServiceProvider;
-                await cardReaderServiceProvider.IsNotNull().MediaRemovedEvent();
+                if (MediaStatus != MediaStatusEnum.NotPresent)
+                {
+                    MediaStatus = MediaStatusEnum.NotPresent;
+                    await cardReaderServiceProvider.IsNotNull().MediaRemovedEvent();
+                }
             }
         }
 
@@ -452,8 +361,232 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             return new QueryEMVApplicationResult(MessagePayload.CompletionCodeEnum.Success, AIDList);
         }
 
-        /// COMMON interface
+        /// <summary>
+        ///  This command is only applicable to motorized and latched dip card readers.
+        ///  If after a successful completion event the card is at the exit position, the card will be accessible to the user.
+        /// A CardReader.MediaRemovedEvent is generated to inform the application when the card is taken.
+        /// 
+        /// * Motorized card readers
+        /// Motorized card readers can physically move cards from or to the transport or exit positions or a storage.
+        /// The default operation is to move a card in the transport position to the exit position.
+        /// If the card is being moved from the exit position to the exit position, these are valid behaviors:
+        /// The card does not move as the card reader can detect the card is already in the correct position.
+        /// The card is moved back into the card reader then moved back to the exit to ensure the card is in the correct position.
+        /// 
+        /// * Latched dip card readers
+        /// Latched dips card readers can logically move cards from the transport position to the exit position by
+        /// unlatching the card reader.That is, the card will not physically move but will be accessible to the user.
+        /// </summary>
+        public async Task<MoveCardResult> MoveCardAsync(IMoveEvents events, MoveCardRequest moveCardInfo, CancellationToken cancellation)
+        {
+            if (moveCardInfo.From.Position == MoveCardRequest.MovePosition.MovePositionEnum.Storage)
+            {
+                return new MoveCardResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                                          $"This device doesn't support dispensing card capability. {moveCardInfo.From.Position}");
+            }
+            else
+            {
+                if (MediaStatus == MediaStatusEnum.NotPresent)
+                {
+                    return new MoveCardResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                                              $"No card present in the reader.",
+                                              MoveCompletion.PayloadData.ErrorCodeEnum.NoMedia);
+                }
+            }
 
+            int cardMoved = 0;
+
+            if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Storage)
+            {
+                await Task.Delay(100, cancellation);
+
+                if (moveCardInfo.To.StorageId != cardUnitInfo.CardBin.PositionName)
+                {
+                    return new MoveCardResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                                              $"Unsupported storage ID specified. {moveCardInfo.To.StorageId}");
+                }
+
+                cardMoved = 1;
+                cardUnitInfo.CurrentCount += cardMoved;
+
+                if (cardUnitInfo.CurrentCount == 0)
+                {
+                    cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.Empty;
+                }
+                else if (cardUnitInfo.CurrentCount >= cardUnitInfo.CardBin.Capacity)
+                {
+                    cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.Full;
+                }
+                else if (cardUnitInfo.CardBin.Configuration.Threshold != 0 &&
+                         cardUnitInfo.CurrentCount > cardUnitInfo.CardBin.Configuration.Threshold)
+                {
+                    cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.High;
+                }
+
+                MediaStatus = MediaStatusEnum.NotPresent;
+            }
+            else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Exit)
+            {
+                MediaStatus = MediaStatusEnum.Entering;
+
+                new Thread(CardTakenThread).IsNotNull().Start();
+            }
+            else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Transport)
+            {
+                MediaStatus = MediaStatusEnum.Present;
+            }
+
+            return new MoveCardResult(MessagePayload.CompletionCodeEnum.Success, 
+                                      cardUnitInfo.CardBin.PositionName,
+                                      cardMoved);
+        }
+        #endregion
+
+        #region Storage Interface
+        /// <summary>
+        /// Return storage information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns></returns>
+        public bool GetCardStorageConfiguration(out Dictionary<string, CardUnitStorageConfiguration> newCardUnits)
+        {
+            newCardUnits = new();
+            newCardUnits.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.CardBin);
+            return true;
+        }
+
+        /// <summary>
+        /// This method is call after card is moved to the storage. Move or Reset command.
+        /// </summary>
+        /// <returns>Return true if the device maintains hardware counters for the card units</returns>
+        public bool GetCardUnitCounts(out Dictionary<string, CardUnitCount> unitCounts)
+        {
+            unitCounts = new();
+            unitCounts.Add(cardUnitInfo.CardBin.PositionName, new (cardUnitInfo.InitialCount,
+                                                                   cardUnitInfo.CurrentCount));
+            return true;
+        }
+
+        /// <summary>
+        /// Update card unit hardware status by device class. the maintaining status by the framework will be overwritten.
+        /// The framework can't handle threshold event if the device class maintains hardware storage status on threshold value is not zero.
+        /// </summary>
+        /// <returns>Return true if the device maintains hardware card unit status</returns>
+        public bool GetCardUnitStatus(out Dictionary<string, CardStatusClass.ReplenishmentStatusEnum> unitStatus)
+        {
+            unitStatus = new();
+            unitStatus.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.UnitStatus);
+            return true;
+        }
+
+        /// <summary>
+        /// Update card unit hardware storage status by device class.
+        /// </summary>
+        /// <returns>Return true if the device maintains hardware card storage status</returns>
+        public bool GetCardStorageStatus(out Dictionary<string, CardUnitStorage.StatusEnum> storageStatus)
+        {
+            storageStatus = new();
+            storageStatus.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.StorageStatus);
+            return true;
+        }
+
+        /// <summary>
+        /// Set new configuration and counters
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public async Task<SetCardStorageResult> SetCardStorageAsync(SetCardStorageRequest request, CancellationToken cancellation)
+        {
+            await Task.Delay(100, cancellation);
+
+            foreach (var unit in request.CardStorageToSet)
+            {
+                if (unit.Key == cardUnitInfo.CardBin.PositionName)
+                {
+                    if (unit.Value.Configuration is not null)
+                    {
+                        if (unit.Value.Configuration.Threshold is not null)
+                        {
+                            cardUnitInfo.CardBin.Configuration.Threshold = (int)unit.Value.Configuration.Threshold;
+                        }
+                        unit.Value.Configuration.CardId = unit.Value.Configuration.CardId;
+                    }
+
+                    if (unit.Value.InitialCount is not null)
+                    {
+                        cardUnitInfo.InitialCount = (int)unit.Value.InitialCount;
+                        cardUnitInfo.CurrentCount = cardUnitInfo.InitialCount;
+
+                        if (cardUnitInfo.CurrentCount == 0)
+                        {
+                            cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.Empty;
+                        }
+                        else if (cardUnitInfo.CurrentCount >= cardUnitInfo.CardBin.Capacity)
+                        {
+                            cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.Full;
+                        }
+                        else if (cardUnitInfo.CardBin.Configuration.Threshold != 0 &&
+                                 cardUnitInfo.CurrentCount > cardUnitInfo.CardBin.Configuration.Threshold)
+                        {
+                            cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.High;
+                        }
+                    }
+                }
+            }
+
+            Dictionary<string, SetCardUnitStorage> newCardStorage = new();
+            newCardStorage.Add(cardUnitInfo.CardBin.PositionName, new SetCardUnitStorage(new (cardUnitInfo.CardBin.Configuration.Threshold,
+                                                                                              cardUnitInfo.CardBin.Configuration.CardId),
+                                                                                         cardUnitInfo.InitialCount));
+
+            return new SetCardStorageResult(MessagePayload.CompletionCodeEnum.Success, newCardStorage);
+        }
+
+        /// <summary>
+        /// Return storage information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the cash unit configuration or capabilities are changed, otherwise false</returns>
+        public bool GetCashStorageConfiguration(out Dictionary<string, CashUnitStorageConfiguration> newCardUnits) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Return return cash unit counts maintained by the device
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetCashUnitCounts(out Dictionary<string, CashUnitCountClass> unitCounts) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Return return cash storage status
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetCashStorageStatus(out Dictionary<string, CashUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Return return cash unit status maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetCashUnitStatus(out Dictionary<string, CashStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Return accuracy of counts. This method is called if the device class supports feature for count accuray
+        /// </summary>
+        public void GetCashUnitAccuray(string storageId, out CashStatusClass.AccuracyEnum unitAccuracy) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Set new configuration and counters
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetCashStorageResult> SetCashStorageAsync(SetCashStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
+        /// Initiate exchange operation
+        /// </summary>
+        public Task<StartExchangeResult> StartExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
+
+        /// <summary>
+        /// End exchange operation
+        /// </summary>
+        public Task<EndExchangeResult> EndExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
+        #endregion
+
+        #region Common Interface
         public StatusCompletion.PayloadData Status()
         {
             StatusPropertiesClass common = new(
@@ -474,15 +607,12 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                     MediaStatusEnum.Unknown => StatusClass.MediaEnum.Unknown,
                     _ => null
                 },
-                StatusClass.RetainBinEnum.Ok,
                 StatusClass.SecurityEnum.NotSupported,
-                CapturedCount,
                 StatusClass.ChipPowerEnum.PoweredOff,
                 StatusClass.ChipModuleEnum.Ok,
                 StatusClass.MagWriteModuleEnum.Ok,
                 StatusClass.FrontImageModuleEnum.Ok,
-                StatusClass.BackImageModuleEnum.Ok,
-                new List<StatusClass.ParkingStationMediaEnum>());
+                StatusClass.BackImageModuleEnum.Ok);
 
             return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
                                                     null,
@@ -526,17 +656,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 AntiFraudModule: false);
 
             CapabilitiesClass cardReader = new(
-                DeviceType switch
-                {
-                    DeviceTypeEnum.Motor => CapabilitiesClass.TypeEnum.Motor,
-                    DeviceTypeEnum.Dip => CapabilitiesClass.TypeEnum.Dip,
-                    DeviceTypeEnum.LatchedDip => CapabilitiesClass.TypeEnum.LatchedDip,
-                    DeviceTypeEnum.Swipe => CapabilitiesClass.TypeEnum.Swipe,
-                    DeviceTypeEnum.Contactless => CapabilitiesClass.TypeEnum.Contactless,
-                    DeviceTypeEnum.IntelligentContactless => CapabilitiesClass.TypeEnum.IntelligentContactless,
-                    DeviceTypeEnum.Permanent => CapabilitiesClass.TypeEnum.Permanent,
-                    _ => null
-                },
+                CapabilitiesClass.TypeEnum.Motor,
                 new CapabilitiesClass.ReadTracksClass(
                     Track1: true,
                     Track2: true,
@@ -563,12 +683,11 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                         ChipTypeAPart4: false, 
                         ChipTypeB: false, 
                         ChipTypeNFC: false),
-                MaxCardCount: CpMaxCaptureCount,
                 CapabilitiesClass.SecurityTypeEnum.NotSupported,
-                CapabilitiesClass.PowerOnOptionEnum.NoAction,
-                CapabilitiesClass.PowerOffOptionEnum.NoAction,
-                FluxSensorProgrammable: false, 
-                ReadWriteAccessFollowingEject: false,
+                CapabilitiesClass.PowerOnOptionEnum.Transport,
+                CapabilitiesClass.PowerOffOptionEnum.Transport,
+                FluxSensorProgrammable: false,
+                ReadWriteAccessFromExit: false,
                 new CapabilitiesClass.WriteModeClass(
                         Loco: true, 
                         Hico: false, 
@@ -580,50 +699,48 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 new CapabilitiesClass.MemoryChipProtocolsClass(
                         Siemens4442: false, 
                         Gpm896: false),
-                new CapabilitiesClass.EjectPositionClass(
-                        Exit: true, 
-                        Transport: false));
+                new CapabilitiesClass.PositionsClass(true, true),
+                CardTakenSensor: true);
 
 
             List<InterfaceClass> interfaces = new()
             {
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.Common,
-                    Commands: new List<string>()
-                    { 
-                        "Status", 
-                        "Capabilities" 
+                    Commands: new ()
+                    {
+                        { "Common.Status", null },
+                        { "Common.Capabilities", null },
                     },
-                    Events: new List<string>(),
+                    Events: new (),
                     MaximumRequests: 1000),
                 new InterfaceClass(
                     Name: InterfaceClass.NameEnum.CardReader,
-                    Commands: new List<string>
-                    { 
-                        "ReadRawData", 
-                        "EjectCard", 
-                        "Reset", 
-                        "WriteRawData",
-                        "ChipIO",
-                        "ChipPower",
-                        "EMVClessConfigure",
-                        "EMVClessIssuerUpdate",
-                        "EMVClessPerformTransaction",
-                        "EMVClessQueryApplications",
-                        "ParkCard",
-                        "QueryIFMIdentifier",
-                        "ResetCount",
-                        "RetainCard",
-                        "SetKey"
-                    },
-                    Events: new List<string>
+                    Commands: new ()
                     {
-                        "MediaDetectedEvent",
-                        "MediaInsertedEvent",
-                        "MediaRemovedEvent",
-                        "MediaRetainedEvent",
-                        "InvalidMediaEvent",
-                        "EMVClessReadStatusEvent"
+                        { "CardReader.ReadRawData", null },
+                        { "CardReader.Reset", null },
+                        { "CardReader.WriteRawData", null },
+                        { "CardReader.ChipIO", null },
+                        { "CardReader.ChipPower", null },
+                        { "CardReader.EMVClessConfigure", null },
+                        { "CardReader.EMVClessIssuerUpdate", null },
+                        { "CardReader.EMVClessPerformTransaction", null },
+                        { "CardReader.EMVClessQueryApplications", null },
+                        { "CardReader.QueryIFMIdentifier", null },
+                        { "CardReader.SetKey", null },
+                        { "CardReader.Move", null },
+                    },
+                    Events: new()
+                    {
+                        { "CardReader.InsertCardEvent", null },
+                        { "CardReader.MediaDetectedEvent", null },
+                        { "CardReader.MediaInsertedEvent", null },
+                        { "CardReader.MediaRemovedEvent", null },
+                        { "CardReader.MediaRetainedEvent", null },
+                        { "CardReader.InvalidMediaEvent", null },
+                        { "CardReader.EMVClessReadStatusEvent", null },
+                        { "CardReader.CardActionEvent", null },
                     },
                     MaximumRequests: 1000)
             };
@@ -642,10 +759,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
         public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
 
-        /// <summary>
-        /// Specify the type of cardreader
-        /// </summary>
-        public DeviceTypeEnum DeviceType { get; private set; } = DeviceTypeEnum.Motor;
+        #endregion 
 
         /// <summary>
         /// Specify the current status of media after card is accepted.
@@ -656,10 +770,45 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
         /// Internal variables
         /// 
-        private int CapturedCount = 0;
-        private int CpMaxCaptureCount = 100;
+        private sealed class CardUnitInfo
+        {
+            public CardUnitInfo()
+            {
+                CurrentCount = 0;
+                InitialCount = 0;
+                StorageStatus = CardUnitStorage.StatusEnum.Good;
+                UnitStatus = CardStatusClass.ReplenishmentStatusEnum.Healthy;
+            }
 
-        private StatusClass.RetainBinEnum RetainBinStatus = StatusClass.RetainBinEnum.Ok;
+            /// <summary>
+            /// Initial count of this unit
+            /// </summary>
+            public int InitialCount { get; set; }
+
+            /// <summary>
+            /// Current count of this unit
+            /// </summary>
+            public int CurrentCount { get; set; }
+
+            /// <summary>
+            /// Current storage status
+            /// </summary>
+            public CardUnitStorage.StatusEnum StorageStatus { get; set; }
+
+            /// <summary>
+            /// Current status of this unit
+            /// </summary>
+            public CardStatusClass.ReplenishmentStatusEnum UnitStatus { get; set; }
+
+            public CardUnitStorageConfiguration CardBin = new("BIN1",
+                                                              50,
+                                                              "SN104827639",
+                                                              new CardCapabilitiesClass(CardCapabilitiesClass.TypeEnum.Retain,
+                                                                                        false),
+                                                              new CardConfigurationClass(40));
+        }
+
+        private CardUnitInfo cardUnitInfo = new ();
 
         private ILogger Logger { get; }
 
