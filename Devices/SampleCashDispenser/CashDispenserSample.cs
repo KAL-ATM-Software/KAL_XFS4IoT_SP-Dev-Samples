@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text;
 using System.Linq;
 using XFS4IoT;
 using XFS4IoTFramework.CashDispenser;
@@ -18,12 +17,9 @@ using XFS4IoTFramework.Storage;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
-using XFS4IoT.CashDispenser.Events;
 using XFS4IoT.CashDispenser;
-using XFS4IoT.CashDispenser.Commands;
 using XFS4IoT.CashDispenser.Completions;
 using XFS4IoT.CashManagement.Completions;
-using XFS4IoT.Storage.Completions;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
 
@@ -46,10 +42,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             {
                 // Check if presented cash is taken. When cash is taken, set output position empty, shutter closed and fire ItemsTakenEvent
                 await cashTakenSignal?.WaitAsync();
-                OutputPositionStatus = OutPosClass.PositionStatusEnum.Empty;
-                ShutterStatus = OutPosClass.ShutterEnum.Closed;
-                CashDispenserServiceProvider cashDispenserServiceProvider = SetServiceProvider as CashDispenserServiceProvider;
-                //await cashDispenserServiceProvider.IsNotNull().ItemsTakenEvent(new ItemsTakenEvent.PayloadData(ItemsTakenEvent.PayloadData.PositionEnum.Center));
+                positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
+                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+                //await ServiceProvider.IsA<CashDispenserServiceProvider>().ItemsTakenEvent(new(ItemsTakenEvent.PayloadData.PositionEnum.Center));
             }
         }
 
@@ -57,10 +52,40 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Constructor
         /// </summary>
         /// <param name="Logger"></param>
-        public CashDispenserSample(ILogger Logger)
+        public CashDispenserSample(XFS4IoT.ILogger Logger)
         {
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CashDispenserSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
+
+            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
+                                                 CommonStatusClass.PositionStatusEnum.InPosition,
+                                                 0,
+                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                                                 CommonStatusClass.ExchangeEnum.Inactive);
+
+            CashDispenserStatus = new CashDispenserStatusClass(CashDispenserStatusClass.IntermediateStackerEnum.Empty,
+                                                               new()
+                                                               {
+                                                                   { CashDispenserCapabilitiesClass.OutputPositionEnum.Center, positionStatus },
+                                                                   { CashDispenserCapabilitiesClass.OutputPositionEnum.Default, positionStatus },
+                                                               });
+
+            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.SafeDoorEnum.Closed,
+                                                                 CashManagementStatusClass.DispenserEnum.Ok,
+                                                                 CashManagementStatusClass.AcceptorEnum.NotSupported);
+
+            Firmware = Firmware.GetFirmware(new FirmwareLogger(Logger));
+        }
+
+        internal class FirmwareLogger : ILogger
+        {
+            private readonly XFS4IoT.ILogger Logger;
+
+            public FirmwareLogger(XFS4IoT.ILogger Logger)
+            {
+                this.Logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
+            }
+            public override void Log(string Message) => this.Logger.Log("Firmware", Message);
         }
 
         #region CashDispenser Interface
@@ -125,7 +150,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             }
 
             // Record the new status. 
-            StackerStatus = StatusClass.IntermediateStackerEnum.NotEmpty;
+            CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.NotEmpty;
 
             foreach (var item in dispenseInfo.Values)
             {
@@ -164,14 +189,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
         public async Task<PresentCashResult> PresentCashAsync(IPresentEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
 		{
-            // When we present cash we want to cancel any existing tokens so that they can't be used twice. 
-            // We can do this by clearing the nonce - if there's no nonce then it can't match any tokens. 
-            // We do this before we present the cash to avoid any race conditions. 
-            Firmware.ClearCommandNonce(); 
-
             await Task.Delay(1000, cancellation);
-
-            if (StackerStatus == StatusClass.IntermediateStackerEnum.Empty || LastDispenseResult.Count == 0)
+            
+            if (CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty || LastDispenseResult.Count == 0)
 			{
                 return new PresentCashResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, 
                                              "No cash to present", 
@@ -179,9 +199,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             }
 
             // When cash is presented successfully, set StackerStatus, OutputpoistionStatus and shutter status
-            StackerStatus = StatusClass.IntermediateStackerEnum.Empty;
-            OutputPositionStatus = OutPosClass.PositionStatusEnum.NotEmpty;
-            ShutterStatus = OutPosClass.ShutterEnum.Open;
+            CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
+            positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.NotEmpty;
+            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Open;
 
             foreach (var item in LastDispenseResult)
             {
@@ -200,8 +220,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 		{
             await Task.Delay(1000, cancellation);
 
-            if ((StackerStatus == StatusClass.IntermediateStackerEnum.Empty && 
-                 OutputPositionStatus == OutPosClass.PositionStatusEnum.Empty) || 
+            if ((CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty &&
+                 positionStatus.PositionStatus == CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty) || 
                 LastDispenseResult.Count == 0)
             {
                 return new RejectResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
@@ -209,9 +229,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                         RejectCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
-            StackerStatus = StatusClass.IntermediateStackerEnum.Empty;
-            OutputPositionStatus = OutPosClass.PositionStatusEnum.Empty;
-            ShutterStatus = OutPosClass.ShutterEnum.Closed;
+            CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
+            positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
+            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
@@ -324,6 +344,27 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             Denomination Denom = new(Amounts, Values); 
             return new PresentStatus(PresentStatus.PresentStatusEnum.Presented, Denom);
         }
+
+        /// <summary>
+        /// CashDispenser Status
+        /// </summary>
+        public CashDispenserStatusClass CashDispenserStatus { get; set; }
+
+        /// <summary>
+        /// CashDispenser Capabilities
+        /// </summary>
+        public CashDispenserCapabilitiesClass CashDispenserCapabilities { get; set; } = new(
+                Type: CashDispenserCapabilitiesClass.TypeEnum.SelfServiceBill,
+                MaxDispenseItems: 200,
+                ShutterControl: false,
+                RetractAreas: CashManagementCapabilitiesClass.RetractAreaEnum.Retract,
+                RetractTransportActions: CashManagementCapabilitiesClass.RetractTransportActionEnum.Retract,
+                RetractStackerActions: CashManagementCapabilitiesClass.RetractStackerActionEnum.Retract,
+                IntermediateStacker: true,
+                ItemsTakenSensor: true,
+                OutputPositions: CashDispenserCapabilitiesClass.OutputPositionEnum.Center | CashDispenserCapabilitiesClass.OutputPositionEnum.Default,
+                MoveItems: CashDispenserCapabilitiesClass.MoveItemEnum.ToCashUnit | CashDispenserCapabilitiesClass.MoveItemEnum.ToTransport | CashDispenserCapabilitiesClass.MoveItemEnum.ToStacker);
+
         #endregion 
 
         #region CashManagement Interface
@@ -336,17 +377,17 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            if (StackerStatus == StatusClass.IntermediateStackerEnum.Empty && 
-                OutputPositionStatus == OutPosClass.PositionStatusEnum.Empty)
+            if (CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty &&
+                positionStatus.PositionStatus == CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty)
             {
                 return new RetractResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                          "No cash to retract",
                                          RetractCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
-            StackerStatus = StatusClass.IntermediateStackerEnum.Empty;
-            OutputPositionStatus = OutPosClass.PositionStatusEnum.Empty;
-            ShutterStatus = OutPosClass.ShutterEnum.Closed;
+            CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
+            positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
+            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
@@ -357,9 +398,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                  });
             cashMovement.Add("PHP2", new CashUnitCountClass(null, cashInCount, cashInCount.Retracted.Total));
 
-            StackerStatus = StatusClass.IntermediateStackerEnum.Empty;
-            OutputPositionStatus = OutPosClass.PositionStatusEnum.Empty;
-            ShutterStatus = OutPosClass.ShutterEnum.Closed;
+            CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
+            positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
+            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
 
             return new RetractResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
         }
@@ -373,9 +414,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             await Task.Delay(1000, cancellation);
 
             if (shutterInfo.Action == OpenCloseShutterRequest.ActionEnum.Open)
-                ShutterStatus = OutPosClass.ShutterEnum.Open;
+                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Open;
             if (shutterInfo.Action == OpenCloseShutterRequest.ActionEnum.Close)
-                ShutterStatus = OutPosClass.ShutterEnum.Closed;
+                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
 
             return new OpenCloseShutterResult(MessagePayload.CompletionCodeEnum.Success);
         }
@@ -389,8 +430,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            Transport = OutPosClass.TransportEnum.Ok;
-            ShutterStatus = OutPosClass.ShutterEnum.Closed;
+            positionStatus.Transport = CashDispenserStatusClass.PositionStatusClass.TransportEnum.Ok;
+            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
 
             return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success, MovementResult:null);
         }
@@ -432,6 +473,27 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// <returns></returns>
         public Task<SetTellerInfoResult> SetTellerInfoAsync(SetTellerInfoRequest request,
                                                             CancellationToken cancellation) => throw new NotSupportedException($"Teller operation is not supported.");
+
+        /// <summary>
+        /// CashManagement Status
+        /// </summary>
+        public CashManagementStatusClass CashManagementStatus { get; set; }
+
+        /// <summary>
+        /// CashManagement Capabilities
+        /// </summary>
+        public CashManagementCapabilitiesClass CashManagementCapabilities { get; set; } = new CashManagementCapabilitiesClass(
+            Positions: CashManagementCapabilitiesClass.PositionEnum.OutCenter | CashManagementCapabilitiesClass.PositionEnum.OutDefault,
+            ShutterControl: true,
+            RetractAreas: CashManagementCapabilitiesClass.RetractAreaEnum.Retract,
+            RetractTransportActions: CashManagementCapabilitiesClass.RetractTransportActionEnum.Retract,
+            RetractStackerActions: CashManagementCapabilitiesClass.RetractStackerActionEnum.Retract,
+            ExchangeTypes: CashManagementCapabilitiesClass.ExchangeTypesEnum.ByHand,
+            ItemInfoTypes: CashManagementCapabilitiesClass.ItemInfoTypesEnum.SerialNumber,
+            SafeDoor: true,
+            CashBox: false,
+            ClassificationList: false
+            );
         #endregion
 
         #region Storage Interface
@@ -766,125 +828,27 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
         #region Common Interface
         /// <summary>
-        /// This command is used to obtain the overall status of any XFS4IoT service. The status includes common status information and can include zero or more interface specific status objects, depending on the implemented interfaces of the service. It may also return vendor-specific status information.
+        /// Stores Commons status
         /// </summary>
-        public StatusCompletion.PayloadData Status()
-        {
-            StatusPropertiesClass common = new(
-                Device: DeviceStatus,
-                DevicePosition: PositionStatusEnum.InPosition,
-                PowerSaveRecoveryTime: 0,
-                AntiFraudModule: StatusPropertiesClass.AntiFraudModuleEnum.Ok);
+        public CommonStatusClass CommonStatus { get; set; }
 
-            List<OutPosClass> Positions = new ();
-
-            OutPosClass OutPos = new(Position: XFS4IoT.CashManagement.OutputPositionEnum.OutCenter,
-                                     Shutter: ShutterStatus,
-                                     PositionStatus: OutputPositionStatus,
-                                     Transport: Transport,
-                                     TransportStatus: TransportStatus,
-                                     JammedShutterPosition: OutPosClass.JammedShutterPositionEnum.NotSupported);
-            Positions.Add(OutPos);
-
-            StatusClass cashDispenser = new(IntermediateStacker: StackerStatus,
-                                            Positions: Positions);
-
-            XFS4IoT.CashManagement.StatusClass cashManagement = new(SafeDoor: SafeDoorStatus,
-                                                                    Dispenser: DispenserStatus);
-
-            return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                    null,
-                                                    Common: common,
-                                                    CashDispenser: cashDispenser,
-                                                    CashManagement: cashManagement);
-        }
-
-        public CapabilitiesCompletion.PayloadData Capabilities()
-        {
-            CapabilityPropertiesClass common = new(
-                ServiceVersion: "1.0",
-                DeviceInformation: new List<DeviceInformationClass>() { new DeviceInformationClass(
-                    ModelName: "Simulator",
-                    SerialNumber: "123456-78900001",
-                    RevisionNumber: "1.0",
-                    ModelDescription: "KAL simualtor",
-                    Firmware: new List<FirmwareClass>() {new FirmwareClass(
-                                                                           FirmwareName: "XFS4 SP",
-                                                                           FirmwareVersion: "1.0",
-                                                                           HardwareRevision: "1.0") },
-                    Software: new List<SoftwareClass>(){ new SoftwareClass(
-                                                                           SoftwareName: "XFS4 SP",
-                                                                           SoftwareVersion: "1.0") }) },
-                VendorModeIformation: new VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "CashDispenser.Dispense",
-                        "CashDispenser.Reset",
-                        "CashDispenser.PresentCash",
-                        "CashDispenser.Reject",
-                        "CashDispenser.Retract",
-                        "CashDispenser.OpenShutter",
-                        "CashDispenser.CloseShutter",
-                        "CashDispenser.TestCashUnits",
-                        "CashDispenser.Count",
-                    }),
-                PowerSaveControl: false,
-                AntiFraudModule: false,
-                SynchronizableCommands: new List<string>(),
-                EndToEndSecurity: true,
-                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
-                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
-                );
-
-            CapabilitiesClass cashDispenser = new(
-                Type: CapabilitiesClass.TypeEnum.SelfServiceBill,
-                MaxDispenseItems: 200,
-                ShutterControl: false,
-                RetractAreas: new CapabilitiesClass.RetractAreasClass(
-                                    Retract: true,
-                                    Transport: true,
-                                    Stacker: true,
-                                    Reject: true,
-                                    ItemCassette: true),
-                RetractTransportActions: new CapabilitiesClass.RetractTransportActionsClass(
-                                                Present: true,
-                                                Retract: true,
-                                                Reject: true,
-                                                ItemCassette: true),
-                RetractStackerActions: new CapabilitiesClass.RetractStackerActionsClass(
-                                                Present: true,
-                                                Retract: true,
-                                                Reject: true,
-                                                ItemCassette: true),
-                IntermediateStacker: true,
-                ItemsTakenSensor: true,
-                Positions: new CapabilitiesClass.PositionsClass(Center: true),
-                MoveItems: new CapabilitiesClass.MoveItemsClass(
-                                    FromCashUnit: true,
-                                    ToCashUnit: false,
-                                    ToTransport: false,
-                                    ToStacker: true));
-
-            XFS4IoT.CashManagement.CapabilitiesClass cashManagement = new(
-                SafeDoor: true,
-                CashBox: null,
-                ExchangeType: new(true));
-
-            List<InterfaceClass> interfaces = new()
-            {
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Common,
+        /// <summary>
+        /// Stores Common Capabilities
+        /// </summary>
+        public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
+                new()
+                {
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
                     Commands: new()
                     {
                         { "Common.Status", null },
                         { "Common.Capabilities", null },
                     },
                     Events: new(),
-                    MaximumRequests: 1000,
-                    AuthenticationRequired: new List<string>()),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.CashDispenser,
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CashDispenser,
                     Commands: new()
                     {
                         { "CashDispenser.Denominate", null },
@@ -900,10 +864,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                         { "CashDispenser.StartDispenseEvent", null },
                         { "CashDispenser.IncompleteDispenseEvent", null },
                     },
-                    MaximumRequests: 1000,
-                    AuthenticationRequired: new()),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.CashManagement,
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CashManagement,
                     Commands: new()
                     {
                         { "CashManagement.Retract", null },
@@ -916,27 +879,84 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                     },
                     Events: new()
                     {
-                        { "CashDispenser.SafeDoorClosedEvent", null },
-                        { "CashDispenser.SafeDoorOpenEvent", null },
-                        { "CashDispenser.ShutterStatusChangedEvent", null },
-                        { "CashDispenser.NoteErrorEvent", null },
-                        { "CashDispenser.ItemsTakenEvent", null },
-                        { "CashDispenser.ItemsPresentedEvent", null },
-                        { "CashDispenser.ItemsInsertedEvent", null },
-                        { "CashDispenser.IncompleteRetractEvent", null },
+                        { "CashManagement.SafeDoorClosedEvent", null },
+                        { "CashManagement.SafeDoorOpenEvent", null },
+                        { "CashManagement.ShutterStatusChangedEvent", null },
+                        { "CashManagement.NoteErrorEvent", null },
+                        { "CashManagement.ItemsTakenEvent", null },
+                        { "CashManagement.ItemsPresentedEvent", null },
+                        { "CashManagement.ItemsInsertedEvent", null },
+                        { "CashManagement.IncompleteRetractEvent", null },
                     },
-                    MaximumRequests: 1000,
-                    AuthenticationRequired: new List<string>())
-            };
-
-            return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          interfaces,
-                                                          common,
-                                                          null, null,
-                                                          cashDispenser,
-                                                          cashManagement);
-        }
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Storage,
+                    Commands: new()
+                    {
+                        { "Storage.StartExchange", null },
+                        { "Storage.EndExchange", null },
+                        { "Storage.GetStorage", null },
+                        { "Storage.SetStorage", null },
+                    },
+                    Events: new()
+                    {
+                        { "Storage.StorageThreshold", null },
+                        { "Storage.StorageChanged", null },
+                        { "Storage.StorageError", null },
+                    },
+                    MaximumRequests: 1000)
+                },
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
+                {
+                    new CommonCapabilitiesClass.DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
+                            {
+                                new CommonCapabilitiesClass.FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0")
+                            },
+                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
+                            {
+                                new CommonCapabilitiesClass.SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            })
+                },
+                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>()
+                    {
+                        "CashDispenser.Dispense",
+                        "CashDispenser.Reset",
+                        "CashDispenser.PresentCash",
+                        "CashDispenser.Reject",
+                        "CashDispenser.Retract",
+                        "CashDispenser.OpenShutter",
+                        "CashDispenser.CloseShutter",
+                        "CashDispenser.TestCashUnits",
+                        "CashDispenser.Count",
+                        "CashManagement.Retract",
+                        "CashManagement.OpenShutter",
+                        "CashManagement.CloseShutter",
+                        "CashManagement.CalibrateCashUnit",
+                        "CashManagement.Reset",
+                        "Storage.StartExchange",
+                        "Storage.EndExchange",
+                        "Storage.GetStorage",
+                        "Storage.SetStorage"
+                    }),
+                PowerSaveControl: false,
+                AntiFraudModule: false,
+                EndToEndSecurity: true,
+                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
+                );
 
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
@@ -963,23 +983,17 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         }
         #endregion
 
-        public StatusPropertiesClass.DeviceEnum DeviceStatus { get; private set; } = StatusPropertiesClass.DeviceEnum.Online; 
-        public StatusClass.IntermediateStackerEnum StackerStatus { get; private set; } = StatusClass.IntermediateStackerEnum.Empty;
-
-        private XFS4IoT.CashManagement.StatusClass.SafeDoorEnum SafeDoorStatus { get; set; } = XFS4IoT.CashManagement.StatusClass.SafeDoorEnum.DoorClosed;
-        private XFS4IoT.CashManagement.StatusClass.DispenserEnum DispenserStatus { get; set; } = XFS4IoT.CashManagement.StatusClass.DispenserEnum.Ok;
-
-        public OutPosClass.ShutterEnum ShutterStatus { get; private set; } = OutPosClass.ShutterEnum.Closed;
-        public OutPosClass.PositionStatusEnum OutputPositionStatus { get; private set; } = OutPosClass.PositionStatusEnum.Empty;
-        public OutPosClass.TransportEnum Transport { get; private set; } = OutPosClass.TransportEnum.Ok;
-        public OutPosClass.TransportStatusEnum TransportStatus { get; private set; } = OutPosClass.TransportStatusEnum.Empty;
-
+        private CashDispenserStatusClass.PositionStatusClass positionStatus = new(CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed,
+                                                                                  CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty,
+                                                                                  CashDispenserStatusClass.PositionStatusClass.TransportEnum.Ok,
+                                                                                  CashDispenserStatusClass.PositionStatusClass.TransportStatusEnum.Empty,
+                                                                                  CashDispenserStatusClass.PositionStatusClass.JammedShutterPositionEnum.NotJammed);
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
 
-        private Dictionary<string, CashUnitCountClass> LastDispenseResult = new();
+        private readonly Dictionary<string, CashUnitCountClass> LastDispenseResult = new();
 
-        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; set; } = new();
+        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; } = new();
 
 
         private sealed class CashStorageInfo
@@ -1029,10 +1043,10 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             }
         };
 
-        private ILogger Logger { get; }
+        private XFS4IoT.ILogger Logger { get; }
 
         private readonly SemaphoreSlim cashTakenSignal = new(0, 1);
 
-        private readonly Firmware Firmware = new(); 
+        private readonly Firmware Firmware; 
     }
 }

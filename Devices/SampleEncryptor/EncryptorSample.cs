@@ -21,8 +21,6 @@ using XFS4IoTFramework.Common;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
-using XFS4IoT.KeyManagement.Events;
-using XFS4IoT.KeyManagement;
 using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.Crypto.Completions;
 using XFS4IoT.Completions;
@@ -43,10 +41,18 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         {
             Logger.IsNotNull($"Invalid parameter received in the {nameof(EncryptorSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
+
+            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
+                                                 CommonStatusClass.PositionStatusEnum.InPosition,
+                                                 0,
+                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+
+            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
+                                                               KeyManagementStatusClass.CertificateStateEnum.Primary);
         }
 
-        /// KeyManagement interface
-
+        #region KeyManagement interface
         /// <summary>
         /// Importing key components temporarily while in secure key loading process 
         /// </summary>
@@ -139,8 +145,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 }
             }
 
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success, 
-                                       new KeyInformationBase(), 
+            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success,
+                                       new KeyInformationBase(),
                                        keyCheckValue,
                                        verifyAttrib,
                                        keyLength);
@@ -338,8 +344,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
             List<byte> signed = rsaServiceProvider.SignHash(eppID.ToArray(), CryptoConfig.MapNameToOID("SHA256")).ToList();
 
-            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success, 
-                                           Data: eppID, 
+            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success,
+                                           Data: eppID,
                                            SignatureAlgorithm: RSASignedItemResult.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
                                            Signature: signed);
         }
@@ -357,9 +363,9 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             List<byte> publicKey = rsaServiceProvider.ExportRSAPublicKey().ToList();
             List<byte> signed = rsaServiceProvider.SignHash(publicKey.ToArray(), CryptoConfig.MapNameToOID("SHA256")).ToList();
 
-            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success, 
-                                           Data: publicKey, 
-                                           SignatureAlgorithm: RSASignedItemResult.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, 
+            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success,
+                                           Data: publicKey,
+                                           SignatureAlgorithm: RSASignedItemResult.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
                                            Signature: signed);
         }
 
@@ -398,7 +404,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 KeyContainerName = request.KeyName
             });
 
-            return new GenerateRSAKeyPairResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new GenerateRSAKeyPairResult(MessagePayload.CompletionCodeEnum.Success,
                                                 new GenerateRSAKeyPairResult.LoadedKeyInformation("S0",
                                                                                                   "R",
                                                                                                   "S",
@@ -414,11 +420,11 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public async Task<ExportCertificateResult> ExportCertificate(ExportCertificateRequest request,
                                                                      CancellationToken cancellation)
         {
-            if (certState == StatusClass.CertificateStateEnum.NotReady ||
-                certState == StatusClass.CertificateStateEnum.Unknown)
+            if (KeyManagementStatus.CertificateState == KeyManagementStatusClass.CertificateStateEnum.NotReady ||
+                KeyManagementStatus.CertificateState == KeyManagementStatusClass.CertificateStateEnum.Unknown)
             {
                 return new ExportCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
-                                                   $"Invalid certification state. {certState}",
+                                                   $"Invalid certification state. {KeyManagementStatus.CertificateState}",
                                                    GetCertificateCompletion.PayloadData.ErrorCodeEnum.InvalidCertificateState);
             }
 
@@ -426,60 +432,60 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
             List<byte> certificate = new()
             {
-                0x30, 0x82, 0x03, 0x6C, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02, 0xA0, 
-                0x82, 0x03, 0x5D, 0x30, 0x82, 0x03, 0x59, 0x02, 0x01, 0x01, 0x31, 0x00, 0x30, 0x0F, 0x06, 0x09, 
-                0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x01, 0xA0, 0x02, 0x04, 0x00, 0xA0, 0x82, 0x03, 
-                0x3D, 0x30, 0x82, 0x03, 0x39, 0x30, 0x82, 0x02, 0x21, 0xA0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x05, 
-                0x34, 0x00, 0x00, 0x00, 0x07, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 
-                0x01, 0x0B, 0x05, 0x00, 0x30, 0x41, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13, 
-                0x02, 0x55, 0x53, 0x31, 0x15, 0x30, 0x13, 0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 0x0C, 0x54, 0x52, 
-                0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x73, 0x31, 0x1B, 0x30, 0x19, 0x06, 0x03, 
-                0x55, 0x04, 0x03, 0x13, 0x12, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65, 
-                0x20, 0x43, 0x41, 0x20, 0x4B, 0x52, 0x44, 0x30, 0x1E, 0x17, 0x0D, 0x31, 0x30, 0x31, 0x31, 0x30, 
-                0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x5A, 0x17, 0x0D, 0x32, 0x30, 0x31, 0x30, 0x32, 0x39, 
-                0x32, 0x33, 0x35, 0x39, 0x35, 0x39, 0x5A, 0x30, 0x40, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 
-                0x04, 0x06, 0x13, 0x02, 0x55, 0x53, 0x31, 0x15, 0x30, 0x13, 0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 
-                0x0C, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x73, 0x31, 0x1A, 0x30, 
-                0x18, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x11, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 
-                0x70, 0x6C, 0x65, 0x20, 0x4B, 0x52, 0x44, 0x20, 0x31, 0x30, 0x82, 0x01, 0x22, 0x30, 0x0D, 0x06, 
-                0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00, 0x03, 0x82, 0x01, 0x0F, 
-                0x00, 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01, 0x00, 0xD4, 0x5C, 0x30, 0xCB, 0x6F, 0xBB, 
-                0x1D, 0x39, 0x4C, 0xE5, 0xA8, 0x7B, 0x49, 0xDB, 0x6D, 0xCF, 0x14, 0x34, 0xB0, 0xFA, 0x4E, 0x0A, 
-                0xA3, 0x71, 0xF8, 0x50, 0xEE, 0x8B, 0xAE, 0x7F, 0x2D, 0xC3, 0xC5, 0x48, 0xD5, 0x1C, 0xBD, 0xA3, 
-                0xDD, 0x01, 0xF0, 0xD6, 0x55, 0x3B, 0xFB, 0x79, 0x85, 0x1E, 0x73, 0x15, 0x43, 0x98, 0x4B, 0x22, 
-                0xE3, 0x62, 0xB4, 0xFC, 0x1D, 0xD3, 0xD6, 0xDE, 0x82, 0x37, 0x7D, 0x20, 0x13, 0x2C, 0xC6, 0x39, 
-                0x65, 0xDD, 0x0A, 0xD2, 0xDD, 0x68, 0x9E, 0x98, 0x52, 0x91, 0x61, 0x35, 0x40, 0xF3, 0x0E, 0x75, 
-                0xA5, 0x58, 0xF9, 0x15, 0xB2, 0xE9, 0xE4, 0x0D, 0xD4, 0x21, 0xCA, 0xC6, 0xBD, 0xB7, 0x45, 0x90, 
-                0xF4, 0x42, 0x8A, 0xB4, 0x68, 0x4E, 0xCB, 0x42, 0x94, 0xD3, 0xBA, 0xD2, 0x12, 0xF6, 0x66, 0x22, 
-                0x00, 0xEE, 0xF7, 0xDD, 0xC3, 0x01, 0x31, 0x6F, 0xBA, 0x67, 0x6B, 0x71, 0x20, 0xFB, 0x91, 0x89, 
-                0x3C, 0x2B, 0xA3, 0x11, 0xA8, 0x4F, 0x73, 0xAF, 0x21, 0x63, 0xB5, 0x60, 0x44, 0x05, 0xFD, 0x76, 
-                0x0B, 0xB1, 0x52, 0x68, 0x9C, 0xF5, 0x20, 0x4F, 0x20, 0xCB, 0xBD, 0x97, 0x62, 0x3B, 0x5D, 0xB9, 
-                0x6C, 0xCF, 0x6B, 0xA3, 0x82, 0x6A, 0xC3, 0x87, 0x90, 0xD3, 0xC2, 0xC6, 0x6C, 0xD7, 0xEB, 0xFD, 
-                0x5C, 0x9F, 0x1E, 0x70, 0xCB, 0xC7, 0x7F, 0x55, 0x8F, 0x95, 0x50, 0x1A, 0x9A, 0x9C, 0xB4, 0xAB, 
+                0x30, 0x82, 0x03, 0x6C, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02, 0xA0,
+                0x82, 0x03, 0x5D, 0x30, 0x82, 0x03, 0x59, 0x02, 0x01, 0x01, 0x31, 0x00, 0x30, 0x0F, 0x06, 0x09,
+                0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x01, 0xA0, 0x02, 0x04, 0x00, 0xA0, 0x82, 0x03,
+                0x3D, 0x30, 0x82, 0x03, 0x39, 0x30, 0x82, 0x02, 0x21, 0xA0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x05,
+                0x34, 0x00, 0x00, 0x00, 0x07, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01,
+                0x01, 0x0B, 0x05, 0x00, 0x30, 0x41, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55, 0x04, 0x06, 0x13,
+                0x02, 0x55, 0x53, 0x31, 0x15, 0x30, 0x13, 0x06, 0x03, 0x55, 0x04, 0x0A, 0x13, 0x0C, 0x54, 0x52,
+                0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x73, 0x31, 0x1B, 0x30, 0x19, 0x06, 0x03,
+                0x55, 0x04, 0x03, 0x13, 0x12, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65,
+                0x20, 0x43, 0x41, 0x20, 0x4B, 0x52, 0x44, 0x30, 0x1E, 0x17, 0x0D, 0x31, 0x30, 0x31, 0x31, 0x30,
+                0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x5A, 0x17, 0x0D, 0x32, 0x30, 0x31, 0x30, 0x32, 0x39,
+                0x32, 0x33, 0x35, 0x39, 0x35, 0x39, 0x5A, 0x30, 0x40, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55,
+                0x04, 0x06, 0x13, 0x02, 0x55, 0x53, 0x31, 0x15, 0x30, 0x13, 0x06, 0x03, 0x55, 0x04, 0x0A, 0x13,
+                0x0C, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x73, 0x31, 0x1A, 0x30,
+                0x18, 0x06, 0x03, 0x55, 0x04, 0x03, 0x13, 0x11, 0x54, 0x52, 0x33, 0x34, 0x20, 0x53, 0x61, 0x6D,
+                0x70, 0x6C, 0x65, 0x20, 0x4B, 0x52, 0x44, 0x20, 0x31, 0x30, 0x82, 0x01, 0x22, 0x30, 0x0D, 0x06,
+                0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00, 0x03, 0x82, 0x01, 0x0F,
+                0x00, 0x30, 0x82, 0x01, 0x0A, 0x02, 0x82, 0x01, 0x01, 0x00, 0xD4, 0x5C, 0x30, 0xCB, 0x6F, 0xBB,
+                0x1D, 0x39, 0x4C, 0xE5, 0xA8, 0x7B, 0x49, 0xDB, 0x6D, 0xCF, 0x14, 0x34, 0xB0, 0xFA, 0x4E, 0x0A,
+                0xA3, 0x71, 0xF8, 0x50, 0xEE, 0x8B, 0xAE, 0x7F, 0x2D, 0xC3, 0xC5, 0x48, 0xD5, 0x1C, 0xBD, 0xA3,
+                0xDD, 0x01, 0xF0, 0xD6, 0x55, 0x3B, 0xFB, 0x79, 0x85, 0x1E, 0x73, 0x15, 0x43, 0x98, 0x4B, 0x22,
+                0xE3, 0x62, 0xB4, 0xFC, 0x1D, 0xD3, 0xD6, 0xDE, 0x82, 0x37, 0x7D, 0x20, 0x13, 0x2C, 0xC6, 0x39,
+                0x65, 0xDD, 0x0A, 0xD2, 0xDD, 0x68, 0x9E, 0x98, 0x52, 0x91, 0x61, 0x35, 0x40, 0xF3, 0x0E, 0x75,
+                0xA5, 0x58, 0xF9, 0x15, 0xB2, 0xE9, 0xE4, 0x0D, 0xD4, 0x21, 0xCA, 0xC6, 0xBD, 0xB7, 0x45, 0x90,
+                0xF4, 0x42, 0x8A, 0xB4, 0x68, 0x4E, 0xCB, 0x42, 0x94, 0xD3, 0xBA, 0xD2, 0x12, 0xF6, 0x66, 0x22,
+                0x00, 0xEE, 0xF7, 0xDD, 0xC3, 0x01, 0x31, 0x6F, 0xBA, 0x67, 0x6B, 0x71, 0x20, 0xFB, 0x91, 0x89,
+                0x3C, 0x2B, 0xA3, 0x11, 0xA8, 0x4F, 0x73, 0xAF, 0x21, 0x63, 0xB5, 0x60, 0x44, 0x05, 0xFD, 0x76,
+                0x0B, 0xB1, 0x52, 0x68, 0x9C, 0xF5, 0x20, 0x4F, 0x20, 0xCB, 0xBD, 0x97, 0x62, 0x3B, 0x5D, 0xB9,
+                0x6C, 0xCF, 0x6B, 0xA3, 0x82, 0x6A, 0xC3, 0x87, 0x90, 0xD3, 0xC2, 0xC6, 0x6C, 0xD7, 0xEB, 0xFD,
+                0x5C, 0x9F, 0x1E, 0x70, 0xCB, 0xC7, 0x7F, 0x55, 0x8F, 0x95, 0x50, 0x1A, 0x9A, 0x9C, 0xB4, 0xAB,
                 0x3D, 0xFD, 0xA2, 0x65, 0xD0, 0x10, 0xA4, 0x9A, 0xB7, 0x02, 0xA0, 0x01, 0x5D, 0xF0, 0xF6, 0xE0,
-                0x8D, 0x0C, 0xE3, 0x63, 0x30, 0x64, 0x1C, 0x4D, 0xC7, 0x5E, 0xA8, 0xFE, 0x7D, 0xD5, 0xEA, 0x6B, 
-                0x37, 0xBD, 0x64, 0x32, 0x85, 0x77, 0xF8, 0x55, 0x0D, 0x3F, 0x01, 0x5A, 0xA5, 0x6F, 0x1A, 0xB5, 
-                0xF2, 0x5E, 0x55, 0xF5, 0x93, 0x40, 0xAF, 0x53, 0xF9, 0x55, 0x02, 0x03, 0x01, 0x00, 0x01, 0xA3, 
-                0x39, 0x30, 0x37, 0x30, 0x09, 0x06, 0x03, 0x55, 0x1D, 0x13, 0x04, 0x02, 0x30, 0x00, 0x30, 0x1D, 
-                0x06, 0x03, 0x55, 0x1D, 0x0E, 0x04, 0x16, 0x04, 0x14, 0x0D, 0x72, 0x05, 0x3C, 0xA9, 0x82, 0xE2, 
-                0xC1, 0x89, 0xCE, 0x47, 0x20, 0x50, 0xD3, 0x4D, 0x04, 0x5A, 0x9A, 0x59, 0xD3, 0x30, 0x0B, 0x06, 
-                0x03, 0x55, 0x1D, 0x0F, 0x04, 0x04, 0x03, 0x02, 0x04, 0x30, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 
-                0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x03, 0x82, 0x01, 0x01, 0x00, 0x0D, 0x9E, 
-                0xD3, 0x9C, 0x97, 0xD2, 0xE1, 0x7B, 0xF0, 0x71, 0x34, 0xDB, 0x40, 0xBA, 0x1A, 0x4A, 0xCE, 0xD7, 
-                0x2A, 0xD6, 0x8F, 0xD5, 0x19, 0xDE, 0x3E, 0x22, 0xF9, 0xB8, 0xCB, 0x6A, 0x51, 0x80, 0x5B, 0x5F, 
-                0xCD, 0x43, 0x8F, 0x1C, 0x73, 0x09, 0x7E, 0x69, 0x99, 0xF0, 0x5C, 0xC0, 0x6F, 0xBC, 0x7B, 0xF2, 
-                0x3F, 0xCB, 0x12, 0x41, 0x12, 0x8E, 0x0A, 0x79, 0xD7, 0x93, 0x51, 0x60, 0x06, 0x85, 0x18, 0xD1, 
-                0x8A, 0x65, 0x30, 0xFB, 0x48, 0x63, 0x37, 0xC9, 0x7F, 0x0C, 0xAD, 0x71, 0x8C, 0xA1, 0xDC, 0x24, 
-                0x81, 0xF2, 0x1C, 0x1F, 0x7D, 0xE0, 0x3E, 0xC5, 0x6B, 0x12, 0xCE, 0xA8, 0x2B, 0xC8, 0x1E, 0xBD, 
-                0xF4, 0x94, 0x42, 0x75, 0x6F, 0xF3, 0xDA, 0x99, 0x2D, 0x28, 0xC1, 0x44, 0x57, 0x47, 0xAB, 0x10, 
-                0x21, 0xF1, 0xC1, 0x4F, 0xFE, 0x43, 0xD0, 0x85, 0x28, 0xE6, 0x68, 0xE0, 0x40, 0x6D, 0xFF, 0x50, 
-                0x0D, 0x55, 0x5D, 0x82, 0x3B, 0x9F, 0x0B, 0x51, 0xC4, 0xBB, 0xDB, 0x47, 0xC6, 0xF1, 0x7B, 0x30, 
-                0x27, 0x47, 0x9B, 0x5C, 0x8B, 0xE4, 0x48, 0x42, 0x76, 0xED, 0x0B, 0x71, 0xCD, 0xAD, 0xC1, 0xC2, 
-                0x49, 0x46, 0xB6, 0xD1, 0x86, 0x46, 0x8C, 0x85, 0x74, 0xE3, 0xB8, 0xD1, 0xEA, 0x15, 0x1F, 0xD8, 
-                0x94, 0x22, 0x1B, 0xDB, 0xF4, 0xC2, 0xE7, 0x3C, 0x94, 0x05, 0xD7, 0x95, 0xE7, 0xB7, 0xFD, 0xE2, 
-                0x19, 0x9A, 0xE3, 0x31, 0x76, 0xD3, 0xAE, 0x72, 0xAD, 0xA8, 0x0D, 0x95, 0x10, 0x20, 0x4F, 0x0C, 
-                0x87, 0x05, 0x77, 0xB7, 0xF7, 0x52, 0xDC, 0x47, 0x9B, 0x29, 0xD5, 0x01, 0x21, 0x39, 0x1C, 0xCF, 
-                0xCA, 0x81, 0x78, 0xC8, 0x6B, 0x1A, 0xAD, 0x76, 0x9B, 0x58, 0x4E, 0x68, 0x17, 0xE1, 0x62, 0xB0, 
+                0x8D, 0x0C, 0xE3, 0x63, 0x30, 0x64, 0x1C, 0x4D, 0xC7, 0x5E, 0xA8, 0xFE, 0x7D, 0xD5, 0xEA, 0x6B,
+                0x37, 0xBD, 0x64, 0x32, 0x85, 0x77, 0xF8, 0x55, 0x0D, 0x3F, 0x01, 0x5A, 0xA5, 0x6F, 0x1A, 0xB5,
+                0xF2, 0x5E, 0x55, 0xF5, 0x93, 0x40, 0xAF, 0x53, 0xF9, 0x55, 0x02, 0x03, 0x01, 0x00, 0x01, 0xA3,
+                0x39, 0x30, 0x37, 0x30, 0x09, 0x06, 0x03, 0x55, 0x1D, 0x13, 0x04, 0x02, 0x30, 0x00, 0x30, 0x1D,
+                0x06, 0x03, 0x55, 0x1D, 0x0E, 0x04, 0x16, 0x04, 0x14, 0x0D, 0x72, 0x05, 0x3C, 0xA9, 0x82, 0xE2,
+                0xC1, 0x89, 0xCE, 0x47, 0x20, 0x50, 0xD3, 0x4D, 0x04, 0x5A, 0x9A, 0x59, 0xD3, 0x30, 0x0B, 0x06,
+                0x03, 0x55, 0x1D, 0x0F, 0x04, 0x04, 0x03, 0x02, 0x04, 0x30, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86,
+                0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x03, 0x82, 0x01, 0x01, 0x00, 0x0D, 0x9E,
+                0xD3, 0x9C, 0x97, 0xD2, 0xE1, 0x7B, 0xF0, 0x71, 0x34, 0xDB, 0x40, 0xBA, 0x1A, 0x4A, 0xCE, 0xD7,
+                0x2A, 0xD6, 0x8F, 0xD5, 0x19, 0xDE, 0x3E, 0x22, 0xF9, 0xB8, 0xCB, 0x6A, 0x51, 0x80, 0x5B, 0x5F,
+                0xCD, 0x43, 0x8F, 0x1C, 0x73, 0x09, 0x7E, 0x69, 0x99, 0xF0, 0x5C, 0xC0, 0x6F, 0xBC, 0x7B, 0xF2,
+                0x3F, 0xCB, 0x12, 0x41, 0x12, 0x8E, 0x0A, 0x79, 0xD7, 0x93, 0x51, 0x60, 0x06, 0x85, 0x18, 0xD1,
+                0x8A, 0x65, 0x30, 0xFB, 0x48, 0x63, 0x37, 0xC9, 0x7F, 0x0C, 0xAD, 0x71, 0x8C, 0xA1, 0xDC, 0x24,
+                0x81, 0xF2, 0x1C, 0x1F, 0x7D, 0xE0, 0x3E, 0xC5, 0x6B, 0x12, 0xCE, 0xA8, 0x2B, 0xC8, 0x1E, 0xBD,
+                0xF4, 0x94, 0x42, 0x75, 0x6F, 0xF3, 0xDA, 0x99, 0x2D, 0x28, 0xC1, 0x44, 0x57, 0x47, 0xAB, 0x10,
+                0x21, 0xF1, 0xC1, 0x4F, 0xFE, 0x43, 0xD0, 0x85, 0x28, 0xE6, 0x68, 0xE0, 0x40, 0x6D, 0xFF, 0x50,
+                0x0D, 0x55, 0x5D, 0x82, 0x3B, 0x9F, 0x0B, 0x51, 0xC4, 0xBB, 0xDB, 0x47, 0xC6, 0xF1, 0x7B, 0x30,
+                0x27, 0x47, 0x9B, 0x5C, 0x8B, 0xE4, 0x48, 0x42, 0x76, 0xED, 0x0B, 0x71, 0xCD, 0xAD, 0xC1, 0xC2,
+                0x49, 0x46, 0xB6, 0xD1, 0x86, 0x46, 0x8C, 0x85, 0x74, 0xE3, 0xB8, 0xD1, 0xEA, 0x15, 0x1F, 0xD8,
+                0x94, 0x22, 0x1B, 0xDB, 0xF4, 0xC2, 0xE7, 0x3C, 0x94, 0x05, 0xD7, 0x95, 0xE7, 0xB7, 0xFD, 0xE2,
+                0x19, 0x9A, 0xE3, 0x31, 0x76, 0xD3, 0xAE, 0x72, 0xAD, 0xA8, 0x0D, 0x95, 0x10, 0x20, 0x4F, 0x0C,
+                0x87, 0x05, 0x77, 0xB7, 0xF7, 0x52, 0xDC, 0x47, 0x9B, 0x29, 0xD5, 0x01, 0x21, 0x39, 0x1C, 0xCF,
+                0xCA, 0x81, 0x78, 0xC8, 0x6B, 0x1A, 0xAD, 0x76, 0x9B, 0x58, 0x4E, 0x68, 0x17, 0xE1, 0x62, 0xB0,
                 0x5A, 0x31, 0x19, 0x30, 0xF8, 0xA4, 0xF1, 0xDD, 0xD7, 0x52, 0x74, 0x20, 0xD7, 0xB1, 0x31, 0x00
             };
 
@@ -496,11 +502,11 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public async Task<ReplaceCertificateResult> ReplaceCertificate(ReplaceCertificateRequest request,
                                                                        CancellationToken cancellation)
         {
-            if (certState == StatusClass.CertificateStateEnum.NotReady ||
-                certState == StatusClass.CertificateStateEnum.Unknown)
+            if (KeyManagementStatus.CertificateState == KeyManagementStatusClass.CertificateStateEnum.NotReady ||
+                KeyManagementStatus.CertificateState == KeyManagementStatusClass.CertificateStateEnum.Unknown)
             {
                 return new ReplaceCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
-                                                    $"Invalid certification state. {certState}",
+                                                    $"Invalid certification state. {KeyManagementStatus.CertificateState}",
                                                     ReplaceCertificateCompletion.PayloadData.ErrorCodeEnum.InvalidCertificateState);
             }
 
@@ -580,8 +586,65 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                digest);
         }
 
-        /// Crypto interface
+        /// <summary>
+        /// KeyManagement Status
+        /// </summary>
+        public KeyManagementStatusClass KeyManagementStatus { get; set; }
 
+        /// <summary>
+        /// KeyManagement Capabilities
+        /// </summary>
+        public KeyManagementCapabilitiesClass KeyManagementCapabilities { get; set; } = new KeyManagementCapabilitiesClass(
+            MaxKeys: 100,
+            KeyCheckModes: KeyManagementCapabilitiesClass.KeyCheckModeEnum.Self | KeyManagementCapabilitiesClass.KeyCheckModeEnum.Zero,
+            HSMVendor: string.Empty,
+            RSAAuthenticationScheme: KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.SecondPartySignature | KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.ThirdPartyCertificate,
+            RSASignatureAlgorithm: KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
+            RSACryptAlgorithm: KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.RSAES_PKCS1_V1_5,
+            RSAKeyCheckMode: KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA1 | KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA256,
+            SignatureScheme: KeyManagementCapabilitiesClass.SignatureSchemeEnum.ExportEPPID | KeyManagementCapabilitiesClass.SignatureSchemeEnum.RandomNumber | KeyManagementCapabilitiesClass.SignatureSchemeEnum.EnhancedRKL,
+            EMVImportSchemes: KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
+            KeyBlockImportFormats: KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKA | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKB | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKC,
+            KeyImportThroughParts: true,
+            DESKeyLength: KeyManagementCapabilitiesClass.DESKeyLengthEmum.Double,
+            CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
+            LoadCertificationOptions: new()
+            {
+                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
+            },
+            CRKLLoadOption: KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
+            SymmetricKeyManagementMethods: KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.MasterKey,
+            KeyAttributes: new()
+            {
+                { "00", new() { { "T", new() { { "V", null } } } } },
+                { "D0", new() { { "T", new() { { "E", null } } } } },
+                { "D1", new() { { "R", new() { { "E", null } } } } },
+                { "I0", new() { { "T", new() { { "D", null } } } } },
+                { "K0", new() { { "T", new() { { "B", null }, { "D", null }, { "E", null } } } } },
+                { "K1", new() { { "R", new() { { "T", null } } } } },
+                { "K2", new() { { "R", new() { { "T", null } } } } },
+                { "M0", new() { { "T", new() { { "C", null }, { "G", null }, { "V", null } } } } },
+                { "P0", new() { { "T", new() { { "E", null } } } } },
+                { "S0", new() { { "R", new() { { "S", null }, { "V", null } } } } },
+                { "S1", new() { { "R", new() { { "T", null }, { "V", null } } } } },
+                { "SS", new() { { "R", new() { { "S", null }, { "V", null } } } } }
+            },
+            DecryptAttributes: new()
+            {
+                { "T", new(KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.ECB | KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.CBC) },
+                { "R", new(KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.RSAES_PKCS1_V1_5) }
+            },
+            VerifyAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.KCVSelf | KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.KCVZero) } } } } },
+                { "S0", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+                { "S1", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+                { "S2", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+            }
+            );
+        #endregion
+
+        #region Crypto interface
         /// <summary>
         /// This command is used to generate a random number. 
         /// </summary>
@@ -767,7 +830,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// Any attempt to call the referenced command without using the Authenticate command, if authentication is required, 
         /// shall result in AuthRequired. 
         /// </summary>
-        public async Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, 
+        public async Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request,
                                                                      CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
@@ -789,140 +852,53 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
         }
 
-        /// COMMON interface
 
-        public StatusCompletion.PayloadData Status()
-        {
-            StatusPropertiesClass common = new(StatusPropertiesClass.DeviceEnum.Online,
-                                               PositionStatusEnum.InPosition,
-                                               0,
-                                               StatusPropertiesClass.AntiFraudModuleEnum.NotSupported);
-
-            StatusClass keyManagementStatus = new(encryptionState, certState);
-
-            return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                    null,
-                                                    common,
-                                                    KeyManagement: keyManagementStatus);
-        }
-
-        public CapabilitiesCompletion.PayloadData Capabilities()
-        {
-            CapabilityPropertiesClass common = new(
-                ServiceVersion: "1.0",
-                DeviceInformation: new List<DeviceInformationClass>() 
-                { 
-                    new DeviceInformationClass(
-                            ModelName: "Simulator",
-                            SerialNumber: "123456-78900001",
-                            RevisionNumber: "1.0",
-                            ModelDescription: "KAL simualtor",
-                            Firmware: new List<FirmwareClass>() 
-                            {
-                                new FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0") 
-                            },
-                            Software: new List<SoftwareClass>()
-                            {
-                                new SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            }) 
-                },
-                VendorModeIformation: new VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>() 
-                    { 
-                        "KeyManagement.Initialize"
-                    }),
-                PowerSaveControl: false,
-                AntiFraudModule: false);
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass>>> cryptoAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass cryptoMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass.CryptoMethodClass(Ecb: true,  Cbc: true));
-            cryptoAttributes.Add("D0", new() { { "T", new() { { "E", cryptoMethod } } } });
-            cryptoMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass.CryptoMethodClass(RsaesPkcs1V15: true));
-            cryptoAttributes.Add("D1", new() { { "R", new() { { "E", cryptoMethod } } } });
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass>>> authAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass authMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass.CryptoMethodClass(RsassaPkcs1V15:true));
-            authAttributes.Add("M0", new() { { "T", new() { { "G", null } } } });
-            authAttributes.Add("S0", new() { { "R", new() { { "S", authMethod } } } });
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass>>> verifyAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass verifyMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass.CryptoMethodClass(RsassaPkcs1V15: true), new XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass.HashAlgorithmClass(Sha1:true, Sha256:true));
-            verifyAttributes.Add("M0", new() { { "T", new() { { "V", null } } } });
-            verifyAttributes.Add("S0", new() { { "R", new() { { "V", verifyMethod } } } });
-
-
-            XFS4IoT.Crypto.CapabilitiesClass cryptoCap = new(EmvHashAlgorithm: new XFS4IoT.Crypto.CapabilitiesClass.EmvHashAlgorithmClass(Sha1Digest: true, Sha256Digest: true),
-                                                             cryptoAttributes,
-                                                             authAttributes,
-                                                             verifyAttributes);
-
-            List<CapabilitiesClass.LoadCertOptionsClass> certOptions = new() 
-            { 
-                new(CapabilitiesClass.LoadCertOptionsClass.SignerEnum.Ca, new(NewHost: true)) 
-            };
-
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.KeyAttributesClass>>> keyAttributes = new();
-            keyAttributes.Add("00", new() { { "T", new() { { "V", null } } } }); 
-            keyAttributes.Add("D0", new() { { "T", new() { { "E", null } } } });
-            keyAttributes.Add("D1", new() { { "R", new() { { "E", null } } } });
-            keyAttributes.Add("I0", new() { { "T", new() { { "D", null } } } });
-            keyAttributes.Add("K0", new() { { "T", new() { { "B", null }, { "D", null }, { "E", null } } } });
-            keyAttributes.Add("K1", new() { { "R", new() { { "T", null } } } });
-            keyAttributes.Add("K2", new() { { "R", new() { { "T", null } } } });
-            keyAttributes.Add("M0", new() { { "T", new() { { "C", null }, { "G", null }, { "V", null } } } });
-            keyAttributes.Add("P0", new() { { "T", new() { { "E", null } } } });
-            keyAttributes.Add("S0", new() { { "R", new() { { "S", null }, { "V", null } } } });
-            keyAttributes.Add("S1", new() { { "R", new() { { "T", null }, { "V", null } } } });
-            keyAttributes.Add("SS", new() { { "R", new() { { "S", null }, { "V", null } } } });
-
-            Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.DecryptAttributesClass> decryptAttributes = new();
-            decryptAttributes.Add("T", new(new(Ecb:true, Cbc:true)));
-            decryptAttributes.Add("R", new(new(RsaesPkcs1V15:true)));
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.VerifyAttributesClass>>> keyVerifyAttributes = new();
-            keyVerifyAttributes.Add("M0", new() { { "T", new() { { "V", new(new(KcvSelf:true, KcvZero:true)) } } } });
-            keyVerifyAttributes.Add("S0", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-            keyVerifyAttributes.Add("S1", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-            keyVerifyAttributes.Add("S2", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-
-            CapabilitiesClass keyManagementCap = new(KeyNum: 100,
-                                                     KeyCheckModes: new(Self: true, Zero: true),
-                                                     RsaAuthenticationScheme: new(Number2partySig: true, Number3partyCert: true),
-                                                     RsaSignatureAlgorithm: new(Pkcs1V15: true),
-                                                     RsaCryptAlgorithm: new(Pkcs1V15:true),
-                                                     RsaKeyCheckMode: new(Sha1:true, Sha256:true),
-                                                     SignatureScheme: new(ExportEppId:true, EnhancedRkl:true),
-                                                     KeyBlockImportFormats: new(A:true, B:true, C:true),
-                                                     KeyImportThroughParts: true,
-                                                     DesKeyLength: new(Double:true),
-                                                     CertificateTypes: new(EncKey:true, VerificationKey:true, HostKey:true),
-                                                     LoadCertOptions: certOptions,
-                                                     SymmetricKeyManagementMethods: new(FixedKey:true, MasterKey:true),
-                                                     KeyAttributes: keyAttributes,
-                                                     DecryptAttributes: decryptAttributes,
-                                                     VerifyAttributes: keyVerifyAttributes);
-
-            List <InterfaceClass> interfaces = new()
+        /// <summary>
+        /// Crypto Capabilities
+        /// </summary>
+        public CryptoCapabilitiesClass CryptoCapabilities { get; set; } = new CryptoCapabilitiesClass(
+            EMVHashAlgorithms: CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA1_Digest | CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA256_Digest,
+            CryptoAttributes: new()
             {
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Common,
-                    Commands: new ()
+                { "D1", new() { { "R", new() { { "E", new CryptoCapabilitiesClass.CryptoAttributesClass(CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.ECB | CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.CBC) } } } } }
+            },
+            AuthenticationAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "G", null } } } } },
+                { "S0", new() { { "R", new() { { "S", new(CryptoCapabilitiesClass.VerifyAuthenticationAttributesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, CryptoCapabilitiesClass.HashAlgorithmEnum.SHA1 | CryptoCapabilitiesClass.HashAlgorithmEnum.SHA256) } } } } }
+            },
+            VerifyAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "V", null } } } } },
+                { "S0", new() { { "R", new() { { "V", new(CryptoCapabilitiesClass.VerifyAuthenticationAttributesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, CryptoCapabilitiesClass.HashAlgorithmEnum.SHA1 | CryptoCapabilitiesClass.HashAlgorithmEnum.SHA256) } } } } }
+            });
+
+        #endregion
+
+        #region COMMON Interface
+        /// <summary>
+        /// Stores Commons status
+        /// </summary>
+        public CommonStatusClass CommonStatus { get; set; }
+
+        /// <summary>
+        /// Stores Common Capabilities
+        /// </summary>
+        public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
+                new()
+                {
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                    Commands: new()
                     {
                         { "Common.Status", null },
-                        { "Common.Capabilities",  null },
+                        { "Common.Capabilities", null },
                     },
-                    Events: new (),
+                    Events: new(),
                     MaximumRequests: 1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.KeyManagement,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.KeyManagement,
+                    Commands: new()
                     {
                         { "KeyManagement.DeleteKey", null },
                         { "KeyManagement.ExportRSAEPPSignedItem", null },
@@ -937,40 +913,66 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                         { "KeyManagement.StartAuthenticate", null },
                         { "KeyManagement.GetKeyDetail", null },
                     },
-                    Events: new ()
+                    Events: new()
                     {
                         { "KeyManagement.CertificateChangeEvent", null },
                         { "KeyManagement.InitializedEvent", null },
                     },
                     MaximumRequests: 1000,
-                    AuthenticationRequired: new ()
+                    AuthenticationRequired: new()
                     {
                         "KeyManagement.Initialization",
                     }),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Crypto,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Crypto,
+                    Commands: new()
                     {
                         { "Crypto.CryptoData", null },
                         { "Crypto.Digest", null },
                         { "Crypto.GenerateAuthentication", null },
                         { "Crypto.GenerateRandom", null },
                         { "Crypto.VerifyAuthentication", null },
-                    }, 
-                    Events: new ()
+                    },
+                    Events: new()
                     {
                         { "Crypto.IllegalKeyAccessEvent", null },
-                    }, 
-                    MaximumRequests:  1000)
-            };
-
-            return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          interfaces,
-                                                          common,
-                                                          Crypto: cryptoCap,
-                                                          KeyManagement: keyManagementCap);
-        }
+                    },
+                    MaximumRequests: 1000)
+                },
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
+                {
+                    new CommonCapabilitiesClass.DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
+                            {
+                                new CommonCapabilitiesClass.FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0")
+                            },
+                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
+                            {
+                                new CommonCapabilitiesClass.SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            })
+                },
+                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>()
+                    {
+                        "KeyManagement.Initialize"
+                    }),
+                PowerSaveControl: false,
+                AntiFraudModule: false,
+                EndToEndSecurity: true,
+                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
+                );
 
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
@@ -978,6 +980,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
         public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
         public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+
+        #endregion
 
         private static List<byte> GenerateRandomNumber()
         {
@@ -1139,9 +1143,6 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         private readonly SemaphoreSlim initializedSignal = new(0, 1);
         private CryptoServiceProvider cryptoServiceProvider = null;
         private bool serviceInitialized = false;
-
-        private StatusClass.EncryptionStateEnum encryptionState = StatusClass.EncryptionStateEnum.NotInitialized;
-        private StatusClass.CertificateStateEnum certState = StatusClass.CertificateStateEnum.Primary;
 
         private static class Constants
         {

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT.Common;
 using XFS4IoT.TextTerminal.Commands;
 using XFS4IoT.TextTerminal.Completions;
 
@@ -21,6 +22,9 @@ namespace TestClientForms.Devices
             : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
         {
         }
+
+        public Task DoServiceDiscovery()
+            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.TextTerminal, InterfaceClass.NameEnum.Common });
 
         public async Task ClearScreen()
         {

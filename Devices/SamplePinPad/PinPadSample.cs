@@ -23,13 +23,9 @@ using XFS4IoTFramework.Common;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
-using XFS4IoT.KeyManagement.Events;
-using XFS4IoT.KeyManagement;
 using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.Crypto.Completions;
-using XFS4IoT.PinPad.Completions;
 using XFS4IoT.Keyboard;
-using XFS4IoT.Keyboard.Completions;
 using XFS4IoT.Keyboard.Events;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
@@ -49,6 +45,17 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             Logger.IsNotNull($"Invalid parameter received in the {nameof(PinPadSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
+
+            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
+                                                 CommonStatusClass.PositionStatusEnum.InPosition,
+                                                 0,
+                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+
+            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
+                                                               KeyManagementStatusClass.CertificateStateEnum.Unknown);
+
+            KeyboardStatus = new KeyboardStatusClass(KeyboardStatusClass.AutoBeepModeEnum.InActive);
         }
 
         #region Keyboard Interface
@@ -269,6 +276,19 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             return new DefineLayoutResult(MessagePayload.CompletionCodeEnum.Success, null);
         }
 
+        /// <summary>
+        /// Keyboard Status
+        /// </summary>
+        public KeyboardStatusClass KeyboardStatus { get; set; }
+
+        /// <summary>
+        /// Keyboard Capabilities
+        /// </summary>
+        public KeyboardCapabilitiesClass KeyboardCapabilities { get; set; } = new KeyboardCapabilitiesClass(
+            AutoBeep: KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveAvailable | KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveSelectable| KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveAvailable | KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveSelectable,
+            ETSCaps: null);
+
+
         #endregion
 
         #region PinPad Interface
@@ -350,6 +370,25 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                         request.ChipProtocol,
                                         new List<byte>() { 0x90, 0x00 });
         }
+
+        /// <summary>
+        /// PinPad Capabilities
+        /// </summary>
+        public PinPadCapabilitiesClass PinPadCapabilities { get; set; } = new PinPadCapabilitiesClass(
+            PINFormat: PinPadCapabilitiesClass.PINFormatEnum.ANSI | PinPadCapabilitiesClass.PINFormatEnum.ISO0,
+            PresentationAlgorithm: PinPadCapabilitiesClass.PresentationAlgorithmEnum.NotSupported,
+            DisplayType: PinPadCapabilitiesClass.DisplayTypeEnum.NotSupported,
+            IDConnect: false,
+            ValidationAlgorithm: PinPadCapabilitiesClass.ValidationAlgorithmEnum.DES | PinPadCapabilitiesClass.ValidationAlgorithmEnum.VISA,
+            PinCanPersistAfterUse: false,
+            TypeCombined: false,
+            SetPinblockDataRequired: false,
+            PinBlockAttributes: new()
+            {
+                { "P0", new() { { "T", new() { { "E", new(PinPadCapabilitiesClass.PinBlockEncryptionAlgorithm.EncryptionAlgorithmEnum.ECB | PinPadCapabilitiesClass.PinBlockEncryptionAlgorithm.EncryptionAlgorithmEnum.CBC) } } } } }
+            }
+            );
+
         #endregion
 
         #region KeyManagement Interface
@@ -1011,6 +1050,64 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             await Task.Delay(100, cancellation);
             return new StartAuthenticateResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
         }
+
+        /// <summary>
+        /// KeyManagement Status
+        /// </summary>
+        public KeyManagementStatusClass KeyManagementStatus { get; set; }
+
+        /// <summary>
+        /// KeyManagement Capabilities
+        /// </summary>
+        public KeyManagementCapabilitiesClass KeyManagementCapabilities { get; set; } = new KeyManagementCapabilitiesClass(
+            MaxKeys: 100,
+            KeyCheckModes: KeyManagementCapabilitiesClass.KeyCheckModeEnum.Self | KeyManagementCapabilitiesClass.KeyCheckModeEnum.Zero,
+            HSMVendor: string.Empty,
+            RSAAuthenticationScheme: KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.SecondPartySignature | KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.ThirdPartyCertificate,
+            RSASignatureAlgorithm: KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
+            RSACryptAlgorithm: KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.RSAES_PKCS1_V1_5,
+            RSAKeyCheckMode: KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA1 | KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA256,
+            SignatureScheme: KeyManagementCapabilitiesClass.SignatureSchemeEnum.ExportEPPID | KeyManagementCapabilitiesClass.SignatureSchemeEnum.RandomNumber | KeyManagementCapabilitiesClass.SignatureSchemeEnum.EnhancedRKL,
+            EMVImportSchemes: KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
+            KeyBlockImportFormats: KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKA | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKB | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKC,
+            KeyImportThroughParts: true,
+            DESKeyLength: KeyManagementCapabilitiesClass.DESKeyLengthEmum.Double,
+            CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
+            LoadCertificationOptions: new()
+            {
+                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
+            },
+            CRKLLoadOption: KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
+            SymmetricKeyManagementMethods: KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.MasterKey,
+            KeyAttributes: new()
+            {
+                { "00", new() { { "T", new() { { "V", null } } } } },
+                { "D0", new() { { "T", new() { { "E", null } } } } },
+                { "D1", new() { { "R", new() { { "E", null } } } } },
+                { "I0", new() { { "T", new() { { "D", null } } } } },
+                { "K0", new() { { "T", new() { { "B", null }, { "D", null }, { "E", null } } } } },
+                { "K1", new() { { "R", new() { { "T", null } } } } },
+                { "K2", new() { { "R", new() { { "T", null } } } } },
+                { "M0", new() { { "T", new() { { "C", null }, { "G", null }, { "V", null } } } } },
+                { "P0", new() { { "T", new() { { "E", null } } } } },
+                { "S0", new() { { "R", new() { { "S", null }, { "V", null } } } } },
+                { "S1", new() { { "R", new() { { "T", null }, { "V", null } } } } },
+                { "SS", new() { { "R", new() { { "S", null }, { "V", null } } } } }
+            },
+            DecryptAttributes: new()
+            {
+                { "T", new(KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.ECB | KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.CBC) },
+                { "R", new(KeyManagementCapabilitiesClass.DecryptMethodClass.DecryptMethodEnum.RSAES_PKCS1_V1_5) }
+            },
+            VerifyAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.KCVSelf | KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.KCVZero) } } } } },
+                { "S0", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+                { "S1", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+                { "S2", new() { { "R", new() { { "V", new KeyManagementCapabilitiesClass.VerifyMethodClass(KeyManagementCapabilitiesClass.VerifyMethodClass.CryptoMethodEnum.RSASSA_PKCS1_V1_5) } } } } },
+            }
+            );
+
         #endregion
 
         #region Crypto Interface
@@ -1192,6 +1289,28 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             return new GenerateDigestResult(MessagePayload.CompletionCodeEnum.Success,
                                             new SHA256CryptoServiceProvider().ComputeHash(request.DataToHash.ToArray()).ToList());
         }
+
+        /// <summary>
+        /// Crypto Capabilities
+        /// </summary>
+        public CryptoCapabilitiesClass CryptoCapabilities { get; set; } = new CryptoCapabilitiesClass(
+            EMVHashAlgorithms: CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA1_Digest | CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA256_Digest,
+            CryptoAttributes: new()
+            {
+                { "D0", new() { { "T", new() { { "E", new CryptoCapabilitiesClass.CryptoAttributesClass(CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.ECB | CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.CBC) } } } } },
+                { "D1", new() { { "R", new() { { "E", new CryptoCapabilitiesClass.CryptoAttributesClass(CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.ECB | CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.CBC) } } } } }
+            },
+            AuthenticationAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "G", null } } } } },
+                { "S0", new() { { "R", new() { { "S", new(CryptoCapabilitiesClass.VerifyAuthenticationAttributesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, CryptoCapabilitiesClass.HashAlgorithmEnum.SHA1 | CryptoCapabilitiesClass.HashAlgorithmEnum.SHA256) } } } } }
+            },
+            VerifyAttributes: new()
+            {
+                { "M0", new() { { "T", new() { { "V", null } } } } },
+                { "S0", new() { { "R", new() { { "V", new(CryptoCapabilitiesClass.VerifyAuthenticationAttributesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, CryptoCapabilitiesClass.HashAlgorithmEnum.SHA1 | CryptoCapabilitiesClass.HashAlgorithmEnum.SHA256) } } } } }
+            });
+
         #endregion
 
         /// <summary>
@@ -1216,155 +1335,31 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             }
         }
 
-        /// COMMON interface
+        #region COMMON Interface
 
-        public StatusCompletion.PayloadData Status()
-        {
-            StatusPropertiesClass common = new(StatusPropertiesClass.DeviceEnum.Online,
-                                               PositionStatusEnum.InPosition,
-                                               0,
-                                               StatusPropertiesClass.AntiFraudModuleEnum.NotSupported);
+        /// <summary>
+        /// Stores Commons status
+        /// </summary>
+        public CommonStatusClass CommonStatus { get; set; }
 
-            XFS4IoT.KeyManagement.StatusClass keyManagementStatus = new(encryptionState, certState);
-            XFS4IoT.Keyboard.StatusClass keyboardStatus = new(XFS4IoT.Keyboard.StatusClass.AutoBeepModeEnum.Active);
-
-            return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                    null,
-                                                    common,
-                                                    KeyManagement: keyManagementStatus,
-                                                    Keyboard: keyboardStatus);
-        }
-
-        public CapabilitiesCompletion.PayloadData Capabilities()
-        {
-            CapabilityPropertiesClass common = new(
-                ServiceVersion: "1.0",
-                DeviceInformation: new List<DeviceInformationClass>() 
-                { 
-                    new DeviceInformationClass(
-                            ModelName: "Simulator",
-                            SerialNumber: "123456-78900001",
-                            RevisionNumber: "1.0",
-                            ModelDescription: "KAL simualtor",
-                            Firmware: new List<FirmwareClass>() 
-                            {
-                                new FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0") 
-                            },
-                            Software: new List<SoftwareClass>()
-                            {
-                                new SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            }) 
-                },
-                VendorModeIformation: new VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>() 
-                    { 
-                        "KeyManagement.Initialize"
-                    }),
-                PowerSaveControl: false,
-                AntiFraudModule: false);
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass>>> cryptoAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass cryptoMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass.CryptoMethodClass(Ecb: true,  Cbc: true));
-            cryptoAttributes.Add("D0", new() { { "T", new() { { "E", cryptoMethod } } } });
-            cryptoMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.CryptoAttributesClass.CryptoMethodClass(RsaesPkcs1V15: true));
-            cryptoAttributes.Add("D1", new() { { "R", new() { { "E", cryptoMethod } } } });
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass>>> authAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass authMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.AuthenticationAttributesClass.CryptoMethodClass(RsassaPkcs1V15:true));
-            authAttributes.Add("M0", new() { { "T", new() { { "G", null } } } });
-            authAttributes.Add("S0", new() { { "R", new() { { "S", authMethod } } } });
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass>>> verifyAttributes = new();
-            XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass verifyMethod = new(new XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass.CryptoMethodClass(RsassaPkcs1V15: true), new XFS4IoT.Crypto.CapabilitiesClass.VerifyAttributesClass.HashAlgorithmClass(Sha1:true, Sha256:true));
-            verifyAttributes.Add("M0", new() { { "T", new() { { "V", null } } } });
-            verifyAttributes.Add("S0", new() { { "R", new() { { "V", verifyMethod } } } });
-
-
-            XFS4IoT.Crypto.CapabilitiesClass cryptoCap = new(EmvHashAlgorithm: new XFS4IoT.Crypto.CapabilitiesClass.EmvHashAlgorithmClass(Sha1Digest: true, Sha256Digest: true),
-                                                             cryptoAttributes,
-                                                             authAttributes,
-                                                             verifyAttributes);
-
-            List<XFS4IoT.KeyManagement.CapabilitiesClass.LoadCertOptionsClass> certOptions = new() 
-            { 
-                new(XFS4IoT.KeyManagement.CapabilitiesClass.LoadCertOptionsClass.SignerEnum.Ca, new(NewHost: true)) 
-            };
-
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.KeyAttributesClass>>> keyAttributes = new();
-            keyAttributes.Add("00", new() { { "T", new() { { "V", null } } } }); 
-            keyAttributes.Add("D0", new() { { "T", new() { { "E", null } } } });
-            keyAttributes.Add("D1", new() { { "R", new() { { "E", null } } } });
-            keyAttributes.Add("I0", new() { { "T", new() { { "D", null } } } });
-            keyAttributes.Add("K0", new() { { "T", new() { { "B", null }, { "D", null }, { "E", null } } } });
-            keyAttributes.Add("K1", new() { { "R", new() { { "T", null } } } });
-            keyAttributes.Add("K2", new() { { "R", new() { { "T", null } } } });
-            keyAttributes.Add("M0", new() { { "T", new() { { "C", null }, { "G", null }, { "V", null } } } });
-            keyAttributes.Add("P0", new() { { "T", new() { { "E", null } } } });
-            keyAttributes.Add("S0", new() { { "R", new() { { "S", null }, { "V", null } } } });
-            keyAttributes.Add("S1", new() { { "R", new() { { "T", null }, { "V", null } } } });
-            keyAttributes.Add("SS", new() { { "R", new() { { "S", null }, { "V", null } } } });
-
-            Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.DecryptAttributesClass> decryptAttributes = new();
-            decryptAttributes.Add("T", new(new(Ecb:true, Cbc:true)));
-            decryptAttributes.Add("R", new(new(RsaesPkcs1V15:true)));
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.KeyManagement.CapabilitiesClass.VerifyAttributesClass>>> keyVerifyAttributes = new();
-            keyVerifyAttributes.Add("M0", new() { { "T", new() { { "V", new(new(KcvSelf:true, KcvZero:true)) } } } });
-            keyVerifyAttributes.Add("S0", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-            keyVerifyAttributes.Add("S1", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-            keyVerifyAttributes.Add("S2", new() { { "R", new() { { "V", new(new(RsassaPkcs1V15: true)) } } } });
-
-            XFS4IoT.KeyManagement.CapabilitiesClass keyManagementCap = new(KeyNum: 100,
-                                                                           KeyCheckModes: new(Self: true, Zero: true),
-                                                                           RsaAuthenticationScheme: new(Number2partySig: true, Number3partyCert: true),
-                                                                           RsaSignatureAlgorithm: new(Pkcs1V15: true),
-                                                                           RsaCryptAlgorithm: new(Pkcs1V15:true),
-                                                                           RsaKeyCheckMode: new(Sha1:true, Sha256:true),
-                                                                           SignatureScheme: new(ExportEppId:true, EnhancedRkl:true),
-                                                                           KeyBlockImportFormats: new(A:true, B:true, C:true),
-                                                                           KeyImportThroughParts: true,
-                                                                           DesKeyLength: new(Double:true),
-                                                                           CertificateTypes: new(EncKey:true, VerificationKey:true, HostKey:true),
-                                                                           LoadCertOptions: certOptions,
-                                                                           SymmetricKeyManagementMethods: new(FixedKey:true, MasterKey:true),
-                                                                           KeyAttributes: keyAttributes,
-                                                                           DecryptAttributes: decryptAttributes,
-                                                                           VerifyAttributes: keyVerifyAttributes);
-
-
-            XFS4IoT.Keyboard.CapabilitiesClass keyboardCap = new(AutoBeep: new (true, true, true, true));
-
-            Dictionary<string, Dictionary<string, Dictionary<string, XFS4IoT.PinPad.CapabilitiesClass.PinBlockAttributesClass>>> pinblockAttributes = new();
-            pinblockAttributes.Add("P0", new() { { "T", new() { { "E", null } } } });
-
-            XFS4IoT.PinPad.CapabilitiesClass pinPadCap = new(PinFormats: new(Ansi: true, Iso0: true),
-                                                             ValidationAlgorithms: new(true, true),
-                                                             PinCanPersistAfterUse: false,
-                                                             TypeCombined: false,
-                                                             SetPinblockDataRequired: false,
-                                                             PinBlockAttributes: pinblockAttributes);
-
-            List <InterfaceClass> interfaces = new()
-            {
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Common,
-                    Commands: new ()
+        /// <summary>
+        /// Stores Common Capabilities
+        /// </summary>
+        public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
+                new()
+                {
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                    Commands: new()
                     {
                         { "Common.Status", null },
                         { "Common.Capabilities", null },
                     },
-                    Events: new (),
+                    Events: new(),
                     MaximumRequests: 1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.KeyManagement,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.KeyManagement,
+                    Commands: new()
                     {
                         { "KeyManagement.DeleteKey", null },
                         { "KeyManagement.ExportRSAEPPSignedItem", null },
@@ -1379,34 +1374,34 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         { "KeyManagement.StartAuthenticate", null },
                         { "KeyManagement.GetKeyDetail", null },
                     },
-                    Events: new ()
+                    Events: new()
                     {
                         { "KeyManagement.CertificateChangeEvent", null },
                         { "KeyManagement.InitializedEvent", null },
                     },
                     MaximumRequests: 1000,
-                    AuthenticationRequired: new ()
+                    AuthenticationRequired: new()
                     {
-                        "KeyManagement.Initialization"
+                        "KeyManagement.Initialization",
                     }),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Crypto,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Crypto,
+                    Commands: new()
                     {
                         { "Crypto.CryptoData", null },
                         { "Crypto.Digest", null },
                         { "Crypto.GenerateAuthentication", null },
                         { "Crypto.GenerateRandom", null },
                         { "Crypto.VerifyAuthentication", null },
-                    }, 
-                    Events: new ()
+                    },
+                    Events: new()
                     {
                         { "Crypto.IllegalKeyAccessEvent", null },
-                    }, 
-                    MaximumRequests:  1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.PinPad,
-                    Commands: new ()
+                    },
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.PinPad,
+                    Commands: new()
                     {
                         { "PinPad.GetPinblock", null },
                         { "PinPad.GetQueryPCIPTSDeviceId", null },
@@ -1417,15 +1412,15 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         { "PinPad.Reset", null },
                         { "PinPad.SetPinblockData", null },
                     },
-                    Events: new ()
+                    Events: new()
                     {
                         { "PinPad.DUKPTKSNEvent", null },
                         { "PinPad.IllegalKeyAccessEvent", null },
                     },
                     MaximumRequests: 1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Keyboard,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Keyboard,
+                    Commands: new()
                     {
                         { "Keyboard.DataEntry", null },
                         { "Keyboard.DefineLayout", null },
@@ -1435,24 +1430,48 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         { "Keyboard.Reset", null },
                         { "Keyboard.SecureKeyEntry", null },
                     },
-                    Events: new ()
+                    Events: new()
                     {
                         { "Keyboard.EnterDataEvent", null },
                         { "Keyboard.KeyEvent", null },
                         { "Keyboard.LayoutEvent", null },
                     },
                     MaximumRequests: 1000)
-            };
-
-            return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          interfaces,
-                                                          common,
-                                                          Crypto: cryptoCap,
-                                                          KeyManagement: keyManagementCap,
-                                                          Keyboard: keyboardCap,
-                                                          PinPad: pinPadCap);
-        }
+                },
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
+                {
+                    new CommonCapabilitiesClass.DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
+                            {
+                                new CommonCapabilitiesClass.FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0")
+                            },
+                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
+                            {
+                                new CommonCapabilitiesClass.SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            })
+                },
+                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>()
+                    {
+                        "KeyManagement.Initialize"
+                    }),
+                PowerSaveControl: false,
+                AntiFraudModule: false,
+                EndToEndSecurity: true,
+                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
+                );
 
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
@@ -1461,6 +1480,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
         public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
 
+        #endregion
 
         private static List<byte> GenerateRandomNumber()
         {

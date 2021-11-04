@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using XFS4IoT;
+using XFS4IoT.Common;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
 
@@ -66,87 +67,96 @@ namespace TestClientForms.Devices
         public static readonly int CommandTimeout = 60000;
 
 
-        public async Task DoServiceDiscovery()
+        private async Task ServiceDiscoveryForPort(string uri, int port, InterfaceClass.NameEnum[] serviceClasses)
         {
-            string commandString = string.Empty;
-            string responseString = string.Empty;
-            string deviceServiceURI = string.Empty;
-
-            CmdBox.Text = commandString;
-            RspBox.Text = responseString;
-            ServiceUriBox.Text = deviceServiceURI;
-            EvtBox.Text = string.Empty;
-
-            ServicePort = null;
-
-
-            foreach (int port in PortRanges)
+            try
             {
+                WebSocketState state;
+                using (var socket = new ClientWebSocket())
+                {
+                    var cancels = new CancellationTokenSource();
+                    cancels.CancelAfter(40_000);
+                    await socket.ConnectAsync(new Uri($"{uri}:{port}/xfs4iot/v1.0"), cancels.Token);
+                    state = socket.State;
+                }
+
+                if (state != WebSocketState.Open)
+                    return;
+
+                var Discovery = new XFS4IoTClient.ClientConnection(new Uri($"{uri}:{port}/xfs4iot/v1.0"));
+
                 try
                 {
-                    WebSocketState state;
-                    using (var socket = new ClientWebSocket())
-                    {
-                        var cancels = new CancellationTokenSource();
-                        cancels.CancelAfter(40_000);
-                        await socket.ConnectAsync(new Uri($"{UriBox.Text}:{port}/xfs4iot/v1.0"), cancels.Token);
-                        state = socket.State;
-                    }
+                    await Discovery.ConnectAsync();
+                }
+                catch (Exception)
+                {
+                    return;
+                }
 
-                    if (state == WebSocketState.Open)
-                    {
-                        ServicePort = port;
-                        var Discovery = new XFS4IoTClient.ClientConnection(new Uri($"{UriBox.Text}:{ServicePort}/xfs4iot/v1.0"));
+                var getServiceCommand = new GetServicesCommand(RequestId.NewID(), new GetServicesCommand.PayloadData(CommandTimeout));
+                string commandString = getServiceCommand.Serialise();
+                string responseString = string.Empty;
 
-                        try
-                        {
-                            await Discovery.ConnectAsync();
-                        }
-                        catch (Exception)
+                object cmdResponse = await SendAndWaitForCompletionAsync(Discovery, getServiceCommand);
+
+                if (cmdResponse is GetServicesCompletion response)
+                {
+                    responseString = response.Serialise();
+
+                    var serviceURI = string.Empty;
+
+                    foreach (var service in response.Payload.Services)
+                    {
+                        var capabilities = await GetCapabilities(service.ServiceURI).IsNotNull();
+                        //Ensure service supports all required Interfaces
+                        if (serviceClasses.Except(capabilities.Payload.Interfaces
+                            .Where(c => c.Name.HasValue).Select(c => c.Name.Value)).Any())
                         {
                             continue;
                         }
 
-                        var getServiceCommand = new GetServicesCommand(RequestId.NewID(), new GetServicesCommand.PayloadData(CommandTimeout));
-                        commandString = getServiceCommand.Serialise();
-
-                        object cmdResponse = await SendAndWaitForCompletionAsync(Discovery, getServiceCommand);
-
-                        if (cmdResponse is GetServicesCompletion response)
-                        {
-                            responseString = response.Serialise();
-                            var service =
-                                (from ep in response.Payload.Services
-                                 where ep.ServiceURI.Contains(ServiceName) //ToDo: Correctly identify services.
-                                 select ep
-                                ).FirstOrDefault()
-                                ?.ServiceURI;
-
-                            if (!string.IsNullOrEmpty(service))
-                                deviceServiceURI = service;
-                        }
+                        //Use this service
+                        serviceURI = service.ServiceURI;
                         break;
                     }
-                }
-                catch (WebSocketException)
-                { }
-                catch (System.Net.HttpListenerException)
-                { }
-                catch (TaskCanceledException)
-                { }
-            }
 
-            if (ServicePort is null)
+                    if (!string.IsNullOrEmpty(serviceURI))
+                    {
+                        ServicePort = port;
+                        PortBox.Text = ServicePort.ToString();
+                        CmdBox.Text = commandString;
+                        RspBox.Text = responseString;
+                        ServiceUriBox.Text = serviceURI;
+                    }
+                }
+            }
+            catch (WebSocketException)
+            { }
+            catch (System.Net.HttpListenerException)
+            { }
+            catch (TaskCanceledException)
+            { }
+        }
+
+
+        public async Task DoServiceDiscovery(XFS4IoT.Common.InterfaceClass.NameEnum[] serviceClasses)
+        {
+            CmdBox.Text = string.Empty;
+            RspBox.Text = string.Empty;
+            ServiceUriBox.Text = string.Empty;
+            EvtBox.Text = string.Empty;
+
+            ServicePort = null;
+
+            await Task.WhenAll(from port in XFSConstants.PortRanges select ServiceDiscoveryForPort(UriBox.Text, port, serviceClasses));
+
+            if (ServicePort is null || string.IsNullOrWhiteSpace(ServiceUriBox.Text))
             {
                 PortBox.Text = "";
+                ServiceUriBox.Text = "";
                 MessageBox.Show("Failed on finding services.");
             }
-            else
-                PortBox.Text = ServicePort.ToString();
-
-            CmdBox.Text = commandString;
-            RspBox.Text = responseString;
-            ServiceUriBox.Text = deviceServiceURI;
         }
 
         public async Task<StatusCompletion> GetStatus()
@@ -177,9 +187,9 @@ namespace TestClientForms.Devices
             return null;
         }
 
-        public async Task<CapabilitiesCompletion> GetCapabilities()
+        public async Task<CapabilitiesCompletion> GetCapabilities(string uri = null)
         {
-            var device = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+            var device = new XFS4IoTClient.ClientConnection(new Uri($"{uri ?? ServiceUriBox.Text}"));
 
             try
             {

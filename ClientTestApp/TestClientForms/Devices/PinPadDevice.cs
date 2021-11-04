@@ -24,7 +24,7 @@ using XFS4IoT.PinPad.Commands;
 using XFS4IoT.PinPad.Completions;
 using XFS4IoT.PinPad.Events;
 using XFS4IoT;
-
+using XFS4IoT.Common;
 
 namespace TestClientForms.Devices
 {
@@ -34,6 +34,9 @@ namespace TestClientForms.Devices
             : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
         {
         }
+
+        public new Task DoServiceDiscovery()
+            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Keyboard, InterfaceClass.NameEnum.PinPad, InterfaceClass.NameEnum.Common });
 
         public async Task GetData()
         {

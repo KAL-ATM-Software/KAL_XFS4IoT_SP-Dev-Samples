@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="0.0.5-alpha.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="0.0.5-alpha.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="0.0.5-alpha.1" />
+	  <Compile Remove="CashDispenserFirmware\**" />
+	  <EmbeddedResource Remove="CashDispenserFirmware\**" />
+	  <None Remove="CashDispenserFirmware\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="0.0.6-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="0.0.6-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="0.0.6-alpha.1" />
   </ItemGroup>
 
   <ItemGroup>

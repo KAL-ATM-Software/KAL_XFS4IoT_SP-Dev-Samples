@@ -17,6 +17,7 @@ using XFS4IoT.Crypto.Commands;
 using XFS4IoT.Crypto.Completions;
 using XFS4IoT.Crypto.Events;
 using XFS4IoT;
+using XFS4IoT.Common;
 
 namespace TestClientForms.Devices
 {
@@ -26,6 +27,9 @@ namespace TestClientForms.Devices
             : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
         {
         }
+
+        public Task DoServiceDiscovery()
+            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Common });
 
         public async Task Initialization()
         {

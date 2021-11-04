@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
@@ -17,10 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="0.0.5-alpha.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="0.0.5-alpha.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="0.0.5-alpha.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="0.0.5-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="0.0.6-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="0.0.6-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="0.0.6-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="0.0.6-alpha.1" />
   </ItemGroup>
 
 </Project>

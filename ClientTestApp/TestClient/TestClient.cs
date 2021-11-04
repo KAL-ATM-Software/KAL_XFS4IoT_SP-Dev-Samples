@@ -48,12 +48,9 @@ namespace TestClient
                             break;
                         case "address"  : Address = value; break;
                         case "showjson" :
-                            if (string.IsNullOrEmpty(value))
-                                ShowJSON = true;
-                            else if (bool.TryParse(value, out bool bValue))
-                                ShowJSON = bValue;
-                            else 
-                                throw new Exception($"Invalid value {value}");
+                            ShowJSON = string.IsNullOrEmpty(value)
+                                        || (bool.TryParse(value, out bool bValue) ? bValue 
+                                        : throw new Exception($"Invalid value {value}"));
                             break;
                         case "waitforunsolic": waitForUnsolic = true; break;
 
@@ -116,44 +113,49 @@ namespace TestClient
                     Logger.LogLine($"Nonce : {nonce}");
 
                     Logger.LogLine("Dispense 100EUR");
-                    string token = MakeToken(nonce, true);
+                    string token = MakeToken(nonce, "100.00EUR");
                     Logger.LogLine($"Token: {token}");
                     await DoDispenseCash(connection, 100, "EUR", token);
-
                     await DoPresentCash(connection);
 
                     Logger.LogLine("Dispense : Stale token");
-                    token = MakeToken(nonce, true);
+                    token = MakeToken(nonce, "100.00EUR");
                     Logger.LogLine($"Token: {token}");
                     await DoDispenseCash(connection, 100, "EUR", token);
 
                     Logger.LogLine("Dispense : Invalid HMAC");
-                    token = MakeToken(nonce, false);
+                    token = MakeToken(nonce, "100.00EUR", false);
                     Logger.LogLine($"Invalid HMAC: {token}");
                     await DoDispenseCash(connection, 100, "EUR", token);
 
                     Logger.LogLine("Dispense : Invalid nonce");
-                    token = MakeToken("FFFF", true);
+                    token = MakeToken("FFFF", "100.00EUR");
                     Logger.LogLine($"Invalid nonce: {token}");
                     await DoDispenseCash(connection, 100, "EUR", token);
 
                     Logger.LogLine("Dispense : Value doesn't match token");
-                    token = MakeToken(await DoGetCommandNonce(connection), true);
+                    token = MakeToken(await DoGetCommandNonce(connection), "100.00EUR");
                     await DoDispenseCash(connection, 200, "EUR", token);
+                    await DoClearCommandNonce(connection);
 
                     Logger.LogLine("Dispense : Currency doesn't match token");
-                    token = MakeToken(await DoGetCommandNonce(connection), true);
-                    await DoDispenseCash(connection, 200, "EUR", token);
+                    token = MakeToken(await DoGetCommandNonce(connection), "200.00EUR");
+                    await DoDispenseCash(connection, 200, "GBP", token);
 
-                    Logger.LogLine("Dispense 100EUR");
-                    token = MakeToken(await DoGetCommandNonce(connection), true);
+                    Logger.LogLine("Dispense : Dispense/Present in multiple parts");
+                    token = MakeToken(await DoGetCommandNonce(connection), "300.00EUR");
                     await DoDispenseCash(connection, 100, "EUR", token);
                     await DoPresentCash(connection);
+                    await DoDispenseCash(connection, 100, "EUR", token);
+                    await DoPresentCash(connection);
+                    await DoDispenseCash(connection, 100, "EUR", token);
+                    await DoPresentCash(connection);
+                    await DoDispenseCash(connection, 100, "EUR", token); // Invalid Token
                 }
 
                 async Task DoAll()
                 {
-                    await DoCardReader();
+                    //await DoCardReader();
                     await DoCashDispenser(); 
                 }
 
@@ -183,21 +185,20 @@ namespace TestClient
             }
         }
 
-        private static string MakeToken(string nonce, bool valid)
+        private static string MakeToken(string nonce, string Value, bool valid=true)
         {
             // 'valid' or invalid HMAC. 
             var HMAC = valid ? "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F2"
                              : "CB735612FD6141213C2827FB5A6A4F4846D7A7347B15434916FEA6AC16F3D2F3";
 
-            var tokenBuilder = new System.Text.StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,DISPENSE1=100.00EUR,ANOTHERKEY=12345,HMACSHA256={HMAC}");
+            var tokenBuilder = new System.Text.StringBuilder($"NONCE={nonce},TOKENFORMAT=1,TOKENLENGTH=$$$$,DISPENSE1={Value},ANOTHERKEY=12345,HMACSHA256={HMAC}");
 
             // The token length field is fix at four digits to make it easy to calculate. 
             // Inject this into the string. 
             var len = $"{tokenBuilder.Length:X4}";
             tokenBuilder = tokenBuilder.Replace("$$$$", len);
 
-            string token = tokenBuilder.ToString();
-            return token;
+            return tokenBuilder.ToString();
         }
 
         private static readonly Regex paramRegex = new("^[/-](?<name>.*?)(?:[=:](?<value>.*))?$");
@@ -256,7 +257,7 @@ namespace TestClient
 
             // We want to do the query for the capabilities in parallel for each service to speed things up. 
             // So we create all the async 'GetServiceDetails' tasks as a group and then wait for them all to finish.  
-            var servicesDetails = (from ep in services.Skip(1)
+            var servicesDetails = (from ep in services
                                    let uri = new Uri(ep.ServiceURI)
                                    select (Uri: uri, task: GetServiceDetails(uri))
                                   ).ToArray();
@@ -295,7 +296,7 @@ namespace TestClient
         private static async Task<ClientConnection> OpenService(Uri service)
         {
             // Create the connection object. This doesn't start anything...  
-            ClientConnection connection
+            var connection
                 = new ClientConnection(
                     EndPoint: service
                     );
@@ -672,7 +673,7 @@ namespace TestClient
                 ConsoleColor msgColour = msgBase.Header.Type switch
                 {
                     MessageHeader.TypeEnum.Command => ConsoleColor.Blue,
-                    MessageHeader.TypeEnum.Acknowledgement => ConsoleColor.DarkGray,
+                    MessageHeader.TypeEnum.Acknowledge => ConsoleColor.DarkGray,
                     MessageHeader.TypeEnum.Event => ConsoleColor.Yellow,
                     MessageHeader.TypeEnum.Completion => ConsoleColor.Green,
                     MessageHeader.TypeEnum.Unsolicited => ConsoleColor.DarkYellow,

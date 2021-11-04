@@ -38,7 +38,20 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CardReaderSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
-            MediaStatus = MediaStatusEnum.NotPresent;
+
+            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
+                                                 CommonStatusClass.PositionStatusEnum.InPosition,
+                                                 0,
+                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+
+            CardReaderStatus = new CardReaderStatusClass(CardReaderStatusClass.MediaEnum.NotPresent,
+                                                         CardReaderStatusClass.SecurityEnum.NotSupported,
+                                                         CardReaderStatusClass.ChipPowerEnum.NoCard,
+                                                         CardReaderStatusClass.ChipModuleEnum.Ok,
+                                                         CardReaderStatusClass.MagWriteModuleEnum.Ok,
+                                                         CardReaderStatusClass.FrontImageModuleEnum.NotSupported,
+                                                         CardReaderStatusClass.BackImageModuleEnum.NotSupported);
         }
 
         #region CardReader Interface
@@ -57,7 +70,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                             CancellationToken cancellation)
         {
             if (acceptCardInfo.DataToRead != ReadCardRequest.CardDataTypesEnum.NoDataRead ||
-                MediaStatus != MediaStatusEnum.Present)
+                CardReaderStatus.Media != CardReaderStatusClass.MediaEnum.Present)
             {
                 await events.InsertCardEvent();
 
@@ -65,7 +78,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 await events.MediaInsertedEvent();
             }
 
-            MediaStatus = MediaStatusEnum.Present;
+            CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Present;
 
             return new AcceptCardResult(MessagePayload.CompletionCodeEnum.Success);
         }
@@ -189,7 +202,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            MediaStatus = MediaStatusEnum.NotPresent;
+            CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.NotPresent;
 
             return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success);
         }
@@ -324,9 +337,9 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             for (; ; )
             {
                 await cardTakenSignal?.WaitAsync();
-                if (MediaStatus != MediaStatusEnum.NotPresent)
+                if (CardReaderStatus.Media != CardReaderStatusClass.MediaEnum.NotPresent)
                 {
-                    MediaStatus = MediaStatusEnum.NotPresent;
+                    CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.NotPresent;
                     await cardReaderServiceProvider.IsNotNull().MediaRemovedEvent();
                 }
             }
@@ -386,7 +399,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             }
             else
             {
-                if (MediaStatus == MediaStatusEnum.NotPresent)
+                if (CardReaderStatus.Media == CardReaderStatusClass.MediaEnum.NotPresent)
                 {
                     return new MoveCardResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                               $"No card present in the reader.",
@@ -423,17 +436,17 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                     cardUnitInfo.UnitStatus = CardStatusClass.ReplenishmentStatusEnum.High;
                 }
 
-                MediaStatus = MediaStatusEnum.NotPresent;
+                CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.NotPresent;
             }
             else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Exit)
             {
-                MediaStatus = MediaStatusEnum.Entering;
+                CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Entering;
 
                 new Thread(CardTakenThread).IsNotNull().Start();
             }
             else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Transport)
             {
-                MediaStatus = MediaStatusEnum.Present;
+                CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Present;
             }
 
             return new MoveCardResult(MessagePayload.CompletionCodeEnum.Success, 
@@ -584,139 +597,56 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// End exchange operation
         /// </summary>
         public Task<EndExchangeResult> EndExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
+
+        /// <summary>
+        /// CardReader Status
+        /// </summary>
+        public CardReaderStatusClass CardReaderStatus { get; set; }
+
+        /// <summary>
+        /// CardReader Capabilities
+        /// </summary>
+        public CardReaderCapabilitiesClass CardReaderCapabilities { get; set; } = new(CardReaderCapabilitiesClass.DeviceTypeEnum.Motor,
+                                                                                      CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track3,
+                                                                                      CardReaderCapabilitiesClass.WritableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track3,
+                                                                                      CardReaderCapabilitiesClass.ChipProtocolsEnum.T0 | CardReaderCapabilitiesClass.ChipProtocolsEnum.T1,
+                                                                                      CardReaderCapabilitiesClass.SecurityTypeEnum.NotSupported,
+                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                                                                                      FluxSensorProgrammable: false,
+                                                                                      ReadWriteAccessFollowingExit: false,
+                                                                                      CardReaderCapabilitiesClass.WriteMethodsEnum.Loco,
+                                                                                      CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Cold | CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Warm,
+                                                                                      CardReaderCapabilitiesClass.MemoryChipProtocolsEnum.NotSupported,
+                                                                                      CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
+                                                                                      true);
+
         #endregion
 
         #region Common Interface
-        public StatusCompletion.PayloadData Status()
-        {
-            StatusPropertiesClass common = new(
-                StatusPropertiesClass.DeviceEnum.Online,
-                PositionStatusEnum.InPosition,
-                0,
-                StatusPropertiesClass.AntiFraudModuleEnum.Ok);
+        /// <summary>
+        /// Stores Commons status
+        /// </summary>
+        public CommonStatusClass CommonStatus { get; set; }
 
-            StatusClass cardReader = new(
-                MediaStatus switch
+        /// <summary>
+        /// Stores Common Capabilities
+        /// </summary>
+        public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
+                new()
                 {
-                    MediaStatusEnum.Entering => StatusClass.MediaEnum.Entering,
-                    MediaStatusEnum.Jammed => StatusClass.MediaEnum.Jammed,
-                    MediaStatusEnum.Latched => StatusClass.MediaEnum.Latched,
-                    MediaStatusEnum.NotPresent => StatusClass.MediaEnum.NotPresent,
-                    MediaStatusEnum.NotSupported => StatusClass.MediaEnum.NotSupported,
-                    MediaStatusEnum.Present => StatusClass.MediaEnum.Present,
-                    MediaStatusEnum.Unknown => StatusClass.MediaEnum.Unknown,
-                    _ => null
-                },
-                StatusClass.SecurityEnum.NotSupported,
-                StatusClass.ChipPowerEnum.PoweredOff,
-                StatusClass.ChipModuleEnum.Ok,
-                StatusClass.MagWriteModuleEnum.Ok,
-                StatusClass.FrontImageModuleEnum.Ok,
-                StatusClass.BackImageModuleEnum.Ok);
-
-            return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                    null,
-                                                    common,
-                                                    cardReader);
-        }
-
-        public CapabilitiesCompletion.PayloadData Capabilities()
-        {
-            CapabilityPropertiesClass common = new(
-                ServiceVersion: "1.0",
-                DeviceInformation: new List<DeviceInformationClass>() 
-                { 
-                    new DeviceInformationClass(
-                            ModelName: "Simulator",
-                            SerialNumber: "123456-78900001",
-                            RevisionNumber: "1.0",
-                            ModelDescription: "KAL simualtor",
-                            Firmware: new List<FirmwareClass>() 
-                            {
-                                new FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0") 
-                            },
-                            Software: new List<SoftwareClass>()
-                            {
-                                new SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            }) 
-                },
-                VendorModeIformation: new VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>() 
-                    { 
-                        "ReadRawData",
-                        "EjectCard"
-                    }),
-                PowerSaveControl: false,
-                AntiFraudModule: false);
-
-            CapabilitiesClass cardReader = new(
-                CapabilitiesClass.TypeEnum.Motor,
-                new CapabilitiesClass.ReadTracksClass(
-                    Track1: true,
-                    Track2: true,
-                    Track3: true,
-                    Watermark: false,
-                    FrontTrack1: false,
-                    FrontImage: false,
-                    BackImage: false,
-                    Track1JIS: false,
-                    Track3JIS: false,
-                    Ddi: false),
-                new CapabilitiesClass.WriteTracksClass(
-                        Track1: true, 
-                        Track2: true, 
-                        Track3: true, 
-                        FrontTrack1: false, 
-                        Track1JIS: false, 
-                        Track3JIS: false),
-                new CapabilitiesClass.ChipProtocolsClass(
-                        ChipT0: true, 
-                        ChipT1: true, 
-                        ChipProtocolNotRequired: false, 
-                        ChipTypeAPart3: false, 
-                        ChipTypeAPart4: false, 
-                        ChipTypeB: false, 
-                        ChipTypeNFC: false),
-                CapabilitiesClass.SecurityTypeEnum.NotSupported,
-                CapabilitiesClass.PowerOnOptionEnum.Transport,
-                CapabilitiesClass.PowerOffOptionEnum.Transport,
-                FluxSensorProgrammable: false,
-                ReadWriteAccessFromExit: false,
-                new CapabilitiesClass.WriteModeClass(
-                        Loco: true, 
-                        Hico: false, 
-                        Auto: true),
-                new CapabilitiesClass.ChipPowerClass(
-                        Cold: true, 
-                        Warm: true, 
-                        Off: true),
-                new CapabilitiesClass.MemoryChipProtocolsClass(
-                        Siemens4442: false, 
-                        Gpm896: false),
-                new CapabilitiesClass.PositionsClass(true, true),
-                CardTakenSensor: true);
-
-
-            List<InterfaceClass> interfaces = new()
-            {
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Common,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                    Commands: new()
                     {
                         { "Common.Status", null },
                         { "Common.Capabilities", null },
                     },
-                    Events: new (),
+                    Events: new(),
                     MaximumRequests: 1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.CardReader,
-                    Commands: new ()
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CardReader,
+                    Commands: new()
                     {
                         { "CardReader.ReadRawData", null },
                         { "CardReader.Reset", null },
@@ -742,15 +672,55 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                         { "CardReader.EMVClessReadStatusEvent", null },
                         { "CardReader.CardActionEvent", null },
                     },
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Storage,
+                    Commands: new()
+                    {
+                        { "Storage.GetStorage", null },
+                        { "Storage.SetStorage", null },
+                    },
+                    Events: new()
+                    {
+                        { "Storage.StorageThreshold", null },
+                        { "Storage.StorageChanged", null },
+                        { "Storage.StorageError", null },
+                    },
                     MaximumRequests: 1000)
-            };
-
-            return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          interfaces,
-                                                          common,
-                                                          cardReader);
-        }
+                },
+                ServiceVersion: "1.0",
+                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
+                {
+                    new CommonCapabilitiesClass.DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
+                            {
+                                new CommonCapabilitiesClass.FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0")
+                            },
+                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
+                            {
+                                new CommonCapabilitiesClass.SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            })
+                },
+                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
+                    AllowOpenSessions: true,
+                    AllowedExecuteCommands: new List<string>()
+                    {
+                        "CardReader.ReadRawData",
+                        "CardReader.Move",
+                        "Storage.GetStorage",
+                        "Storage.SetStorage",
+                    }),
+                PowerSaveControl: false,
+                AntiFraudModule: false);
 
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
@@ -760,11 +730,6 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
 
         #endregion 
-
-        /// <summary>
-        /// Specify the current status of media after card is accepted.
-        /// </summary>
-        public MediaStatusEnum MediaStatus { get; private set; } = MediaStatusEnum.Unknown;
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
 

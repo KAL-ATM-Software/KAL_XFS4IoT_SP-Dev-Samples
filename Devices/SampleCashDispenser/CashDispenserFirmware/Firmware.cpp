@@ -61,24 +61,14 @@ bool KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::VerifyAndDispense(System::
             cout << hex << showbase << c << '\n';
     }
 
-    // Check that the token is valid. 
+    // Check that the token is valid and authorises the requested dispense. 
     // Include null in token (buffer) size.
-    auto tokenValid = ValidateToken(utf8Token.c_str(), utf8Token.size() + 1);
-    if (!tokenValid)
+    auto Authorised = AuthoriseDispenseAgainstToken(utf8Token.c_str(), utf8Token.size() + 1, Value, 0, utf8Currency.c_str());
+    if (!Authorised)
         return false; 
-
-    tokenValid = ParseDispenseToken(utf8Token.c_str(), utf8Token.size() + 1);
-    if (!tokenValid)
-        return false;
 
     auto TokenValues = GetDispenseKeyValues();
     cout << "Got dispense token values: Currency:" << string(TokenValues->Currency, 3) << " value:" << TokenValues->Value << " cents:" << TokenValues->Fraction << "\n";
-
-    if (string(TokenValues->Currency, 3) != utf8Currency)
-        return false;
-
-    if (TokenValues->Value != Value)
-        return false;
 
     // Simulate the actual dispense 
     cout << "dispensing: " << TokenValues->Value << "." << TokenValues->Fraction << string(TokenValues->Currency, 3) << "\n";
@@ -102,18 +92,18 @@ System::String^ KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::GetCommandNonce
 
 void KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::ClearCommandNonce()
 {
-    ClearNonce(); 
+    InvalidateToken(); // Also delete any existing token. 
 }
 
 extern "C" void FatalError(char const* const Message)
 {
-    cerr << Message;
+    Log( Message );
     exit(-1);  
 };
 
 extern "C" void Log(char const* const Message)
 {
-    cout << Message << "\n";
+    KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::GetFirmware()->Log( gcnew String((std::string("FIRMARE: ") + Message).c_str()));
 };
 
 extern "C" void NewNonce(char const** outNonce)

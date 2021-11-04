@@ -6,11 +6,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using XFS4IoT;
-using XFS4IoT.TextTerminal;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Completions;
 using XFS4IoT.Completions;
@@ -42,6 +40,16 @@ namespace TextTerminalSample
         {
             Logger.IsNotNull($"Invalid parameter received in the {nameof(TextTerminalSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
+
+            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
+                                                 CommonStatusClass.PositionStatusEnum.InPosition,
+                                                 0,
+                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+
+            TextTerminalStatus = new TextTerminalStatusClass(TextTerminalStatusClass.KeyboardEnum.Off,
+                                                             TextTerminalStatusClass.KeyLockEnum.NotAvailable,
+                                                             0, 0);
         }
 
         /// <summary>
@@ -73,9 +81,9 @@ namespace TextTerminalSample
                                                           new()
                                                           {
                                                               "enter", "cancel", "clear",
-                                                              "fdk01", "fdk02", "fdk03", 
-                                                              "fdk04", "fdk05", "fdk06", 
-                                                              "fdk07", "fdk08", 
+                                                              "fdk01", "fdk02", "fdk03",
+                                                              "fdk04", "fdk05", "fdk06",
+                                                              "fdk07", "fdk08",
                                                           });
         }
 
@@ -128,12 +136,12 @@ namespace TextTerminalSample
         {
             TextTerminalUI.SetReading(true);
             StringBuilder buffer = new StringBuilder(readInfo.NumChars);
-            
-            for(; buffer.Length < readInfo.NumChars || !readInfo.AutoEnd; )
+
+            for (; buffer.Length < readInfo.NumChars || !readInfo.AutoEnd;)
             {
                 //Await key press 
                 var key = await readPressChannel.Reader.ReadAsync(cancellation);
-                
+
                 //Check if key is a terminate key.
                 if (readInfo.TerminateCommandKeys.Contains(key))
                 {
@@ -151,7 +159,7 @@ namespace TextTerminalSample
                             TextTerminalUI.WriteAt(readInfo.PositionX, readInfo.PositionY, new string(' ', buffer.Length));
                             buffer.Clear();
                             break;
-                        //Default - Send KeyEvent only
+                            //Default - Send KeyEvent only
                     }
                 }
                 //Check if key is a valid active key.
@@ -159,7 +167,7 @@ namespace TextTerminalSample
                 {
                     //Add to buffer and write to display.
                     buffer.Append(key);
-                    TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length-1, readInfo.PositionY, key);
+                    TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length - 1, readInfo.PositionY, key);
                     await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(new(key, null));
                 }
                 else
@@ -190,47 +198,96 @@ namespace TextTerminalSample
             return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
         }
 
+        /// <summary>
+        /// TextTerminal Status
+        /// </summary>
+        public TextTerminalStatusClass TextTerminalStatus { get; set; }
+
+        /// <summary>
+        /// TextTerminal Capabilities
+        /// </summary>
+        public TextTerminalCapabilitiesClass TextTerminalCapabilities { get; set; } = new TextTerminalCapabilitiesClass(
+            Type: TextTerminalCapabilitiesClass.TypeEnum.Fixed,
+            Resolutions: new()
+            { new(32, 16), new(16, 16) },
+            KeyLock: false,
+            Cursor: true,
+            Forms: false
+            );
+
         #endregion
 
         #region COMMON interface
 
-        public StatusCompletion.PayloadData Status()
-        {
-            StatusPropertiesClass common = new(
-                Device: StatusPropertiesClass.DeviceEnum.Online,
-                DevicePosition: PositionStatusEnum.InPosition,
-                PowerSaveRecoveryTime: 0,
-                AntiFraudModule: StatusPropertiesClass.AntiFraudModuleEnum.Ok);
+        /// <summary>
+        /// Stores Commons status
+        /// </summary>
+        public CommonStatusClass CommonStatus { get; set; }
 
-            StatusClass textTerminal = new(
-                    Keyboard: TextTerminalUI.GetReading() ? StatusClass.KeyboardEnum.On : StatusClass.KeyboardEnum.Off, 
-                    KeyLock: StatusClass.KeyLockEnum.Off, 
-                    DisplaySizeX: CurrentWidth, 
-                    DisplaySizeY: CurrentHeight);
-
-            return new StatusCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                    null,
-                                                    common, 
-                                                    TextTerminal: textTerminal);
-        }
-
-        public CapabilitiesCompletion.PayloadData Capabilities()
-        {
-            CapabilityPropertiesClass common = new(
+        /// <summary>
+        /// Stores Common Capabilities
+        /// </summary>
+        public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
+                new()
+                {
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                    Commands: new()
+                    {
+                        { "Common.Status", null },
+                        { "Common.Capabilities", null },
+                    },
+                    Events: new(),
+                    MaximumRequests: 1000),
+                    new CommonCapabilitiesClass.InterfaceClass(
+                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.TextTerminal,
+                    Commands: new()
+                    {
+                        { "TextTerminal.Beep", null },
+                        { "TextTerminal.ClearScreen", null },
+                        //"TextTerminal.DefineKeys", null },
+                        //"TextTerminal.GetFormList", null },
+                        { "TextTerminal.GetKeyDetail", null },
+                        //"TextTerminal.GetQueryField", null },
+                        //"TextTerminal.GetQueryForm", null },
+                        { "TextTerminal.Read", null },
+                        //"TextTerminal.ReadForm", null },
+                        { "TextTerminal.Reset", null },
+                        { "TextTerminal.SetResolution", null },
+                        { "TextTerminal.Write", null },
+                        //"TextTerminal.WriteForm", null },
+                    },
+                    Events: new()
+                    {
+                        { "TextTerminal.FieldErrorEvent", null },
+                        { "TextTerminal.FieldWarningEvent", null },
+                        { "TextTerminal.KeyEvent", null },
+                    },
+                    MaximumRequests: 1000)
+                },
                 ServiceVersion: "1.0",
-                DeviceInformation: new List<DeviceInformationClass>() { new DeviceInformationClass(
-                    ModelName: "Simulator",
-                    SerialNumber: "123456-78900001",
-                    RevisionNumber: "1.0",
-                    ModelDescription: "KAL simualtor",
-                    Firmware: new List<FirmwareClass>() {new FirmwareClass(
-                                                                           FirmwareName: "XFS4 SP",
-                                                                           FirmwareVersion: "1.0",
-                                                                           HardwareRevision: "1.0") },
-                    Software: new List<SoftwareClass>(){ new SoftwareClass(
-                                                                           SoftwareName: "XFS4 SP",
-                                                                           SoftwareVersion: "1.0") }) },
-                VendorModeIformation: new VendorModeInfoClass(
+                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
+                {
+                    new CommonCapabilitiesClass.DeviceInformationClass(
+                            ModelName: "Simulator",
+                            SerialNumber: "123456-78900001",
+                            RevisionNumber: "1.0",
+                            ModelDescription: "KAL simualtor",
+                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
+                            {
+                                new CommonCapabilitiesClass.FirmwareClass(
+                                        FirmwareName: "XFS4 SP",
+                                        FirmwareVersion: "1.0",
+                                        HardwareRevision: "1.0")
+                            },
+                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
+                            {
+                                new CommonCapabilitiesClass.SoftwareClass(
+                                        SoftwareName: "XFS4 SP",
+                                        SoftwareVersion: "1.0")
+                            })
+                },
+                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
                     AllowOpenSessions: true,
                     AllowedExecuteCommands: new List<string>()
                     {
@@ -252,63 +309,11 @@ namespace TextTerminalSample
                     }),
                 PowerSaveControl: false,
                 AntiFraudModule: false,
-                SynchronizableCommands: new List<string>(),
                 EndToEndSecurity: false,
                 HardwareSecurityElement: false,
                 ResponseSecurityEnabled: false);
 
-            CapabilitiesClass textTerminal = new(Type: CapabilitiesClass.TypeEnum.Fixed, 
-                                                 Resolutions: new() { new(32, 16), new(16, 16) }, 
-                                                 KeyLock: false, 
-                                                 Cursor: false, 
-                                                 Forms: false);
-
-
-            List<InterfaceClass> interfaces = new()
-            {
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.Common,
-                    Commands: new ()
-                    {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new (),
-                    MaximumRequests: 1000),
-                new InterfaceClass(
-                    Name: InterfaceClass.NameEnum.TextTerminal,
-                    Commands: new ()
-                    {
-                        { "TextTerminal.Beep", null },
-                        { "TextTerminal.ClearScreen", null },
-                        //"TextTerminal.DefineKeys", null },
-                        //"TextTerminal.GetFormList", null },
-                        { "TextTerminal.GetKeyDetail", null },
-                        //"TextTerminal.GetQueryField", null },
-                        //"TextTerminal.GetQueryForm", null },
-                        { "TextTerminal.Read", null },
-                        //"TextTerminal.ReadForm", null },
-                        { "TextTerminal.Reset", null },
-                        { "TextTerminal.SetResolution", null },
-                        { "TextTerminal.Write", null },
-                        //"TextTerminal.WriteForm", null },
-                    },
-                    Events: new ()
-                    {
-                        { "TextTerminal.FieldErrorEvent", null },
-                        { "TextTerminal.FieldWarningEvent", null },
-                        { "TextTerminal.KeyEvent", null },
-                    },
-                    MaximumRequests: 1000)
-            };
-
-            return new CapabilitiesCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          Interfaces: interfaces,
-                                                          Common: common,
-                                                          TextTerminal: textTerminal);
-        }
-
+        
         public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
         public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
