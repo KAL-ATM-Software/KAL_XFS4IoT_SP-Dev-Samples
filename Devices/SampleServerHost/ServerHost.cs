@@ -77,6 +77,27 @@ namespace Server
                 simPinPadDevice.SetServiceProvider = pinPadService;
                 Publisher.Add(pinPadService);
 
+                /// Printer Service Provider
+                var simPrinterDevice = new KAL.XFS4IoTSP.Printer.Sample.PrinterSample(Logger);
+                var printerService = new PrinterServiceProvider(EndpointDetails,
+                                                                ServiceName: "SimPrinter",
+                                                                simPrinterDevice,
+                                                                Logger,
+                                                                new FilePersistentData(Logger));
+
+                simPrinterDevice.SetServiceProvider = printerService;
+                Publisher.Add(printerService);
+
+                /// SIU Service Provider
+                var simLightsDevice = new KAL.XFS4IoTSP.Lights.Sample.LightsSample(Logger);
+                var lightsService = new LightsServiceProvider(EndpointDetails,
+                                                              ServiceName: "SimLights",
+                                                              simLightsDevice,
+                                                              Logger);
+
+                simLightsDevice.SetServiceProvider = lightsService;
+                Publisher.Add(lightsService);
+
                 // TODO: adding other services
 
                 await Publisher.RunAsync();

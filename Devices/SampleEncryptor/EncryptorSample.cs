@@ -663,7 +663,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// The start value (or Initialization Vector) can be provided as input data to this command, or it can beimported via TR-31 prior to requesting this command and referenced by name.
         /// The start value and start value keyare both optional parameters.
         /// </summary>
-        public async Task<CryptoDataResult> Crypto(ICryptoDataEvents events,
+        public async Task<CryptoDataResult> Crypto(CryptoCommandEvents events,
                                                    CryptoDataRequest request,
                                                    CancellationToken cancellation)
         {
@@ -713,7 +713,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// This input data is padded to necessary length mandated by the signature algorithm using padding parameter.
         /// Applications can use an alternative padding method by pre-formatting the data passed and combining this withthe standard padding method. 
         /// </summary>
-        public async Task<GenerateAuthenticationDataResult> GenerateSignature(IGenerateAuthenticationEvents events,
+        public async Task<GenerateAuthenticationDataResult> GenerateSignature(CryptoCommandEvents events,
                                                                               GenerateSignatureRequest request,
                                                                               CancellationToken cancellation)
         {
@@ -745,7 +745,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
         /// This command can be used for Message Authentication Code generation (i.e. macing).
         /// The input data ispadded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<GenerateAuthenticationDataResult> GenerateMAC(IGenerateAuthenticationEvents events,
+        public async Task<GenerateAuthenticationDataResult> GenerateMAC(CryptoCommandEvents events,
                                                                         GenerateMACRequest request,
                                                                         CancellationToken cancellation)
         {
@@ -761,7 +761,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// The start value (orInitialization Vector) can be provided as input data to this command, or it can be imported via TR-31 prior to requesting this command and referenced by name. 
         /// The start value and start value key are both optional parameters.
         /// </summary>
-        public async Task<VerifyAuthenticationDataResult> VerifySignature(IVerifyAuthenticationEvents events,
+        public async Task<VerifyAuthenticationDataResult> VerifySignature(CryptoCommandEvents events,
                                                                           VerifySignatureRequest request,
                                                                           CancellationToken cancellation)
         {
@@ -797,7 +797,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
         /// This command can be used for MAC verification.
         /// The input data is padded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<VerifyAuthenticationDataResult> VerifyMAC(IVerifyAuthenticationEvents events,
+        public async Task<VerifyAuthenticationDataResult> VerifyMAC(CryptoCommandEvents events,
                                                                     VerifyMACRequest request,
                                                                     CancellationToken cancellation)
         {
@@ -885,61 +885,56 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// Stores Common Capabilities
         /// </summary>
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
-                new()
-                {
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new(),
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.KeyManagement,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                    }
+                ),
+                KeyManagementInterface: new CommonCapabilitiesClass.KeyManagementInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "KeyManagement.DeleteKey", null },
-                        { "KeyManagement.ExportRSAEPPSignedItem", null },
-                        { "KeyManagement.GenerateKCV", null },
-                        { "KeyManagement.GenerateRSAKeyPair", null },
-                        { "KeyManagement.GetCertificate", null },
-                        { "KeyManagement.ImportKey", null },
-                        { "KeyManagement.Initialization", null },
-                        { "KeyManagement.LoadCertificate", null },
-                        { "KeyManagement.ReplaceCertificate", null },
-                        { "KeyManagement.Reset", null },
-                        { "KeyManagement.StartAuthenticate", null },
-                        { "KeyManagement.GetKeyDetail", null },
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateRSAKeyPair,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ImportKey,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.LoadCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ReplaceCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.StartAuthenticate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetKeyDetail,
                     },
                     Events: new()
                     {
-                        { "KeyManagement.CertificateChangeEvent", null },
-                        { "KeyManagement.InitializedEvent", null },
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.CertificateChangeEvent,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.InitializedEvent,
                     },
-                    MaximumRequests: 1000,
                     AuthenticationRequired: new()
                     {
-                        "KeyManagement.Initialization",
-                    }),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Crypto,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
+                    }
+                ),
+                CryptoInterface: new CommonCapabilitiesClass.CryptoInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Crypto.CryptoData", null },
-                        { "Crypto.Digest", null },
-                        { "Crypto.GenerateAuthentication", null },
-                        { "Crypto.GenerateRandom", null },
-                        { "Crypto.VerifyAuthentication", null },
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.CryptoData,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.Digest,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateAuthentication,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateRandom,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
                     },
                     Events: new()
                     {
-                        { "Crypto.IllegalKeyAccessEvent", null },
-                    },
-                    MaximumRequests: 1000)
-                },
-                ServiceVersion: "1.0",
+                        CommonCapabilitiesClass.CryptoInterfaceClass.EventEnum.IllegalKeyAccessEvent,
+                    }
+                ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
                     new CommonCapabilitiesClass.DeviceInformationClass(
@@ -961,25 +956,21 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                         SoftwareVersion: "1.0")
                             })
                 },
-                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "KeyManagement.Initialize"
-                    }),
                 PowerSaveControl: false,
                 AntiFraudModule: false,
-                EndToEndSecurity: true,
-                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
-                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
-                );
+                EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
+                (
+                    Required: CommonCapabilitiesClass.EndToEndSecurityClass.RequiredEnum.Always,
+                    HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                    ResponseSecurityEnabled: CommonCapabilitiesClass.EndToEndSecurityClass.ResponseSecurityEnabledEnum.NotSupported // ToDo: GetPresentStatus token support
+                ));
 
-        public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
-        public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
-        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
+        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
+        public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
+        public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
+        public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> ClearCommandNonce() => throw new NotImplementedException();
 
         #endregion
 

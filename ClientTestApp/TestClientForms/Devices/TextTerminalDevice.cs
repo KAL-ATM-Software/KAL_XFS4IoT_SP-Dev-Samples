@@ -50,7 +50,7 @@ namespace TestClientForms.Devices
             if (cmdResponse is ClearScreenCompletion response)
             {
                 RspBox.Text = response.Serialise();
-            }            
+            }
         }
 
         public async Task Write()

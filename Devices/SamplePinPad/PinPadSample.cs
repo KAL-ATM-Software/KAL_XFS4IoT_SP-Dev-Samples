@@ -25,7 +25,6 @@ using XFS4IoT.Common.Completions;
 using XFS4IoT.Common;
 using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.Crypto.Completions;
-using XFS4IoT.Keyboard;
 using XFS4IoT.Keyboard.Events;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
@@ -93,7 +92,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// If the application makes a call to [PinPad.GetPinblock](#pinpad.getpinblock) or a local verification command without the minimum PIN digits having been entered, 
         /// either the command will fail or the PIN verification will fail. It is the responsibility of the application to identify the mapping between the FDK code and the physical location of the FDK.
         /// </summary>
-        public async Task<PinEntryResult> PinEntry(IPinEntryEvents events, PinEntryRequest request, CancellationToken cancellation)
+        public async Task<PinEntryResult> PinEntry(KeyboardCommandEvents events, PinEntryRequest request, CancellationToken cancellation)
         {
             await events.EnterDataEvent();
 
@@ -122,7 +121,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         _ => EntryCompletionEnum.Enter
                     };
 
-                    await events.KeyEvent(new(EntryCompletion.Value, keyClass.KeyName));
+                    await events.KeyEvent(EntryCompletion.Value, keyClass.KeyName);
                     break;
                 }
                 else if (key == "clear") keysPressed = 0;
@@ -130,7 +129,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 else if (keysPressed < pinMax)
                 {
                     ++keysPressed;
-                    await events.KeyEvent(new KeyEvent.PayloadData());
+                    await events.KeyEvent();
                 }
             }
             return new PinEntryResult(MessagePayload.CompletionCodeEnum.Success,
@@ -142,7 +141,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// This function enables keyboard insercure mode and report entered key in clear text with solicited events. 
         /// For Keyboard device, this command will clear the pin unless the application has requested that the pin be maintained through the MaintainPin command.
         /// </summary>
-        public async Task<DataEntryResult> DataEntry(IDataEntryEvents events, DataEntryRequest request, CancellationToken cancellation)
+        public async Task<DataEntryResult> DataEntry(KeyboardCommandEvents events, DataEntryRequest request, CancellationToken cancellation)
         {
             await events.EnterDataEvent();
 
@@ -172,7 +171,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         _ => EntryCompletionEnum.Enter
                     };
 
-                    await events.KeyEvent(new(EntryCompletion.Value, keyClass.KeyName));
+                    await events.KeyEvent(EntryCompletion.Value, keyClass.KeyName);
                     break;
                 }
                 else if (key == "clear")
@@ -190,7 +189,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                     keys.Add(new(key));
                     ++keysPressed;
                 }
-                await events.KeyEvent(new KeyEvent.PayloadData(Digit: key));
+                await events.KeyEvent(Digit: key);
             }
 
             return new DataEntryResult(MessagePayload.CompletionCodeEnum.Success,
@@ -226,7 +225,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// Encryption key parts entered with this command are stored through either the ImportKey. 
         /// Each key part can only be stored once after which the secure key buffer will be cleared automatically.
         /// </summary>
-        public async Task<SecureKeyEntryResult> SecureKeyEntry(ISecureKeyEntryEvents events, SecureKeyEntryRequest request, CancellationToken cancellation)
+        public async Task<SecureKeyEntryResult> SecureKeyEntry(KeyboardCommandEvents events, SecureKeyEntryRequest request, CancellationToken cancellation)
         {
             await events.EnterDataEvent();
 
@@ -234,12 +233,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             {
                 await Task.Delay(300, cancellation);
 
-                await events.KeyEvent(new KeyEvent.PayloadData());
+                await events.KeyEvent();
             }
 
             if (!request.AutoEnd)
             {
-                await events.KeyEvent(new KeyEvent.PayloadData(EntryCompletionEnum.Enter, "enter"));
+                await events.KeyEvent(EntryCompletionEnum.Enter, "enter");
             }
 
             return new SecureKeyEntryResult(MessagePayload.CompletionCodeEnum.Success,
@@ -350,7 +349,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// The PIN block can be calculated using one of the algorithms specified in the device capabilities.
         /// This command will clear the PIN unless the application has requested that the PIN be maintained through the MaintinPin command enabled.
         /// </summary>
-        public async Task<PINBlockResult> GetPinBlock(IGetPinBlockEvents events, PINBlockRequest request, CancellationToken cancellation)
+        public async Task<PINBlockResult> GetPinBlock(PinPadCommandEvents events, PINBlockRequest request, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
             return new PINBlockResult(MessagePayload.CompletionCodeEnum.Success,
@@ -1129,7 +1128,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// The start value (or Initialization Vector) can be provided as input data to this command, or it can beimported via TR-31 prior to requesting this command and referenced by name.
         /// The start value and start value keyare both optional parameters.
         /// </summary>
-        public async Task<CryptoDataResult> Crypto(ICryptoDataEvents events,
+        public async Task<CryptoDataResult> Crypto(CryptoCommandEvents events,
                                                    CryptoDataRequest request,
                                                    CancellationToken cancellation)
         {
@@ -1179,7 +1178,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// This input data is padded to necessary length mandated by the signature algorithm using padding parameter.
         /// Applications can use an alternative padding method by pre-formatting the data passed and combining this withthe standard padding method. 
         /// </summary>
-        public async Task<GenerateAuthenticationDataResult> GenerateSignature(IGenerateAuthenticationEvents events,
+        public async Task<GenerateAuthenticationDataResult> GenerateSignature(CryptoCommandEvents events,
                                                                               GenerateSignatureRequest request,
                                                                               CancellationToken cancellation)
         {
@@ -1211,7 +1210,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
         /// This command can be used for Message Authentication Code generation (i.e. macing).
         /// The input data ispadded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<GenerateAuthenticationDataResult> GenerateMAC(IGenerateAuthenticationEvents events,
+        public async Task<GenerateAuthenticationDataResult> GenerateMAC(CryptoCommandEvents events,
                                                                         GenerateMACRequest request,
                                                                         CancellationToken cancellation)
         {
@@ -1227,7 +1226,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// The start value (orInitialization Vector) can be provided as input data to this command, or it can be imported via TR-31 prior to requesting this command and referenced by name. 
         /// The start value and start value key are both optional parameters.
         /// </summary>
-        public async Task<VerifyAuthenticationDataResult> VerifySignature(IVerifyAuthenticationEvents events,
+        public async Task<VerifyAuthenticationDataResult> VerifySignature(CryptoCommandEvents events,
                                                                           VerifySignatureRequest request,
                                                                           CancellationToken cancellation)
         {
@@ -1263,7 +1262,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
         /// This command can be used for MAC verification.
         /// The input data is padded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<VerifyAuthenticationDataResult> VerifyMAC(IVerifyAuthenticationEvents events,
+        public async Task<VerifyAuthenticationDataResult> VerifyMAC(CryptoCommandEvents events,
                                                                     VerifyMACRequest request,
                                                                     CancellationToken cancellation)
         {
@@ -1346,99 +1345,94 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// Stores Common Capabilities
         /// </summary>
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
-                new()
-                {
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new(),
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.KeyManagement,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                    }
+                ),
+                KeyManagementInterface: new CommonCapabilitiesClass.KeyManagementInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "KeyManagement.DeleteKey", null },
-                        { "KeyManagement.ExportRSAEPPSignedItem", null },
-                        { "KeyManagement.GenerateKCV", null },
-                        { "KeyManagement.GenerateRSAKeyPair", null },
-                        { "KeyManagement.GetCertificate", null },
-                        { "KeyManagement.ImportKey", null },
-                        { "KeyManagement.Initialization", null },
-                        { "KeyManagement.LoadCertificate", null },
-                        { "KeyManagement.ReplaceCertificate", null },
-                        { "KeyManagement.Reset", null },
-                        { "KeyManagement.StartAuthenticate", null },
-                        { "KeyManagement.GetKeyDetail", null },
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateRSAKeyPair,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ImportKey,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.LoadCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ReplaceCertificate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.StartAuthenticate,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetKeyDetail,
                     },
                     Events: new()
                     {
-                        { "KeyManagement.CertificateChangeEvent", null },
-                        { "KeyManagement.InitializedEvent", null },
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.CertificateChangeEvent,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.InitializedEvent,
                     },
-                    MaximumRequests: 1000,
                     AuthenticationRequired: new()
                     {
-                        "KeyManagement.Initialization",
-                    }),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Crypto,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
+                    }
+                ),
+                CryptoInterface: new CommonCapabilitiesClass.CryptoInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Crypto.CryptoData", null },
-                        { "Crypto.Digest", null },
-                        { "Crypto.GenerateAuthentication", null },
-                        { "Crypto.GenerateRandom", null },
-                        { "Crypto.VerifyAuthentication", null },
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.CryptoData,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.Digest,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateAuthentication,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateRandom,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
                     },
                     Events: new()
                     {
-                        { "Crypto.IllegalKeyAccessEvent", null },
-                    },
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.PinPad,
+                        CommonCapabilitiesClass.CryptoInterfaceClass.EventEnum.IllegalKeyAccessEvent,
+                    }
+                ),
+                PinPadInterface: new CommonCapabilitiesClass.PinPadInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "PinPad.GetPinblock", null },
-                        { "PinPad.GetQueryPCIPTSDeviceId", null },
-                        { "PinPad.LocalDES", null },
-                        { "PinPad.LocalVisa", null },
-                        { "PinPad.MaintainPin", null },
-                        { "PinPad.PresentIDC", null },
-                        { "PinPad.Reset", null },
-                        { "PinPad.SetPinblockData", null },
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetPinBlock,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetQueryPCIPTSDeviceId,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.LocalDES,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.LocalVisa,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.MaintainPin,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.PresentIDC,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.SetPinBlockData,
                     },
                     Events: new()
                     {
-                        { "PinPad.DUKPTKSNEvent", null },
-                        { "PinPad.IllegalKeyAccessEvent", null },
-                    },
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Keyboard,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.DUKPTKSNEvent,
+                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.IllegalKeyAccessEvent,
+                    }
+                ),
+                KeyboardInterface: new CommonCapabilitiesClass.KeyboardInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Keyboard.DataEntry", null },
-                        { "Keyboard.DefineLayout", null },
-                        { "Keyboard.GetLayout", null },
-                        { "Keyboard.KeypressBeep", null },
-                        { "Keyboard.PinEntry", null },
-                        { "Keyboard.Reset", null },
-                        { "Keyboard.SecureKeyEntry", null },
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DataEntry,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DefineLayout,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.GetLayout,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.KeypressBeep,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.PinEntry,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.SecureKeyEntry,
                     },
                     Events: new()
                     {
-                        { "Keyboard.EnterDataEvent", null },
-                        { "Keyboard.KeyEvent", null },
-                        { "Keyboard.LayoutEvent", null },
-                    },
-                    MaximumRequests: 1000)
-                },
-                ServiceVersion: "1.0",
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.EnterDataEvent,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.KeyEvent,
+                        CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.LayoutEvent,
+                    }
+                ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
                     new CommonCapabilitiesClass.DeviceInformationClass(
@@ -1460,25 +1454,21 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                         SoftwareVersion: "1.0")
                             })
                 },
-                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "KeyManagement.Initialize"
-                    }),
                 PowerSaveControl: false,
                 AntiFraudModule: false,
-                EndToEndSecurity: true,
-                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
-                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
-                );
+                EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
+                (
+                    Required: CommonCapabilitiesClass.EndToEndSecurityClass.RequiredEnum.Always,
+                    HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                    ResponseSecurityEnabled: CommonCapabilitiesClass.EndToEndSecurityClass.ResponseSecurityEnabledEnum.NotSupported // ToDo: GetPresentStatus token support
+                ));
 
-        public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
-        public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
-        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
+        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
+        public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
+        public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
+        public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> ClearCommandNonce() => throw new NotImplementedException();
 
         #endregion
 

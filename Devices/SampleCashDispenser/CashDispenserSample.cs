@@ -38,13 +38,16 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// <returns></returns>
         public async Task RunAsync()
         {
+            CashDispenserServiceProvider cashDispenserServiceProvider = SetServiceProvider as CashDispenserServiceProvider;
             for (; ; )
             {
                 // Check if presented cash is taken. When cash is taken, set output position empty, shutter closed and fire ItemsTakenEvent
                 await cashTakenSignal?.WaitAsync();
+                if (positionStatus.PositionStatus != CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.NotEmpty)
+                    continue;
                 positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
-                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
-                //await ServiceProvider.IsA<CashDispenserServiceProvider>().ItemsTakenEvent(new(ItemsTakenEvent.PayloadData.PositionEnum.Center));
+                positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
+                await cashDispenserServiceProvider.ItemsTakenEvent(CashDispenserCapabilitiesClass.OutputPositionEnum.Center);
             }
         }
 
@@ -72,7 +75,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.SafeDoorEnum.Closed,
                                                                  CashManagementStatusClass.DispenserEnum.Ok,
-                                                                 CashManagementStatusClass.AcceptorEnum.NotSupported);
+                                                                 CashManagementStatusClass.AcceptorEnum.NotSupported,
+                                                                 AllBanknoteIDs.ToDictionary(i => i.Key, i => true));
 
             Firmware = Firmware.GetFirmware(new FirmwareLogger(Logger));
         }
@@ -89,7 +93,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         }
 
         #region CashDispenser Interface
-        public async Task<DispenseResult> DispenseAsync(IDispenseEvents events, DispenseRequest dispenseInfo, CancellationToken cancellation)
+        public async Task<DispenseResult> DispenseAsync(DispenseCommandEvents events, DispenseRequest dispenseInfo, CancellationToken cancellation)
 		{
             if (dispenseInfo.E2EToken is null)
                 return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, 
@@ -156,12 +160,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             {
                 CashUnitInfo.ContainsKey(item.Key).IsTrue($"Invalid cash unit ID supplied by the framework.");
 
-                string noteId = string.Empty;
-                foreach (var banknoteItem in CashUnitInfo[item.Key].CashUnitStorageConfig.Configuration.BanknoteItems)
-                {
-                    noteId = banknoteItem.Key;
-                    break;
-                }
+                string noteId = CashUnitInfo[item.Key].CashUnitStorageConfig.Configuration.BanknoteItems[0];
                 if (LastDispenseResult.ContainsKey(item.Key))
                 {
                     if (LastDispenseResult[item.Key].StorageCashOutCount.Stacked.ItemCounts.ContainsKey(noteId))
@@ -187,7 +186,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             return new DispenseResult(MessagePayload.CompletionCodeEnum.Success, dispenseInfo.Values, LastDispenseResult);
         }
 
-        public async Task<PresentCashResult> PresentCashAsync(IPresentEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
+        public async Task<PresentCashResult> PresentCashAsync(ShutterStatusChangedCommandEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
             
@@ -201,7 +200,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             // When cash is presented successfully, set StackerStatus, OutputpoistionStatus and shutter status
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.NotEmpty;
-            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Open;
+            positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Open;
 
             foreach (var item in LastDispenseResult)
             {
@@ -212,11 +211,13 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                     LastDispenseResult[item.Key].Count = 0;
                 }
             }
+            
+            new Thread(CashTakenThread).IsNotNull().Start();
 
             return new PresentCashResult(MessagePayload.CompletionCodeEnum.Success, 0, LastDispenseResult);
         }
 
-        public async Task<RejectResult> RejectAsync(IRejectEvents events, CancellationToken cancellation)
+        public async Task<RejectResult> RejectAsync(ItemInfoAvailableCommandEvent events, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -231,7 +232,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
-            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+            positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
@@ -254,7 +255,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// The method completes with success if the device successfully manages to test all of the testable cash units regardless of the outcome of the test. 
         /// This is the case if all testable cash units could be tested and a dispense was possible from at least one of the cash units.
         /// </summary>
-        public async Task<TestCashUnitsResult> TestCashUnitsAsync(ITestCashUnitsEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
+        public async Task<TestCashUnitsResult> TestCashUnitsAsync(DispenserCommandEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -287,7 +288,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Perform count operation to empty the specified physical cash unit(s). 
         /// All items dispensed from the cash unit are counted and moved to the specified output location.
         /// </summary>
-        public async Task<CountResult> CountAsync(ICountEvents events, CountRequest countInfo, CancellationToken cancellation)
+        public async Task<CountResult> CountAsync(DispenserCommandEvents events, CountRequest countInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -373,7 +374,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Retracted items will be moved to either a retract cash unit, a reject cash unit, item cash units, the transport or the intermediate stacker. 
         /// After the items are retracted the shutter is closed automatically, even if the ShutterControl capability is set to false.
         /// </summary>
-        public async Task<RetractResult> RetractAsync(IRetractEvents events, RetractRequest retractInfo, CancellationToken cancellation)
+        public async Task<RetractResult> RetractAsync(RetractCommandEvents events, RetractRequest retractInfo, CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
 
@@ -387,7 +388,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
-            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+            positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
@@ -400,7 +401,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty;
-            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+            positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
             return new RetractResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
         }
@@ -414,9 +415,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             await Task.Delay(1000, cancellation);
 
             if (shutterInfo.Action == OpenCloseShutterRequest.ActionEnum.Open)
-                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Open;
+                positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Open;
             if (shutterInfo.Action == OpenCloseShutterRequest.ActionEnum.Close)
-                positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+                positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
             return new OpenCloseShutterResult(MessagePayload.CompletionCodeEnum.Success);
         }
@@ -426,12 +427,12 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// ResetDeviceAsync
         /// Perform a hardware reset which will attempt to return the CashDispenser device to a known good state.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(IResetEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
+        public async Task<ResetDeviceResult> ResetDeviceAsync(ShutterStatusChangedCommandEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
 
             positionStatus.Transport = CashDispenserStatusClass.PositionStatusClass.TransportEnum.Ok;
-            positionStatus.Shutter = CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed;
+            positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
             return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success, MovementResult:null);
         }
@@ -453,7 +454,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// <summary>
         /// This method will cause a vendor dependent sequence of hardware events which will calibrate one or more physical cash units associated with a logical cash unit.
         /// </summary>
-        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(ICalibrateCashUnitEvents events,
+        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(ItemErrorCommandEvents events,
                                                                     CalibrateCashUnitRequest calibrationInfo,
                                                                     CancellationToken cancellation) => throw new NotSupportedException($"Calibration commans is not supported.");
 
@@ -492,7 +493,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             ItemInfoTypes: CashManagementCapabilitiesClass.ItemInfoTypesEnum.SerialNumber,
             SafeDoor: true,
             CashBox: false,
-            ClassificationList: false
+            ClassificationList: false,
+            AllBanknoteItems: AllBanknoteIDs
             );
         #endregion
 
@@ -505,7 +507,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         {
             if (CashUnitInfo.Count == 0)
             {
-                CashStorageInfo reject = new (new ("PHP1",
+                CashStorageInfo reject = new (new ("REJ",
+                                              "PHP1",
                                               2000,
                                               "sn90376878-0209",
                                               new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.Reject,
@@ -514,7 +517,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                         CashCapabilitiesClass.ItemsEnum.Unfit,
                                                                         true,
                                                                         1,
-                                                                        AllBanknoteIDs),
+                                                                        new List<string>(AllBanknoteIDs.Keys)),
                                               new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.Reject,
                                                                          CashCapabilitiesClass.ItemsEnum.Fit |
                                                                          CashCapabilitiesClass.ItemsEnum.Unrecognized |
@@ -525,12 +528,13 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                          50,
                                                                          false,
                                                                          false,
-                                                                         AllBanknoteIDs),
+                                                                         new List<string>(AllBanknoteIDs.Keys)),
                                               new CashUnitAdditionalInfoClass(1, false)));
 
                 CashUnitInfo.Add(reject.CashUnitStorageConfig.PositionName, reject);
 
-                CashStorageInfo retract = new (new ("PHP2",
+                CashStorageInfo retract = new (new ("RET",
+                                                    "PHP2",
                                                     2000,
                                                     "sn90376878-0228",
                                                     new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOutRetract,
@@ -539,7 +543,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                                 CashCapabilitiesClass.ItemsEnum.Unfit,
                                                                                 true,
                                                                                 1,
-                                                                                AllBanknoteIDs),
+                                                                                new List<string>(AllBanknoteIDs.Keys)),
                                                     new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashOutRetract,
                                                                                 CashCapabilitiesClass.ItemsEnum.Fit |
                                                                                 CashCapabilitiesClass.ItemsEnum.Unrecognized |
@@ -550,12 +554,13 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                                 50,
                                                                                 false,
                                                                                 false,
-                                                                                AllBanknoteIDs),
+                                                                                new List<string>(AllBanknoteIDs.Keys)),
                                                     new CashUnitAdditionalInfoClass(2, false)));
 
                 CashUnitInfo.Add(retract.CashUnitStorageConfig.PositionName, retract);
 
-                CashStorageInfo eur5 = new (new ("PHP3",
+                CashStorageInfo eur5 = new (new ("LOG1",
+                                                 "PHP3",
                                                  1500,
                                                  "sn90376878-0228",
                                                  new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOut,
@@ -563,7 +568,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                            CashCapabilitiesClass.ItemsEnum.Unfit,
                                                                            true,
                                                                            0,
-                                                                           AllBanknoteIDs),
+                                                                           new List<string>(AllBanknoteIDs.Keys)),
                                                  new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashOut,
                                                                             CashCapabilitiesClass.ItemsEnum.Fit,
                                                                             "EUR",
@@ -574,13 +579,14 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                             false,
                                                                             new()
                                                                             {
-                                                                                { "EUR5", AllBanknoteIDs["EUR5"] }
+                                                                                "EUR5"
                                                                             }),
                                                 new CashUnitAdditionalInfoClass(3, false)));
 
                 CashUnitInfo.Add(eur5.CashUnitStorageConfig.PositionName, eur5);
 
-                CashStorageInfo eur10 = new (new ("PHP4",
+                CashStorageInfo eur10 = new (new ("LOG2", 
+                                                  "PHP4",
                                                   1500,
                                                   "sn90376878-0229",
                                                   new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOut,
@@ -588,7 +594,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                             CashCapabilitiesClass.ItemsEnum.Unfit,
                                                                             true,
                                                                             1,
-                                                                            AllBanknoteIDs),
+                                                                            new List<string>(AllBanknoteIDs.Keys)),
                                                   new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashOut,
                                                                              CashCapabilitiesClass.ItemsEnum.Fit,
                                                                              "EUR",
@@ -599,13 +605,14 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                              false,
                                                                              new()
                                                                              {
-                                                                                 { "EUR10", AllBanknoteIDs["EUR10"] }
+                                                                                 "EUR10"
                                                                              }),
                                                   new CashUnitAdditionalInfoClass(4, false)));
 
                 CashUnitInfo.Add(eur10.CashUnitStorageConfig.PositionName, eur10);
 
-                CashStorageInfo eur20 = new (new ("PHP5",
+                CashStorageInfo eur20 = new (new ("LOG3", 
+                                                  "PHP5",
                                                   1500,
                                                   "sn90376878-0230",
                                                   new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOut,
@@ -613,7 +620,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                             CashCapabilitiesClass.ItemsEnum.Unfit,
                                                                             true,
                                                                             1,
-                                                                            AllBanknoteIDs),
+                                                                            new List<string>(AllBanknoteIDs.Keys)),
                                                   new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashOut,
                                                                              CashCapabilitiesClass.ItemsEnum.Fit,
                                                                              "EUR",
@@ -624,7 +631,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                              false,
                                                                              new()
                                                                              {
-                                                                                  { "EUR20", AllBanknoteIDs["EUR20"] }
+                                                                                 "EUR20"
                                                                              }),
                                                   new CashUnitAdditionalInfoClass(5, false)));
 
@@ -836,77 +843,73 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Stores Common Capabilities
         /// </summary>
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
-                new()
-                {
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new(),
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CashDispenser,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                    }
+                ),
+                CashDispenserInterface: new CommonCapabilitiesClass.CashDispenserInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "CashDispenser.Denominate", null },
-                        { "CashDispenser.Dispense", null },
-                        { "CashDispenser.PresentCash", null },
-                        { "CashDispenser.Reject", null },
-                        { "CashDispenser.TestCashUnits", null },
-                        { "CashDispenser.Count", null },
-                        { "CashDispenser.GetMixTypes", null },
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Denominate,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Dispense,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Present,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Reject,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.GetPresentStatus,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Count,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.GetMixTypes,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.GetMixTable,
                     },
                     Events: new()
                     {
-                        { "CashDispenser.StartDispenseEvent", null },
-                        { "CashDispenser.IncompleteDispenseEvent", null },
-                    },
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CashManagement,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.EventEnum.StartDispenseEvent,
+                        CommonCapabilitiesClass.CashDispenserInterfaceClass.EventEnum.IncompleteDispenseEvent,
+                    }
+                ),
+                CashManagementInterface: new CommonCapabilitiesClass.CashManagementInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "CashManagement.Retract", null },
-                        { "CashManagement.OpenShutter", null },
-                        { "CashManagement.CloseShutter", null },
-                        { "CashManagement.CalibrateCashUnit", null },
-                        { "CashManagement.Reset", null },
-                        { "CashManagement.GetTellerInfo", null },
-                        { "CashManagement.SetTellerInfo", null },
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Retract,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.OpenShutter,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.CloseShutter,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.CalibrateCashUnit,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.GetTellerInfo,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.SetTellerInfo,
                     },
                     Events: new()
                     {
-                        { "CashManagement.SafeDoorClosedEvent", null },
-                        { "CashManagement.SafeDoorOpenEvent", null },
-                        { "CashManagement.ShutterStatusChangedEvent", null },
-                        { "CashManagement.NoteErrorEvent", null },
-                        { "CashManagement.ItemsTakenEvent", null },
-                        { "CashManagement.ItemsPresentedEvent", null },
-                        { "CashManagement.ItemsInsertedEvent", null },
-                        { "CashManagement.IncompleteRetractEvent", null },
-                    },
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Storage,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorClosedEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorOpenEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ShutterStatusChangedEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.NoteErrorEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsTakenEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsPresentedEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsInsertedEvent,
+                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.IncompleteRetractEvent,
+                    }
+                ),
+                StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Storage.StartExchange", null },
-                        { "Storage.EndExchange", null },
-                        { "Storage.GetStorage", null },
-                        { "Storage.SetStorage", null },
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.StartExchange,
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.EndExchange,
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
                     },
                     Events: new()
                     {
-                        { "Storage.StorageThreshold", null },
-                        { "Storage.StorageChanged", null },
-                        { "Storage.StorageError", null },
-                    },
-                    MaximumRequests: 1000)
-                },
-                ServiceVersion: "1.0",
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
+                    }
+                ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
                     new CommonCapabilitiesClass.DeviceInformationClass(
@@ -928,62 +931,35 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                         SoftwareVersion: "1.0")
                             })
                 },
-                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "CashDispenser.Dispense",
-                        "CashDispenser.Reset",
-                        "CashDispenser.PresentCash",
-                        "CashDispenser.Reject",
-                        "CashDispenser.Retract",
-                        "CashDispenser.OpenShutter",
-                        "CashDispenser.CloseShutter",
-                        "CashDispenser.TestCashUnits",
-                        "CashDispenser.Count",
-                        "CashManagement.Retract",
-                        "CashManagement.OpenShutter",
-                        "CashManagement.CloseShutter",
-                        "CashManagement.CalibrateCashUnit",
-                        "CashManagement.Reset",
-                        "Storage.StartExchange",
-                        "Storage.EndExchange",
-                        "Storage.GetStorage",
-                        "Storage.SetStorage"
-                    }),
                 PowerSaveControl: false,
                 AntiFraudModule: false,
-                EndToEndSecurity: true,
-                HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
-                ResponseSecurityEnabled: false  // ToDo: GetPresentStatus token support
-                );
+                EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
+                (
+                    Required: CommonCapabilitiesClass.EndToEndSecurityClass.RequiredEnum.Always,
+                    HardwareSecurityElement: false, // Sample is software. Real hardware should use an HSE. 
+                    ResponseSecurityEnabled: CommonCapabilitiesClass.EndToEndSecurityClass.ResponseSecurityEnabledEnum.NotSupported // ToDo: GetPresentStatus token support
+                ));
 
-        public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
-        public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce()
+        public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
+        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
+        public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
+        public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
+        public Task<GetCommandNonceResult> GetCommandNonce()
         {
             string nonce = Firmware.GetCommandNonce();
 
-            return Task.FromResult(
-                        new GetCommandNonceCompletion.PayloadData(CompletionCode: MessagePayload.CompletionCodeEnum.Success, ErrorDescription: "",
-                                                  nonce )
-                        );
-            throw new NotImplementedException();
+            return Task.FromResult(new GetCommandNonceResult(MessagePayload.CompletionCodeEnum.Success,
+                                                             nonce));
         }
-        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce()
+        public Task<DeviceResult> ClearCommandNonce()
         {
             Firmware.ClearCommandNonce();
 
-            return Task.FromResult(
-                        new ClearCommandNonceCompletion.PayloadData(CompletionCode: MessagePayload.CompletionCodeEnum.Success, ErrorDescription: "" )
-                        );
-            throw new NotImplementedException();
+            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
         }
         #endregion
 
-        private CashDispenserStatusClass.PositionStatusClass positionStatus = new(CashDispenserStatusClass.PositionStatusClass.ShutterEnum.Closed,
+        private CashDispenserStatusClass.PositionStatusClass positionStatus = new(CashManagementStatusClass.ShutterEnum.Closed,
                                                                                   CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty,
                                                                                   CashDispenserStatusClass.PositionStatusClass.TransportEnum.Ok,
                                                                                   CashDispenserStatusClass.PositionStatusClass.TransportStatusEnum.Empty,
@@ -1015,33 +991,43 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             public CashUnitStorageConfiguration CashUnitStorageConfig { get; init; }
         }
 
-        private readonly Dictionary<string, BanknoteItem> AllBanknoteIDs = new()
+        private static readonly Dictionary<string, CashManagementCapabilitiesClass.BanknoteItem> AllBanknoteIDs = new()
         {
             {
                 "EUR5",
-                new BanknoteItem(1, "EUR", 5.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(1, "EUR", 5.0, 1)
             },
             {
                 "EUR10",
-                new BanknoteItem(2, "EUR", 10.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(2, "EUR", 10.0, 1)
             },
             {
                 "EUR20",
-                new BanknoteItem(3, "EUR", 20.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(3, "EUR", 20.0, 1)
             },
             {
                 "EUR50",
-                new BanknoteItem(4, "EUR", 50.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(4, "EUR", 50.0, 1)
             },
             {
                 "EUR100",
-                new BanknoteItem(5, "EUR", 100.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(5, "EUR", 100.0, 1)
             },
             {
                 "EUR500",
-                new BanknoteItem(6, "EUR", 500.0, 1)
+                new CashManagementCapabilitiesClass.BanknoteItem(6, "EUR", 500.0, 1)
             }
         };
+
+        /// <summary>
+        /// Thread for simulate cash taken event to be fired
+        /// </summary>
+        private void CashTakenThread()
+        {
+            Thread.Sleep(5000);
+
+            cashTakenSignal.Release();
+        }
 
         private XFS4IoT.ILogger Logger { get; }
 

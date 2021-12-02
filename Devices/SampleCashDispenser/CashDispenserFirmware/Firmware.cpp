@@ -75,6 +75,10 @@ bool KAL::XFS4IoTSP::CashDispenser::Sample::Firmware::VerifyAndDispense(System::
     Sleep(1000);
     cout << "dispensed\n";
 
+    // At this point the "dispense" has completed successfully, so we must confirm that to E2E security. 
+    // If the dispense failed we just skip this, or even confirm a partial amount if only part of the 
+    // cash was dispensed. 
+    ConfirmDispenseAgainstToken(utf8Token.c_str(), utf8Token.size() + 1, Value, 0, utf8Currency.c_str());
 
     return true; 
 }

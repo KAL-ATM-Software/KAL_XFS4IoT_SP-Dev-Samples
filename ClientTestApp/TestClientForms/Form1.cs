@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Windows.Forms;
 using TestClientForms.Devices;
+using System.IO;
 
 namespace TestClientForms
 {
@@ -27,12 +28,19 @@ namespace TestClientForms
             TextTerminalServiceURI.Text = "ws://localhost";
             EncryptorServiceURI.Text = "ws://localhost";
             PinPadServiceURI.Text = "ws://localhost";
+            PrinterServiceURI.Text = "ws://localhost";
+            LightsServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
             CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
             EncryptorDev = new("Encryptor", EncryptorCmdBox, EncryptorRspBox, EncryptorEvtBox, EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
             PinPadDev = new("PinPad", PinPadCmdBox, PinPadRspBox, PinPadEvtBox, PinPadServiceURI, PinPadPortNum, PinPadURI);
+            PrinterDev = new("Printer", PrinterCmdBox, PrinterRspBox, PrinterEvtBox, PrinterServiceURI, PrinterPortNum, PrinterURI);
+            LightsDev = new("Lights", LightsCmdBox, LightsRspBox, LightsEvtBox, LightsServiceURI, LightsPortNum, LightsURI);
+
+            LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
+            LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
         }
         
         private DispenserDevice DispenserDev { get; init; }
@@ -40,6 +48,8 @@ namespace TestClientForms
         private TextTerminalDevice TextTerminalDev { get; init; }
         private EncryptorDevice EncryptorDev { get; init; }
         private PinPadDevice PinPadDev { get; init; }
+        private PrinterDevice PrinterDev { get; init; }
+        private LightsDevice LightsDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
@@ -460,9 +470,210 @@ namespace TestClientForms
         {
             await PinPadDev.GetLayout();
         }
-
-
         #endregion
 
+        #region Printer
+        private async void PrinterStatus_Click(object sender, EventArgs e)
+        {
+            var status = await PrinterDev.GetStatus();
+
+            if (status != null)
+            {
+                PrinterStDevice.Text = status.Payload?.Common?.Device?.ToString();
+            }
+            else
+                MessageBox.Show("Failed to get Printer status.");
+        }
+
+        private async void PrinterCapabilities_Click(object sender, EventArgs e)
+        {
+            var caps = await PrinterDev.GetCapabilities();
+            if (caps != null)
+            {
+                PrinterType.Text = string.Empty;
+                if (caps.Payload?.Printer?.Type?.Receipt is not null && (bool)caps.Payload?.Printer?.Type?.Receipt)
+                {
+                    PrinterType.Text = "Receipt";
+                }
+                else if (caps.Payload?.Printer?.Type?.Journal is not null && (bool)caps.Payload?.Printer?.Type?.Journal)
+                {
+                    PrinterType.Text = "Journal";
+                }
+                else if (caps.Payload?.Printer?.Type?.Passbook is not null && (bool)caps.Payload?.Printer?.Type?.Passbook)
+                {
+                    PrinterType.Text = "Passbook";
+                }
+                else if (caps.Payload?.Printer?.Type?.Scanner is not null && (bool)caps.Payload?.Printer?.Type?.Scanner)
+                {
+                    PrinterType.Text = "Scanner";
+                }
+            }
+            else
+                MessageBox.Show("Failed to get Printer status.");
+        }
+
+        private async void PrinterGetFormList_Click(object sender, EventArgs e)
+        {
+            var result = await PrinterDev.GetFormList();
+            PrinterFormListBox.Items.Clear();
+
+            if (result is not null &&
+                result.Payload is not null &&
+                result.Payload.FormList is not null)
+            {
+                foreach (var name in result.Payload.FormList)
+                {
+                    PrinterFormListBox.Items.Add(name);
+                }
+            }
+        }
+
+        private async void PrinterQueryForm_Click(object sender, EventArgs e)
+        {
+            int index = PrinterFormListBox.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Select form name to query.");
+                return;
+            }
+
+            string selectedForm = (string)PrinterFormListBox.Items[index];
+            await PrinterDev.GetQueryForm(selectedForm);
+        }
+
+        private async void PrinterGetMediaList_Click(object sender, EventArgs e)
+        {
+            var result = await PrinterDev.GetMediaList();
+            PrinterMediaListBox.Items.Clear();
+
+            if (result is not null &&
+                result.Payload is not null &&
+                result.Payload.MediaList is not null)
+            {
+                foreach (var name in result.Payload.MediaList)
+                {
+                    PrinterMediaListBox.Items.Add(name);
+                }
+            }
+        }
+
+        private async void PrinterQueryMedia_Click(object sender, EventArgs e)
+        {
+            int index = PrinterMediaListBox.SelectedIndex;
+            if (index < 0)
+            {
+                MessageBox.Show("Select media name to query.");
+                return;
+            }
+
+            string selectedMedia = (string)PrinterMediaListBox.Items[index];
+            await PrinterDev.GetQueryMedia(selectedMedia);
+        }
+
+        private async void PrinterPrintForm_Click(object sender, EventArgs e)
+        {
+            int formIndex = PrinterFormListBox.SelectedIndex;
+            if (formIndex < 0)
+            {
+                MessageBox.Show("Select form name name to print.");
+                return;
+            }
+
+            string selectedForm = (string)PrinterFormListBox.Items[formIndex];
+
+            int mediaIndex = PrinterMediaListBox.SelectedIndex;
+            if (mediaIndex < 0)
+            {
+                MessageBox.Show("Select media name name to print.");
+                return;
+            }
+
+            string selectedMedia = (string)PrinterMediaListBox.Items[mediaIndex];
+
+            Dictionary<string, string> fields = new();
+            if (!string.IsNullOrWhiteSpace(PrinterFormFields.Text))
+            {
+                string[] pairs = PrinterFormFields.Text.Split(',');
+                foreach (string pair in pairs)
+                {
+                    var split = pair.Split('=');
+                    if(split.Length != 2)
+                    {
+                        MessageBox.Show($"Invalid form field \"{pair}\"");
+                        return;
+                    }
+                    fields.Add(split[0], split[1]);
+                }
+            }
+
+            await PrinterDev.PrintForm(selectedForm, selectedMedia, fields);
+        }
+
+        private async void PrinterEject_Click(object sender, EventArgs e)
+        {
+            await PrinterDev.Eject();
+        }
+
+        private async void PrinterPrintRaw_Click(object sender, EventArgs e)
+        {
+            string testPrintData = "TEST PRINT";
+            await PrinterDev.PrintRaw(System.Text.Encoding.ASCII.GetBytes(testPrintData));
+        }
+
+        private async void PrinterReset_Click(object sender, EventArgs e)
+        {
+            await PrinterDev.Reset();
+        }
+        
+        private async void PrinterServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await PrinterDev.DoServiceDiscovery();
+        }
+
+        private async void PrinterLoadDefinition_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new()
+            {
+                Title = "Select definition file to load."
+            };
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                if (!File.Exists(ofd.FileName))
+                    return;
+
+                string contents = await File.ReadAllTextAsync(ofd.FileName);
+                await PrinterDev.DoLoadDefinition(contents);
+            }
+        }
+        #endregion
+
+        #region Lights
+        private async void LightsStatus_Click(object sender, EventArgs e)
+        {
+            var status = await LightsDev.GetStatus();
+            lblLightsStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
+        }
+
+        private async void LightsCapabilities_Click(object sender, EventArgs e)
+        {
+            await LightsDev.GetCapabilities();
+        }
+
+        private async void LightsSetLight_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtLightName.Text))
+            {
+                MessageBox.Show("Light name must be specified.");
+                return;
+            }
+
+            await LightsDev.SetLight(txtLightName.Text, (XFS4IoT.Lights.LightStateClass.FlashRateEnum)LightsFlashRate.SelectedItem);
+        }
+
+        private async void LightsServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await LightsDev.DoServiceDiscovery();
+        }
+        #endregion
     }
 }

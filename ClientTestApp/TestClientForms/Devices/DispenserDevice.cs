@@ -728,19 +728,29 @@ namespace TestClientForms.Devices
                 return;
             }
 
+            StorageCashCountsClass unit3 = new (0);
+            Dictionary<string, StorageCashCountClass> unit3Counts = new() { { "EUR5", new StorageCashCountClass(Fit: 1000) } };
+            unit3.ExtendedProperties = unit3Counts;
+            StorageCashCountsClass unit4 = new(0);
+            Dictionary<string, StorageCashCountClass> unit4Counts = new() { { "EUR10", new StorageCashCountClass(Fit: 1000) } };
+            unit4.ExtendedProperties = unit4Counts;
+            StorageCashCountsClass unit5 = new(0);
+            Dictionary<string, StorageCashCountClass> unit5Counts = new() { { "EUR20", new StorageCashCountClass(Fit: 1000) } };
+            unit5.ExtendedProperties = unit5Counts;
+
             Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
             {
                 { "PHP3", new XFS4IoT.Storage.SetStorageUnitClass(
                     new StorageSetCashClass(null, 
-                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR5", new StorageCashCountClass(Fit: 1000) } }))),
+                                            new StorageSetCashStatusClass(unit3)),
                     null) },
                 { "PHP4", new XFS4IoT.Storage.SetStorageUnitClass(
                     new StorageSetCashClass(null,
-                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR10", new StorageCashCountClass(Fit: 1000) } }))),
+                                            new StorageSetCashStatusClass(unit4)),
                     null) },
                 { "PHP5", new XFS4IoT.Storage.SetStorageUnitClass(
                     new StorageSetCashClass(null,
-                                            new StorageSetCashStatusClass(new StorageCashCountsClass(0, new() { { "EUR20", new StorageCashCountClass(Fit: 1000) } }))),
+                                            new StorageSetCashStatusClass(unit5)),
                     null) },
             };
             var cmd = new SetStorageCommand(RequestId.NewID(), new(CommandTimeout, storage));

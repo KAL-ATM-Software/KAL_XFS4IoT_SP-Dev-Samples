@@ -180,12 +180,65 @@ namespace TestClientForms
             this.PinPadURI = new System.Windows.Forms.TextBox();
             this.label30 = new System.Windows.Forms.Label();
             this.label31 = new System.Windows.Forms.Label();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label39 = new System.Windows.Forms.Label();
+            this.PrinterFormFields = new System.Windows.Forms.TextBox();
+            this.PrinterLoadDefinition = new System.Windows.Forms.Button();
+            this.PrinterMediaListBox = new System.Windows.Forms.ListBox();
+            this.PrinterQueryForm = new System.Windows.Forms.Button();
+            this.PrinterEject = new System.Windows.Forms.Button();
+            this.PrinterQueryMedia = new System.Windows.Forms.Button();
+            this.PrinterGetMediaList = new System.Windows.Forms.Button();
+            this.PrinterPrintForm = new System.Windows.Forms.Button();
+            this.PrinterReset = new System.Windows.Forms.Button();
+            this.PrinterPrintRaw = new System.Windows.Forms.Button();
+            this.PrinterGetFormList = new System.Windows.Forms.Button();
+            this.label33 = new System.Windows.Forms.Label();
+            this.PrinterFormListBox = new System.Windows.Forms.ListBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.label35 = new System.Windows.Forms.Label();
+            this.PrinterEvtBox = new System.Windows.Forms.TextBox();
+            this.PrinterRspBox = new System.Windows.Forms.TextBox();
+            this.PrinterCmdBox = new System.Windows.Forms.TextBox();
+            this.PrinterType = new System.Windows.Forms.TextBox();
+            this.PrinterStDevice = new System.Windows.Forms.TextBox();
+            this.PrinterCapabilities = new System.Windows.Forms.Button();
+            this.PrinterStatus = new System.Windows.Forms.Button();
+            this.PrinterServiceURI = new System.Windows.Forms.TextBox();
+            this.PrinterServiceDiscovery = new System.Windows.Forms.Button();
+            this.PrinterPortNum = new System.Windows.Forms.TextBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.PrinterURI = new System.Windows.Forms.TextBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.label38 = new System.Windows.Forms.Label();
+            this.lightsTab = new System.Windows.Forms.TabPage();
+            this.LightsServiceDiscovery = new System.Windows.Forms.Button();
+            this.label45 = new System.Windows.Forms.Label();
+            this.LightsFlashRate = new System.Windows.Forms.ComboBox();
+            this.label40 = new System.Windows.Forms.Label();
+            this.txtLightName = new System.Windows.Forms.TextBox();
+            this.LightsSetLight = new System.Windows.Forms.Button();
+            this.label41 = new System.Windows.Forms.Label();
+            this.LightsEvtBox = new System.Windows.Forms.TextBox();
+            this.LightsRspBox = new System.Windows.Forms.TextBox();
+            this.LightsCmdBox = new System.Windows.Forms.TextBox();
+            this.lblLightsStatus = new System.Windows.Forms.TextBox();
+            this.LightsCapabilities = new System.Windows.Forms.Button();
+            this.LightsStatus = new System.Windows.Forms.Button();
+            this.LightsServiceURI = new System.Windows.Forms.TextBox();
+            this.LightsPortNum = new System.Windows.Forms.TextBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.LightsURI = new System.Windows.Forms.TextBox();
+            this.label43 = new System.Windows.Forms.Label();
+            this.label44 = new System.Windows.Forms.Label();
             this.testClientTabControl.SuspendLayout();
             this.CardReaderTab.SuspendLayout();
             this.DispenserTab.SuspendLayout();
             this.TextTerminalTab.SuspendLayout();
             this.EncryptorTab.SuspendLayout();
             this.PinPadTab.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.lightsTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // AcceptCard
@@ -440,6 +493,8 @@ namespace TestClientForms
             this.testClientTabControl.Controls.Add(this.TextTerminalTab);
             this.testClientTabControl.Controls.Add(this.EncryptorTab);
             this.testClientTabControl.Controls.Add(this.PinPadTab);
+            this.testClientTabControl.Controls.Add(this.tabPage1);
+            this.testClientTabControl.Controls.Add(this.lightsTab);
             this.testClientTabControl.Location = new System.Drawing.Point(7, 2);
             this.testClientTabControl.Name = "testClientTabControl";
             this.testClientTabControl.SelectedIndex = 0;
@@ -1851,6 +1906,585 @@ namespace TestClientForms
             this.label31.TabIndex = 66;
             this.label31.Text = "Service URI";
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.label39);
+            this.tabPage1.Controls.Add(this.PrinterFormFields);
+            this.tabPage1.Controls.Add(this.PrinterLoadDefinition);
+            this.tabPage1.Controls.Add(this.PrinterMediaListBox);
+            this.tabPage1.Controls.Add(this.PrinterQueryForm);
+            this.tabPage1.Controls.Add(this.PrinterEject);
+            this.tabPage1.Controls.Add(this.PrinterQueryMedia);
+            this.tabPage1.Controls.Add(this.PrinterGetMediaList);
+            this.tabPage1.Controls.Add(this.PrinterPrintForm);
+            this.tabPage1.Controls.Add(this.PrinterReset);
+            this.tabPage1.Controls.Add(this.PrinterPrintRaw);
+            this.tabPage1.Controls.Add(this.PrinterGetFormList);
+            this.tabPage1.Controls.Add(this.label33);
+            this.tabPage1.Controls.Add(this.PrinterFormListBox);
+            this.tabPage1.Controls.Add(this.label34);
+            this.tabPage1.Controls.Add(this.label35);
+            this.tabPage1.Controls.Add(this.PrinterEvtBox);
+            this.tabPage1.Controls.Add(this.PrinterRspBox);
+            this.tabPage1.Controls.Add(this.PrinterCmdBox);
+            this.tabPage1.Controls.Add(this.PrinterType);
+            this.tabPage1.Controls.Add(this.PrinterStDevice);
+            this.tabPage1.Controls.Add(this.PrinterCapabilities);
+            this.tabPage1.Controls.Add(this.PrinterStatus);
+            this.tabPage1.Controls.Add(this.PrinterServiceURI);
+            this.tabPage1.Controls.Add(this.PrinterServiceDiscovery);
+            this.tabPage1.Controls.Add(this.PrinterPortNum);
+            this.tabPage1.Controls.Add(this.label36);
+            this.tabPage1.Controls.Add(this.PrinterURI);
+            this.tabPage1.Controls.Add(this.label37);
+            this.tabPage1.Controls.Add(this.label38);
+            this.tabPage1.Location = new System.Drawing.Point(4, 24);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage1.Size = new System.Drawing.Size(1177, 515);
+            this.tabPage1.TabIndex = 5;
+            this.tabPage1.Text = "Printer";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label39
+            // 
+            this.label39.AutoSize = true;
+            this.label39.Location = new System.Drawing.Point(14, 142);
+            this.label39.Name = "label39";
+            this.label39.Size = new System.Drawing.Size(71, 15);
+            this.label39.TabIndex = 127;
+            this.label39.Text = "Form Fields:";
+            // 
+            // PrinterFormFields
+            // 
+            this.PrinterFormFields.Location = new System.Drawing.Point(14, 169);
+            this.PrinterFormFields.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterFormFields.Name = "PrinterFormFields";
+            this.PrinterFormFields.Size = new System.Drawing.Size(552, 23);
+            this.PrinterFormFields.TabIndex = 126;
+            this.PrinterFormFields.Text = "Field1=Value1,Field2=Field Value2";
+            // 
+            // PrinterLoadDefinition
+            // 
+            this.PrinterLoadDefinition.Location = new System.Drawing.Point(954, 36);
+            this.PrinterLoadDefinition.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterLoadDefinition.Name = "PrinterLoadDefinition";
+            this.PrinterLoadDefinition.Size = new System.Drawing.Size(99, 22);
+            this.PrinterLoadDefinition.TabIndex = 124;
+            this.PrinterLoadDefinition.Text = "LoadDefinition";
+            this.PrinterLoadDefinition.UseVisualStyleBackColor = true;
+            this.PrinterLoadDefinition.Click += new System.EventHandler(this.PrinterLoadDefinition_Click);
+            // 
+            // PrinterMediaListBox
+            // 
+            this.PrinterMediaListBox.FormattingEnabled = true;
+            this.PrinterMediaListBox.ItemHeight = 15;
+            this.PrinterMediaListBox.Location = new System.Drawing.Point(894, 102);
+            this.PrinterMediaListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.PrinterMediaListBox.Name = "PrinterMediaListBox";
+            this.PrinterMediaListBox.Size = new System.Drawing.Size(159, 94);
+            this.PrinterMediaListBox.TabIndex = 123;
+            // 
+            // PrinterQueryForm
+            // 
+            this.PrinterQueryForm.Location = new System.Drawing.Point(794, 133);
+            this.PrinterQueryForm.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterQueryForm.Name = "PrinterQueryForm";
+            this.PrinterQueryForm.Size = new System.Drawing.Size(90, 23);
+            this.PrinterQueryForm.TabIndex = 122;
+            this.PrinterQueryForm.Text = "QueryForm";
+            this.PrinterQueryForm.UseVisualStyleBackColor = true;
+            this.PrinterQueryForm.Click += new System.EventHandler(this.PrinterQueryForm_Click);
+            // 
+            // PrinterEject
+            // 
+            this.PrinterEject.Location = new System.Drawing.Point(1061, 36);
+            this.PrinterEject.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterEject.Name = "PrinterEject";
+            this.PrinterEject.Size = new System.Drawing.Size(93, 21);
+            this.PrinterEject.TabIndex = 121;
+            this.PrinterEject.Text = "Eject";
+            this.PrinterEject.UseVisualStyleBackColor = true;
+            this.PrinterEject.Click += new System.EventHandler(this.PrinterEject_Click);
+            // 
+            // PrinterQueryMedia
+            // 
+            this.PrinterQueryMedia.Location = new System.Drawing.Point(1064, 133);
+            this.PrinterQueryMedia.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterQueryMedia.Name = "PrinterQueryMedia";
+            this.PrinterQueryMedia.Size = new System.Drawing.Size(93, 21);
+            this.PrinterQueryMedia.TabIndex = 119;
+            this.PrinterQueryMedia.Text = "QueryMedia";
+            this.PrinterQueryMedia.UseVisualStyleBackColor = true;
+            this.PrinterQueryMedia.Click += new System.EventHandler(this.PrinterQueryMedia_Click);
+            // 
+            // PrinterGetMediaList
+            // 
+            this.PrinterGetMediaList.Location = new System.Drawing.Point(1064, 102);
+            this.PrinterGetMediaList.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterGetMediaList.Name = "PrinterGetMediaList";
+            this.PrinterGetMediaList.Size = new System.Drawing.Size(93, 21);
+            this.PrinterGetMediaList.TabIndex = 118;
+            this.PrinterGetMediaList.Text = "GetMediaList";
+            this.PrinterGetMediaList.UseVisualStyleBackColor = true;
+            this.PrinterGetMediaList.Click += new System.EventHandler(this.PrinterGetMediaList_Click);
+            // 
+            // PrinterPrintForm
+            // 
+            this.PrinterPrintForm.Location = new System.Drawing.Point(14, 120);
+            this.PrinterPrintForm.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterPrintForm.Name = "PrinterPrintForm";
+            this.PrinterPrintForm.Size = new System.Drawing.Size(105, 21);
+            this.PrinterPrintForm.TabIndex = 115;
+            this.PrinterPrintForm.Text = "PrintForm";
+            this.PrinterPrintForm.UseVisualStyleBackColor = true;
+            this.PrinterPrintForm.Click += new System.EventHandler(this.PrinterPrintForm_Click);
+            // 
+            // PrinterReset
+            // 
+            this.PrinterReset.Location = new System.Drawing.Point(1061, 9);
+            this.PrinterReset.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterReset.Name = "PrinterReset";
+            this.PrinterReset.Size = new System.Drawing.Size(93, 22);
+            this.PrinterReset.TabIndex = 114;
+            this.PrinterReset.Text = "Reset";
+            this.PrinterReset.UseVisualStyleBackColor = true;
+            this.PrinterReset.Click += new System.EventHandler(this.PrinterReset_Click);
+            // 
+            // PrinterPrintRaw
+            // 
+            this.PrinterPrintRaw.Location = new System.Drawing.Point(954, 11);
+            this.PrinterPrintRaw.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterPrintRaw.Name = "PrinterPrintRaw";
+            this.PrinterPrintRaw.Size = new System.Drawing.Size(99, 22);
+            this.PrinterPrintRaw.TabIndex = 112;
+            this.PrinterPrintRaw.Text = "PrintRaw";
+            this.PrinterPrintRaw.UseVisualStyleBackColor = true;
+            this.PrinterPrintRaw.Click += new System.EventHandler(this.PrinterPrintRaw_Click);
+            // 
+            // PrinterGetFormList
+            // 
+            this.PrinterGetFormList.Location = new System.Drawing.Point(794, 101);
+            this.PrinterGetFormList.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterGetFormList.Name = "PrinterGetFormList";
+            this.PrinterGetFormList.Size = new System.Drawing.Size(90, 23);
+            this.PrinterGetFormList.TabIndex = 111;
+            this.PrinterGetFormList.Text = "GetFormList";
+            this.PrinterGetFormList.UseVisualStyleBackColor = true;
+            this.PrinterGetFormList.Click += new System.EventHandler(this.PrinterGetFormList_Click);
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(592, 80);
+            this.label33.Margin = new System.Windows.Forms.Padding(0);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(75, 15);
+            this.label33.TabIndex = 110;
+            this.label33.Text = "Form Names";
+            // 
+            // PrinterFormListBox
+            // 
+            this.PrinterFormListBox.FormattingEnabled = true;
+            this.PrinterFormListBox.ItemHeight = 15;
+            this.PrinterFormListBox.Location = new System.Drawing.Point(592, 101);
+            this.PrinterFormListBox.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterFormListBox.Name = "PrinterFormListBox";
+            this.PrinterFormListBox.Size = new System.Drawing.Size(190, 94);
+            this.PrinterFormListBox.TabIndex = 109;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(592, 47);
+            this.label34.Margin = new System.Windows.Forms.Padding(0);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(69, 15);
+            this.label34.TabIndex = 108;
+            this.label34.Text = "Printer Type";
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(592, 12);
+            this.label35.Margin = new System.Windows.Forms.Padding(0);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(76, 15);
+            this.label35.TabIndex = 107;
+            this.label35.Text = "Device status";
+            // 
+            // PrinterEvtBox
+            // 
+            this.PrinterEvtBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PrinterEvtBox.Location = new System.Drawing.Point(815, 202);
+            this.PrinterEvtBox.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterEvtBox.MaxLength = 1048576;
+            this.PrinterEvtBox.Multiline = true;
+            this.PrinterEvtBox.Name = "PrinterEvtBox";
+            this.PrinterEvtBox.ReadOnly = true;
+            this.PrinterEvtBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PrinterEvtBox.Size = new System.Drawing.Size(355, 307);
+            this.PrinterEvtBox.TabIndex = 106;
+            // 
+            // PrinterRspBox
+            // 
+            this.PrinterRspBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PrinterRspBox.Location = new System.Drawing.Point(425, 202);
+            this.PrinterRspBox.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterRspBox.MaxLength = 1048576;
+            this.PrinterRspBox.Multiline = true;
+            this.PrinterRspBox.Name = "PrinterRspBox";
+            this.PrinterRspBox.ReadOnly = true;
+            this.PrinterRspBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PrinterRspBox.Size = new System.Drawing.Size(371, 307);
+            this.PrinterRspBox.TabIndex = 105;
+            // 
+            // PrinterCmdBox
+            // 
+            this.PrinterCmdBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.PrinterCmdBox.Location = new System.Drawing.Point(14, 202);
+            this.PrinterCmdBox.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterCmdBox.MaxLength = 1048576;
+            this.PrinterCmdBox.Multiline = true;
+            this.PrinterCmdBox.Name = "PrinterCmdBox";
+            this.PrinterCmdBox.ReadOnly = true;
+            this.PrinterCmdBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.PrinterCmdBox.Size = new System.Drawing.Size(394, 307);
+            this.PrinterCmdBox.TabIndex = 104;
+            // 
+            // PrinterType
+            // 
+            this.PrinterType.Location = new System.Drawing.Point(676, 45);
+            this.PrinterType.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterType.Name = "PrinterType";
+            this.PrinterType.ReadOnly = true;
+            this.PrinterType.Size = new System.Drawing.Size(106, 23);
+            this.PrinterType.TabIndex = 103;
+            // 
+            // PrinterStDevice
+            // 
+            this.PrinterStDevice.Location = new System.Drawing.Point(676, 12);
+            this.PrinterStDevice.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterStDevice.Name = "PrinterStDevice";
+            this.PrinterStDevice.ReadOnly = true;
+            this.PrinterStDevice.Size = new System.Drawing.Size(106, 23);
+            this.PrinterStDevice.TabIndex = 102;
+            // 
+            // PrinterCapabilities
+            // 
+            this.PrinterCapabilities.Location = new System.Drawing.Point(815, 38);
+            this.PrinterCapabilities.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterCapabilities.Name = "PrinterCapabilities";
+            this.PrinterCapabilities.Size = new System.Drawing.Size(90, 22);
+            this.PrinterCapabilities.TabIndex = 101;
+            this.PrinterCapabilities.Text = "Capabilities";
+            this.PrinterCapabilities.UseVisualStyleBackColor = true;
+            this.PrinterCapabilities.Click += new System.EventHandler(this.PrinterCapabilities_Click);
+            // 
+            // PrinterStatus
+            // 
+            this.PrinterStatus.Location = new System.Drawing.Point(815, 10);
+            this.PrinterStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterStatus.Name = "PrinterStatus";
+            this.PrinterStatus.Size = new System.Drawing.Size(90, 22);
+            this.PrinterStatus.TabIndex = 100;
+            this.PrinterStatus.Text = "Status";
+            this.PrinterStatus.UseVisualStyleBackColor = true;
+            this.PrinterStatus.Click += new System.EventHandler(this.PrinterStatus_Click);
+            // 
+            // PrinterServiceURI
+            // 
+            this.PrinterServiceURI.Location = new System.Drawing.Point(102, 12);
+            this.PrinterServiceURI.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterServiceURI.Name = "PrinterServiceURI";
+            this.PrinterServiceURI.Size = new System.Drawing.Size(464, 23);
+            this.PrinterServiceURI.TabIndex = 98;
+            // 
+            // PrinterServiceDiscovery
+            // 
+            this.PrinterServiceDiscovery.Location = new System.Drawing.Point(441, 95);
+            this.PrinterServiceDiscovery.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterServiceDiscovery.Name = "PrinterServiceDiscovery";
+            this.PrinterServiceDiscovery.Size = new System.Drawing.Size(116, 23);
+            this.PrinterServiceDiscovery.TabIndex = 93;
+            this.PrinterServiceDiscovery.Text = "Service Discovery";
+            this.PrinterServiceDiscovery.UseVisualStyleBackColor = true;
+            this.PrinterServiceDiscovery.Click += new System.EventHandler(this.PrinterServiceDiscovery_Click);
+            // 
+            // PrinterPortNum
+            // 
+            this.PrinterPortNum.Location = new System.Drawing.Point(102, 36);
+            this.PrinterPortNum.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterPortNum.Name = "PrinterPortNum";
+            this.PrinterPortNum.ReadOnly = true;
+            this.PrinterPortNum.Size = new System.Drawing.Size(106, 23);
+            this.PrinterPortNum.TabIndex = 94;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(6, 62);
+            this.label36.Margin = new System.Windows.Forms.Padding(0);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(63, 15);
+            this.label36.TabIndex = 95;
+            this.label36.Text = "Printer URI";
+            // 
+            // PrinterURI
+            // 
+            this.PrinterURI.Location = new System.Drawing.Point(102, 59);
+            this.PrinterURI.Margin = new System.Windows.Forms.Padding(0);
+            this.PrinterURI.Name = "PrinterURI";
+            this.PrinterURI.ReadOnly = true;
+            this.PrinterURI.Size = new System.Drawing.Size(464, 23);
+            this.PrinterURI.TabIndex = 96;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(8, 36);
+            this.label37.Margin = new System.Windows.Forms.Padding(0);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(76, 15);
+            this.label37.TabIndex = 97;
+            this.label37.Text = "Port Number";
+            // 
+            // label38
+            // 
+            this.label38.AutoSize = true;
+            this.label38.Location = new System.Drawing.Point(8, 12);
+            this.label38.Margin = new System.Windows.Forms.Padding(0);
+            this.label38.Name = "label38";
+            this.label38.Size = new System.Drawing.Size(65, 15);
+            this.label38.TabIndex = 99;
+            this.label38.Text = "Service URI";
+            // 
+            // lightsTab
+            // 
+            this.lightsTab.Controls.Add(this.LightsServiceDiscovery);
+            this.lightsTab.Controls.Add(this.label45);
+            this.lightsTab.Controls.Add(this.LightsFlashRate);
+            this.lightsTab.Controls.Add(this.label40);
+            this.lightsTab.Controls.Add(this.txtLightName);
+            this.lightsTab.Controls.Add(this.LightsSetLight);
+            this.lightsTab.Controls.Add(this.label41);
+            this.lightsTab.Controls.Add(this.LightsEvtBox);
+            this.lightsTab.Controls.Add(this.LightsRspBox);
+            this.lightsTab.Controls.Add(this.LightsCmdBox);
+            this.lightsTab.Controls.Add(this.lblLightsStatus);
+            this.lightsTab.Controls.Add(this.LightsCapabilities);
+            this.lightsTab.Controls.Add(this.LightsStatus);
+            this.lightsTab.Controls.Add(this.LightsServiceURI);
+            this.lightsTab.Controls.Add(this.LightsPortNum);
+            this.lightsTab.Controls.Add(this.label42);
+            this.lightsTab.Controls.Add(this.LightsURI);
+            this.lightsTab.Controls.Add(this.label43);
+            this.lightsTab.Controls.Add(this.label44);
+            this.lightsTab.Location = new System.Drawing.Point(4, 24);
+            this.lightsTab.Name = "lightsTab";
+            this.lightsTab.Padding = new System.Windows.Forms.Padding(3);
+            this.lightsTab.Size = new System.Drawing.Size(1177, 515);
+            this.lightsTab.TabIndex = 6;
+            this.lightsTab.Text = "Lights";
+            this.lightsTab.UseVisualStyleBackColor = true;
+            // 
+            // LightsServiceDiscovery
+            // 
+            this.LightsServiceDiscovery.Location = new System.Drawing.Point(450, 88);
+            this.LightsServiceDiscovery.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsServiceDiscovery.Name = "LightsServiceDiscovery";
+            this.LightsServiceDiscovery.Size = new System.Drawing.Size(116, 23);
+            this.LightsServiceDiscovery.TabIndex = 135;
+            this.LightsServiceDiscovery.Text = "Service Discovery";
+            this.LightsServiceDiscovery.UseVisualStyleBackColor = true;
+            this.LightsServiceDiscovery.Click += new System.EventHandler(this.LightsServiceDiscovery_Click);
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(949, 45);
+            this.label45.Margin = new System.Windows.Forms.Padding(0);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(60, 15);
+            this.label45.TabIndex = 134;
+            this.label45.Text = "Flash Rate";
+            // 
+            // LightsFlashRate
+            // 
+            this.LightsFlashRate.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.LightsFlashRate.FormattingEnabled = true;
+            this.LightsFlashRate.Location = new System.Drawing.Point(1031, 42);
+            this.LightsFlashRate.Name = "LightsFlashRate";
+            this.LightsFlashRate.Size = new System.Drawing.Size(106, 23);
+            this.LightsFlashRate.TabIndex = 133;
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(940, 9);
+            this.label40.Margin = new System.Windows.Forms.Padding(0);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(69, 15);
+            this.label40.TabIndex = 132;
+            this.label40.Text = "Light Name";
+            // 
+            // txtLightName
+            // 
+            this.txtLightName.Location = new System.Drawing.Point(1031, 9);
+            this.txtLightName.Margin = new System.Windows.Forms.Padding(0);
+            this.txtLightName.Name = "txtLightName";
+            this.txtLightName.Size = new System.Drawing.Size(106, 23);
+            this.txtLightName.TabIndex = 131;
+            this.txtLightName.Text = "cardReader";
+            // 
+            // LightsSetLight
+            // 
+            this.LightsSetLight.Location = new System.Drawing.Point(1044, 89);
+            this.LightsSetLight.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsSetLight.Name = "LightsSetLight";
+            this.LightsSetLight.Size = new System.Drawing.Size(93, 22);
+            this.LightsSetLight.TabIndex = 130;
+            this.LightsSetLight.Text = "SetLight";
+            this.LightsSetLight.UseVisualStyleBackColor = true;
+            this.LightsSetLight.Click += new System.EventHandler(this.LightsSetLight_Click);
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(592, 10);
+            this.label41.Margin = new System.Windows.Forms.Padding(0);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(76, 15);
+            this.label41.TabIndex = 128;
+            this.label41.Text = "Device status";
+            // 
+            // LightsEvtBox
+            // 
+            this.LightsEvtBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.LightsEvtBox.Location = new System.Drawing.Point(815, 200);
+            this.LightsEvtBox.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsEvtBox.MaxLength = 1048576;
+            this.LightsEvtBox.Multiline = true;
+            this.LightsEvtBox.Name = "LightsEvtBox";
+            this.LightsEvtBox.ReadOnly = true;
+            this.LightsEvtBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.LightsEvtBox.Size = new System.Drawing.Size(355, 307);
+            this.LightsEvtBox.TabIndex = 127;
+            // 
+            // LightsRspBox
+            // 
+            this.LightsRspBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.LightsRspBox.Location = new System.Drawing.Point(425, 200);
+            this.LightsRspBox.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsRspBox.MaxLength = 1048576;
+            this.LightsRspBox.Multiline = true;
+            this.LightsRspBox.Name = "LightsRspBox";
+            this.LightsRspBox.ReadOnly = true;
+            this.LightsRspBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.LightsRspBox.Size = new System.Drawing.Size(371, 307);
+            this.LightsRspBox.TabIndex = 126;
+            // 
+            // LightsCmdBox
+            // 
+            this.LightsCmdBox.Font = new System.Drawing.Font("Segoe UI", 11.1F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.LightsCmdBox.Location = new System.Drawing.Point(14, 200);
+            this.LightsCmdBox.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsCmdBox.MaxLength = 1048576;
+            this.LightsCmdBox.Multiline = true;
+            this.LightsCmdBox.Name = "LightsCmdBox";
+            this.LightsCmdBox.ReadOnly = true;
+            this.LightsCmdBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.LightsCmdBox.Size = new System.Drawing.Size(394, 307);
+            this.LightsCmdBox.TabIndex = 125;
+            // 
+            // lblLightsStatus
+            // 
+            this.lblLightsStatus.Location = new System.Drawing.Point(676, 10);
+            this.lblLightsStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.lblLightsStatus.Name = "lblLightsStatus";
+            this.lblLightsStatus.ReadOnly = true;
+            this.lblLightsStatus.Size = new System.Drawing.Size(106, 23);
+            this.lblLightsStatus.TabIndex = 123;
+            // 
+            // LightsCapabilities
+            // 
+            this.LightsCapabilities.Location = new System.Drawing.Point(815, 38);
+            this.LightsCapabilities.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsCapabilities.Name = "LightsCapabilities";
+            this.LightsCapabilities.Size = new System.Drawing.Size(90, 22);
+            this.LightsCapabilities.TabIndex = 122;
+            this.LightsCapabilities.Text = "Capabilities";
+            this.LightsCapabilities.UseVisualStyleBackColor = true;
+            this.LightsCapabilities.Click += new System.EventHandler(this.LightsCapabilities_Click);
+            // 
+            // LightsStatus
+            // 
+            this.LightsStatus.Location = new System.Drawing.Point(815, 10);
+            this.LightsStatus.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsStatus.Name = "LightsStatus";
+            this.LightsStatus.Size = new System.Drawing.Size(90, 22);
+            this.LightsStatus.TabIndex = 121;
+            this.LightsStatus.Text = "Status";
+            this.LightsStatus.UseVisualStyleBackColor = true;
+            this.LightsStatus.Click += new System.EventHandler(this.LightsStatus_Click);
+            // 
+            // LightsServiceURI
+            // 
+            this.LightsServiceURI.Location = new System.Drawing.Point(102, 10);
+            this.LightsServiceURI.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsServiceURI.Name = "LightsServiceURI";
+            this.LightsServiceURI.Size = new System.Drawing.Size(464, 23);
+            this.LightsServiceURI.TabIndex = 119;
+            // 
+            // LightsPortNum
+            // 
+            this.LightsPortNum.Location = new System.Drawing.Point(102, 34);
+            this.LightsPortNum.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsPortNum.Name = "LightsPortNum";
+            this.LightsPortNum.ReadOnly = true;
+            this.LightsPortNum.Size = new System.Drawing.Size(106, 23);
+            this.LightsPortNum.TabIndex = 115;
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(6, 60);
+            this.label42.Margin = new System.Windows.Forms.Padding(0);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(63, 15);
+            this.label42.TabIndex = 116;
+            this.label42.Text = "Printer URI";
+            // 
+            // LightsURI
+            // 
+            this.LightsURI.Location = new System.Drawing.Point(102, 57);
+            this.LightsURI.Margin = new System.Windows.Forms.Padding(0);
+            this.LightsURI.Name = "LightsURI";
+            this.LightsURI.ReadOnly = true;
+            this.LightsURI.Size = new System.Drawing.Size(464, 23);
+            this.LightsURI.TabIndex = 117;
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(8, 34);
+            this.label43.Margin = new System.Windows.Forms.Padding(0);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(76, 15);
+            this.label43.TabIndex = 118;
+            this.label43.Text = "Port Number";
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(8, 10);
+            this.label44.Margin = new System.Windows.Forms.Padding(0);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(65, 15);
+            this.label44.TabIndex = 120;
+            this.label44.Text = "Service URI";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -1876,6 +2510,10 @@ namespace TestClientForms
             this.EncryptorTab.PerformLayout();
             this.PinPadTab.ResumeLayout(false);
             this.PinPadTab.PerformLayout();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.lightsTab.ResumeLayout(false);
+            this.lightsTab.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2029,6 +2667,57 @@ namespace TestClientForms
         private System.Windows.Forms.Button ResetBinCount;
         private System.Windows.Forms.Button SetCashUnitInfo;
         private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.ListBox PrinterMediaListBox;
+        private System.Windows.Forms.Button PrinterQueryForm;
+        private System.Windows.Forms.Button PrinterEject;
+        private System.Windows.Forms.Button PrinterQueryMedia;
+        private System.Windows.Forms.Button PrinterGetMediaList;
+        private System.Windows.Forms.Button PrinterPrintForm;
+        private System.Windows.Forms.Button PrinterReset;
+        private System.Windows.Forms.Button PrinterPrintRaw;
+        private System.Windows.Forms.Button PrinterGetFormList;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.ListBox PrinterFormListBox;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.TextBox PrinterEvtBox;
+        private System.Windows.Forms.TextBox PrinterRspBox;
+        private System.Windows.Forms.TextBox PrinterCmdBox;
+        private System.Windows.Forms.TextBox PrinterType;
+        private System.Windows.Forms.TextBox PrinterStDevice;
+        private System.Windows.Forms.Button PrinterCapabilities;
+        private System.Windows.Forms.Button PrinterStatus;
+        private System.Windows.Forms.TextBox PrinterServiceURI;
+        private System.Windows.Forms.Button PrinterServiceDiscovery;
+        private System.Windows.Forms.TextBox PrinterPortNum;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.TextBox PrinterURI;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.Label label38;
+        private System.Windows.Forms.Button PrinterLoadDefinition;
+        private System.Windows.Forms.Label label39;
+        private System.Windows.Forms.TextBox PrinterFormFields;
+        private System.Windows.Forms.TabPage lightsTab;
+        private System.Windows.Forms.Button LightsSetLight;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.TextBox LightsEvtBox;
+        private System.Windows.Forms.TextBox LightsRspBox;
+        private System.Windows.Forms.TextBox LightsCmdBox;
+        private System.Windows.Forms.TextBox lblLightsStatus;
+        private System.Windows.Forms.Button LightsCapabilities;
+        private System.Windows.Forms.Button LightsStatus;
+        private System.Windows.Forms.TextBox LightsServiceURI;
+        private System.Windows.Forms.TextBox LightsPortNum;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.TextBox LightsURI;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.TextBox txtLightName;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.ComboBox LightsFlashRate;
+        private System.Windows.Forms.Button LightsServiceDiscovery;
     }
 }
 

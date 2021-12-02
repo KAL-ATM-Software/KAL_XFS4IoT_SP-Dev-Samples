@@ -65,7 +65,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// If no card has been inserted, and for all other categories of card readers, the card unit waits for the period of time specified in the call for a card to be either inserted or pulled through.
         /// The InsertCardEvent will be generated when there is no card in the cardreader and the device is ready to accept a card.
         /// </summary>
-        public async Task<AcceptCardResult> AcceptCardAsync(IAcceptCardEvents events,
+        public async Task<AcceptCardResult> AcceptCardAsync(AcceptCardCommandEvents events,
                                                             AcceptCardRequest acceptCardInfo,
                                                             CancellationToken cancellation)
         {
@@ -94,7 +94,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// For contactless chip card readers a collision of two or more card signals may happen. 
         /// In this case, if the deviceis not able to pick the strongest signal, errorCardCollision will be returned.
         /// </summary>
-        public async Task<ReadCardResult> ReadCardAsync(IReadRawDataEvents events,
+        public async Task<ReadCardResult> ReadCardAsync(ReadCardCommandEvents events,
                                                         ReadCardRequest dataToRead,
                                                         CancellationToken cancellation)
         {
@@ -148,7 +148,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// This procedure is followed by data verification.
         /// If power fails during a write the outcome of the operation will be vendor specific, there is no guarantee that thewrite will have succeeded.
         /// </summary>
-        public async Task<WriteCardResult> WriteCardAsync(IWriteRawDataEvents events,
+        public async Task<WriteCardResult> WriteCardAsync(WriteCardCommandEvents events,
                                                           WriteCardRequest dataToWrite,
                                                           CancellationToken cancellation)
         {
@@ -196,7 +196,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// If no action is specified the user card will not be moved even if this means that the devicecannot be recovered.
         /// If the device is a permanent chip card unit, this command will power-off the chip.For devices with parking station capability there will be one MediaInsertedEvent for each card found.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(IResetEvents events,
+        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events,
                                                               ResetDeviceRequest cardAction,
                                                               CancellationToken cancellation)
         {
@@ -210,8 +210,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <summary>
         /// This command handles the power actions that can be done on the chip.For user chips, this command is only used after the chip has been contacted for the first time using the[CardReader.ReadRawData](#cardreader.readrawdata) command. For contactless user chips, this command may be used todeactivate the contactless card communication.For permanently connected chip cards, this command is the only way to control the chip power.
         /// </summary>
-        public async Task<ChipPowerResult> ChipPowerAsync(IChipPowerEvents events,
-                                                          ChipPowerRequest action,
+        public async Task<ChipPowerResult> ChipPowerAsync(ChipPowerRequest action,
                                                           CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
@@ -243,11 +242,11 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// For intelligent contactless card readers, any in-built audio/visual feedback such as Beep/LEDs, need to becontrolled directly by the reader. 
         /// These indications should be implemented based on the EMVCo and payment system'sspecifications.
         /// </summary>
-        public async Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(IEMVClessPerformTransactionEvents events,
+        public async Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(EMVClessCommandEvents events,
                                                                                                         EMVContactlessPerformTransactionRequest transactionData,
                                                                                                         CancellationToken cancellation)
         {
-            await events.EMVClessReadStatusEvent(new EMVClessReadStatusEvent.PayloadData(100, EMVClessReadStatusEvent.PayloadData.StatusEnum.ReadyToRead, 0, EMVClessReadStatusEvent.PayloadData.ValueQualifierEnum.Amount));
+            await events.EMVClessReadStatusEvent(100, EMVClessCommandEvents.StatusEnum.ReadyToRead, 0, EMVClessCommandEvents.ValueQualifierEnum.Amount, string.Empty, "EUR", "EN");
 
             await Task.Delay(1000, cancellation);
 
@@ -286,7 +285,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// The command enables the contactless card reader and waits for the customer to re-tap their card.
         /// The contactless chip card reader waits for the period of time specified in the command all for a card to be tapped.
         /// </summary>
-        public async Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(IEMVClessIssuerUpdateEvents events,
+        public async Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(EMVClessCommandEvents events,
                                                                                             EMVContactlessIssuerUpdateRequest transactionData,
                                                                                             CancellationToken cancellation)
         {
@@ -390,9 +389,9 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// Latched dips card readers can logically move cards from the transport position to the exit position by
         /// unlatching the card reader.That is, the card will not physically move but will be accessible to the user.
         /// </summary>
-        public async Task<MoveCardResult> MoveCardAsync(IMoveEvents events, MoveCardRequest moveCardInfo, CancellationToken cancellation)
+        public async Task<MoveCardResult> MoveCardAsync(MoveCardRequest moveCardInfo, CancellationToken cancellation)
         {
-            if (moveCardInfo.From.Position == MoveCardRequest.MovePosition.MovePositionEnum.Storage)
+            if (moveCardInfo.From.Position == MovePosition.MovePositionEnum.Storage)
             {
                 return new MoveCardResult(MessagePayload.CompletionCodeEnum.InvalidData,
                                           $"This device doesn't support dispensing card capability. {moveCardInfo.From.Position}");
@@ -409,7 +408,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
             int cardMoved = 0;
 
-            if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Storage)
+            if (moveCardInfo.To.Position == MovePosition.MovePositionEnum.Storage)
             {
                 await Task.Delay(100, cancellation);
 
@@ -438,13 +437,13 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
                 CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.NotPresent;
             }
-            else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Exit)
+            else if (moveCardInfo.To.Position == MovePosition.MovePositionEnum.Exit)
             {
                 CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Entering;
 
                 new Thread(CardTakenThread).IsNotNull().Start();
             }
-            else if (moveCardInfo.To.Position == MoveCardRequest.MovePosition.MovePositionEnum.Transport)
+            else if (moveCardInfo.To.Position == MovePosition.MovePositionEnum.Transport)
             {
                 CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Present;
             }
@@ -633,62 +632,56 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// Stores Common Capabilities
         /// </summary>
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
-                new()
-                {
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new(),
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.CardReader,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                    }
+                ),
+                CardReaderInterface: new CommonCapabilitiesClass.CardReaderInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "CardReader.ReadRawData", null },
-                        { "CardReader.Reset", null },
-                        { "CardReader.WriteRawData", null },
-                        { "CardReader.ChipIO", null },
-                        { "CardReader.ChipPower", null },
-                        { "CardReader.EMVClessConfigure", null },
-                        { "CardReader.EMVClessIssuerUpdate", null },
-                        { "CardReader.EMVClessPerformTransaction", null },
-                        { "CardReader.EMVClessQueryApplications", null },
-                        { "CardReader.QueryIFMIdentifier", null },
-                        { "CardReader.SetKey", null },
-                        { "CardReader.Move", null },
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.ReadRawData,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.WriteRawData,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.ChipIO,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.ChipPower,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.EMVClessConfigure,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.EMVClessIssuerUpdate,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.EMVClessPerformTransaction,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.EMVClessQueryApplications,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.QueryIFMIdentifier,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.SetKey,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Move,
                     },
                     Events: new()
                     {
-                        { "CardReader.InsertCardEvent", null },
-                        { "CardReader.MediaDetectedEvent", null },
-                        { "CardReader.MediaInsertedEvent", null },
-                        { "CardReader.MediaRemovedEvent", null },
-                        { "CardReader.MediaRetainedEvent", null },
-                        { "CardReader.InvalidMediaEvent", null },
-                        { "CardReader.EMVClessReadStatusEvent", null },
-                        { "CardReader.CardActionEvent", null },
-                    },
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Storage,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InsertCardEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaDetectedEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaInsertedEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaRemovedEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InvalidMediaEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.EMVClessReadStatusEvent,
+                        CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.CardActionEvent,
+                    }
+                ),
+                StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Storage.GetStorage", null },
-                        { "Storage.SetStorage", null },
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
+                        CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
                     },
                     Events: new()
                     {
-                        { "Storage.StorageThreshold", null },
-                        { "Storage.StorageChanged", null },
-                        { "Storage.StorageError", null },
-                    },
-                    MaximumRequests: 1000)
-                },
-                ServiceVersion: "1.0",
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
+                        CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
+                    }
+                ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
                     new CommonCapabilitiesClass.DeviceInformationClass(
@@ -710,24 +703,15 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                         SoftwareVersion: "1.0")
                             })
                 },
-                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "CardReader.ReadRawData",
-                        "CardReader.Move",
-                        "Storage.GetStorage",
-                        "Storage.SetStorage",
-                    }),
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
-        public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
-        public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
-        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
+        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
+        public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
+        public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
+        public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> ClearCommandNonce() => throw new NotImplementedException();
 
         #endregion 
 

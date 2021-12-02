@@ -555,6 +555,15 @@ namespace TestClient
 
         public async Task DoSetCashUnitInfo(ClientConnection cashDispenser)
         {
+            XFS4IoT.CashManagement.StorageCashCountsClass unit3 = new(0);
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit3Counts = new() { { "EUR5", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            unit3.ExtendedProperties = unit3Counts;
+            XFS4IoT.CashManagement.StorageCashCountsClass unit4 = new(0);
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit4Counts = new() { { "EUR10", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            unit4.ExtendedProperties = unit4Counts;
+            XFS4IoT.CashManagement.StorageCashCountsClass unit5 = new(0);
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit5Counts = new() { { "EUR20", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            unit5.ExtendedProperties = unit5Counts;
 
             Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
             {
@@ -562,21 +571,21 @@ namespace TestClient
                     "PHP3",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
-                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR5", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
+                                                                   new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit3)),
                     null)
                 },
                 {
                     "PHP4",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
-                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR10", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
+                                                                   new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit4)),
                     null)
                 },
                 {
                     "PHP5",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
-                                            new XFS4IoT.CashManagement.StorageSetCashStatusClass(new XFS4IoT.CashManagement.StorageCashCountsClass(0, new() { { "EUR20", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } }))),
+                                                                   new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit5)),
                     null)
                 },
             };

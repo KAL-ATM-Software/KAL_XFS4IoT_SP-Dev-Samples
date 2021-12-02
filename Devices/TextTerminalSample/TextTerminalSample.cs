@@ -145,13 +145,13 @@ namespace TextTerminalSample
                 //Check if key is a terminate key.
                 if (readInfo.TerminateCommandKeys.Contains(key))
                 {
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(new(null, key));
+                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(string.Empty, key);
                     break; //Terminate read.
                 }
                 //Check if key is a command key.
                 else if (readInfo.ActiveCommandKeys.Contains(key))
                 {
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(new(null, key));
+                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(string.Empty, key);
                     switch (key)
                     {
                         //Sample SP only supports "clear". Clear the buffered keys.
@@ -168,7 +168,7 @@ namespace TextTerminalSample
                     //Add to buffer and write to display.
                     buffer.Append(key);
                     TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length - 1, readInfo.PositionY, key);
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(new(key, null));
+                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(key, string.Empty);
                 }
                 else
                 {
@@ -193,7 +193,7 @@ namespace TextTerminalSample
         /// <summary>
         /// Reset the device
         /// </summary>
-        public Task<DeviceResult> ResetDeviceAsync(IResetEvents events, CancellationToken cancellation)
+        public Task<DeviceResult> ResetDeviceAsync(CancellationToken cancellation)
         {
             return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
         }
@@ -228,44 +228,31 @@ namespace TextTerminalSample
         /// Stores Common Capabilities
         /// </summary>
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
-                new()
-                {
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.Common,
+                CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "Common.Status", null },
-                        { "Common.Capabilities", null },
-                    },
-                    Events: new(),
-                    MaximumRequests: 1000),
-                    new CommonCapabilitiesClass.InterfaceClass(
-                    Name: CommonCapabilitiesClass.InterfaceClass.NameEnum.TextTerminal,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                    }
+                ),
+                TextTerminalInterface: new CommonCapabilitiesClass.TextTerminalInterfaceClass
+                (
                     Commands: new()
                     {
-                        { "TextTerminal.Beep", null },
-                        { "TextTerminal.ClearScreen", null },
-                        //"TextTerminal.DefineKeys", null },
-                        //"TextTerminal.GetFormList", null },
-                        { "TextTerminal.GetKeyDetail", null },
-                        //"TextTerminal.GetQueryField", null },
-                        //"TextTerminal.GetQueryForm", null },
-                        { "TextTerminal.Read", null },
-                        //"TextTerminal.ReadForm", null },
-                        { "TextTerminal.Reset", null },
-                        { "TextTerminal.SetResolution", null },
-                        { "TextTerminal.Write", null },
-                        //"TextTerminal.WriteForm", null },
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Beep,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.ClearScreen,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.GetKeyDetail,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Read,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Reset,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.SetResolution,
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Write,
                     },
                     Events: new()
                     {
-                        { "TextTerminal.FieldErrorEvent", null },
-                        { "TextTerminal.FieldWarningEvent", null },
-                        { "TextTerminal.KeyEvent", null },
-                    },
-                    MaximumRequests: 1000)
-                },
-                ServiceVersion: "1.0",
+                        CommonCapabilitiesClass.TextTerminalInterfaceClass.EventEnum.KeyEvent,
+                    }
+                ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
                     new CommonCapabilitiesClass.DeviceInformationClass(
@@ -287,39 +274,16 @@ namespace TextTerminalSample
                                         SoftwareVersion: "1.0")
                             })
                 },
-                VendorModeIformation: new CommonCapabilitiesClass.VendorModeInfoClass(
-                    AllowOpenSessions: true,
-                    AllowedExecuteCommands: new List<string>()
-                    {
-                        "Beep",
-                        "ClearScreen",
-                        //"DefineKeys",
-                        "DispLight",
-                        //"GetFormList",
-                        "GetKeyDetail",
-                        //"GetQueryField",
-                        //"GetQueryForm",
-                        "Read",
-                        //"ReadForm",
-                        "Reset",
-                        "SetLed",
-                        "SetResolution",
-                        "Write",
-                        //"TextTerminal.WriteForm"
-                    }),
                 PowerSaveControl: false,
-                AntiFraudModule: false,
-                EndToEndSecurity: false,
-                HardwareSecurityElement: false,
-                ResponseSecurityEnabled: false);
+                AntiFraudModule: false);
 
-        
-        public Task<PowerSaveControlCompletion.PayloadData> PowerSaveControl(PowerSaveControlCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SynchronizeCommandCompletion.PayloadData> SynchronizeCommand(SynchronizeCommandCommand.PayloadData payload) => throw new NotImplementedException();
-        public Task<SetTransactionStateCompletion.PayloadData> SetTransactionState(SetTransactionStateCommand.PayloadData payload) => throw new NotImplementedException();
-        public GetTransactionStateCompletion.PayloadData GetTransactionState() => throw new NotImplementedException();
-        public Task<GetCommandNonceCompletion.PayloadData> GetCommandNonce() => throw new NotImplementedException();
-        public Task<ClearCommandNonceCompletion.PayloadData> ClearCommandNonce() => throw new NotImplementedException();
+
+        public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
+        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
+        public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
+        public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
+        public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();
+        public Task<DeviceResult> ClearCommandNonce() => throw new NotImplementedException();
 
 
         #endregion
