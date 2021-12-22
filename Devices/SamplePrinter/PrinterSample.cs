@@ -43,7 +43,8 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                                                  DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
                                                  PowerSaveRecoveryTime: 0,
                                                  AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             PrinterStatus = new PrinterStatusClass(Media: PrinterStatusClass.MediaEnum.NotPresent,
                                                    Paper: new Dictionary<PrinterStatusClass.PaperSourceEnum, PrinterStatusClass.SupplyStatusClass>()

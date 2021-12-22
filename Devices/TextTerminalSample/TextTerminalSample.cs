@@ -45,7 +45,8 @@ namespace TextTerminalSample
                                                  CommonStatusClass.PositionStatusEnum.InPosition,
                                                  0,
                                                  CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             TextTerminalStatus = new TextTerminalStatusClass(TextTerminalStatusClass.KeyboardEnum.Off,
                                                              TextTerminalStatusClass.KeyLockEnum.NotAvailable,
@@ -132,7 +133,7 @@ namespace TextTerminalSample
         /// A KeyPress event should be triggered for each valid key.
         /// The method will return once a termination key is pressed or if the numChars is reached when AutoEnd is true.
         /// </summary>
-        public async Task<ReadResult> ReadAsync(ReadRequest readInfo, CancellationToken cancellation)
+        public async Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest readInfo, CancellationToken cancellation)
         {
             TextTerminalUI.SetReading(true);
             StringBuilder buffer = new StringBuilder(readInfo.NumChars);
@@ -145,13 +146,13 @@ namespace TextTerminalSample
                 //Check if key is a terminate key.
                 if (readInfo.TerminateCommandKeys.Contains(key))
                 {
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(string.Empty, key);
+                    await events.KeyEvent(string.Empty, key);
                     break; //Terminate read.
                 }
                 //Check if key is a command key.
                 else if (readInfo.ActiveCommandKeys.Contains(key))
                 {
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(string.Empty, key);
+                    await events.KeyEvent(string.Empty, key);
                     switch (key)
                     {
                         //Sample SP only supports "clear". Clear the buffered keys.
@@ -168,7 +169,7 @@ namespace TextTerminalSample
                     //Add to buffer and write to display.
                     buffer.Append(key);
                     TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length - 1, readInfo.PositionY, key);
-                    await SetServiceProvider.IsA<TextTerminalServiceProvider>().KeyEvent(key, string.Empty);
+                    await events.KeyEvent(key, string.Empty);
                 }
                 else
                 {

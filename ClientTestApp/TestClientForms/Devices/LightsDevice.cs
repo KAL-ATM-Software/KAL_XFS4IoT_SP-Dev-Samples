@@ -34,7 +34,7 @@ namespace TestClientForms.Devices
                 return;
             }
             var payload = new SetLightCommand.PayloadData(CommandTimeout);
-            payload.ExtendedProperties = new() { { lightName, new(null, flashRate, XFS4IoT.Lights.LightStateClass.ColourEnum.Red, null) } };
+            payload.ExtendedProperties = new() { { lightName, new(null, flashRate, XFS4IoT.Lights.LightStateClass.ColorEnum.Red, null) } };
 
             var cmd = new SetLightCommand(RequestId.NewID(), payload);
 

@@ -37,7 +37,8 @@ namespace KAL.XFS4IoTSP.Lights.Sample
                                                  DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
                                                  PowerSaveRecoveryTime: 0,
                                                  AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 EndToEndSecurity: CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             LightsStatus.Status = new()
             {

@@ -64,7 +64,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                  CommonStatusClass.PositionStatusEnum.InPosition,
                                                  0,
                                                  CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.Inactive);
+                                                 CommonStatusClass.ExchangeEnum.Inactive,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotEnforced);
 
             CashDispenserStatus = new CashDispenserStatusClass(CashDispenserStatusClass.IntermediateStackerEnum.Empty,
                                                                new()
@@ -186,7 +187,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             return new DispenseResult(MessagePayload.CompletionCodeEnum.Success, dispenseInfo.Values, LastDispenseResult);
         }
 
-        public async Task<PresentCashResult> PresentCashAsync(ShutterStatusChangedCommandEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
+        public async Task<PresentCashResult> PresentCashAsync(ItemInfoAvailableCommandEvent events, PresentCashRequest presentInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
             
@@ -255,7 +256,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// The method completes with success if the device successfully manages to test all of the testable cash units regardless of the outcome of the test. 
         /// This is the case if all testable cash units could be tested and a dispense was possible from at least one of the cash units.
         /// </summary>
-        public async Task<TestCashUnitsResult> TestCashUnitsAsync(DispenserCommandEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
+        public async Task<TestCashUnitsResult> TestCashUnitsAsync(ItemErrorCommandEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -288,7 +289,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Perform count operation to empty the specified physical cash unit(s). 
         /// All items dispensed from the cash unit are counted and moved to the specified output location.
         /// </summary>
-        public async Task<CountResult> CountAsync(DispenserCommandEvents events, CountRequest countInfo, CancellationToken cancellation)
+        public async Task<CountResult> CountAsync(ItemErrorCommandEvents events, CountRequest countInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -427,7 +428,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// ResetDeviceAsync
         /// Perform a hardware reset which will attempt to return the CashDispenser device to a known good state.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(ShutterStatusChangedCommandEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
+        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
 
@@ -491,7 +492,6 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             RetractStackerActions: CashManagementCapabilitiesClass.RetractStackerActionEnum.Retract,
             ExchangeTypes: CashManagementCapabilitiesClass.ExchangeTypesEnum.ByHand,
             ItemInfoTypes: CashManagementCapabilitiesClass.ItemInfoTypesEnum.SerialNumber,
-            SafeDoor: true,
             CashBox: false,
             ClassificationList: false,
             AllBanknoteItems: AllBanknoteIDs
@@ -962,8 +962,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         private CashDispenserStatusClass.PositionStatusClass positionStatus = new(CashManagementStatusClass.ShutterEnum.Closed,
                                                                                   CashDispenserStatusClass.PositionStatusClass.PositionStatusEnum.Empty,
                                                                                   CashDispenserStatusClass.PositionStatusClass.TransportEnum.Ok,
-                                                                                  CashDispenserStatusClass.PositionStatusClass.TransportStatusEnum.Empty,
-                                                                                  CashDispenserStatusClass.PositionStatusClass.JammedShutterPositionEnum.NotJammed);
+                                                                                  CashDispenserStatusClass.PositionStatusClass.TransportStatusEnum.Empty);
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
 

@@ -43,7 +43,8 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                  CommonStatusClass.PositionStatusEnum.InPosition,
                                                  0,
                                                  CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             CardReaderStatus = new CardReaderStatusClass(CardReaderStatusClass.MediaEnum.NotPresent,
                                                          CardReaderStatusClass.SecurityEnum.NotSupported,
@@ -65,7 +66,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// If no card has been inserted, and for all other categories of card readers, the card unit waits for the period of time specified in the call for a card to be either inserted or pulled through.
         /// The InsertCardEvent will be generated when there is no card in the cardreader and the device is ready to accept a card.
         /// </summary>
-        public async Task<AcceptCardResult> AcceptCardAsync(AcceptCardCommandEvents events,
+        public async Task<AcceptCardResult> AcceptCardAsync(CommonCardCommandEvents events,
                                                             AcceptCardRequest acceptCardInfo,
                                                             CancellationToken cancellation)
         {
@@ -148,7 +149,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// This procedure is followed by data verification.
         /// If power fails during a write the outcome of the operation will be vendor specific, there is no guarantee that thewrite will have succeeded.
         /// </summary>
-        public async Task<WriteCardResult> WriteCardAsync(WriteCardCommandEvents events,
+        public async Task<WriteCardResult> WriteCardAsync(CommonCardCommandEvents events,
                                                           WriteCardRequest dataToWrite,
                                                           CancellationToken cancellation)
         {
@@ -354,7 +355,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             return new QueryIFMIdentifierResult(MessagePayload.CompletionCodeEnum.Success,
                                                 new List<IFMIdentifierInfo>()
                                                 {
-                                                new IFMIdentifierInfo(QueryIFMIdentifierCompletion.PayloadData.IfmAuthorityEnum.Emv, new List<byte>() { 0x1, 0x2, 0x3, 0x4 } )
+                                                new IFMIdentifierInfo(IFMIdentifierInfo.IFMAuthorityEnum.EMV, "1234" )
                                                 });
         }
 

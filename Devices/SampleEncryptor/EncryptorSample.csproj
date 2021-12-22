@@ -16,8 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="0.0.7-alpha.2" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="0.0.7-alpha.2" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="0.0.8-alpha.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="0.0.8-alpha.1" />
   </ItemGroup>
 
 </Project>

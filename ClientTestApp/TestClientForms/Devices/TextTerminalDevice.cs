@@ -173,7 +173,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var beepCmd = new BeepCommand(RequestId.NewID(), new BeepCommand.PayloadData(CommandTimeout, new(null, true)));
+            var beepCmd = new BeepCommand(RequestId.NewID(), new BeepCommand.PayloadData(CommandTimeout, new(null, BeepCommand.PayloadData.BeepClass.BeepTypeEnum.Exclamation)));
 
             CmdBox.Text = beepCmd.Serialise();
 

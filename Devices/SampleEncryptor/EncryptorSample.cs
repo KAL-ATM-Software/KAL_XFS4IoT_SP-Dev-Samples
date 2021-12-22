@@ -46,7 +46,8 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                  CommonStatusClass.PositionStatusEnum.InPosition,
                                                  0,
                                                  CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
                                                                KeyManagementStatusClass.CertificateStateEnum.Primary);
@@ -100,6 +101,9 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                            $"Specified algorithm is not supproted. {request.Algorithm}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.AlgorithmNotSupported);
             }
+
+            loadedKeys.Add(request.KeyName, new(request.KeyName, LoadedKeyInfo.AlgorithmKeyEnum.TDES, request.KeyData));
+            StoreKeys(loadedKeys);
 
             List<byte> keyCheckValue = null;
             int keyLength = 0;
@@ -673,7 +677,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             {
                 return new CryptoDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                             $"Smaple SP only supports encryption.",
-                                            CryptoDataCompletion.PayloadData.ErrorCodeEnum.ModeNotSupported);
+                                            CryptoDataCompletion.PayloadData.ErrorCodeEnum.ModeOfUseNotSupported);
             }
 
             Dictionary<string, LoadedKeyInfo> keysLoaded = GetKeys();
@@ -860,6 +864,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             EMVHashAlgorithms: CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA1_Digest | CryptoCapabilitiesClass.EMVHashAlgorithmEnum.SHA256_Digest,
             CryptoAttributes: new()
             {
+                { "D0", new() { { "T", new() { { "E", new CryptoCapabilitiesClass.CryptoAttributesClass(CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.ECB | CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.CBC) } } } } },
                 { "D1", new() { { "R", new() { { "E", new CryptoCapabilitiesClass.CryptoAttributesClass(CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.ECB | CryptoCapabilitiesClass.CryptoAttributesClass.CryptoMethodEnum.CBC) } } } } }
             },
             AuthenticationAttributes: new()

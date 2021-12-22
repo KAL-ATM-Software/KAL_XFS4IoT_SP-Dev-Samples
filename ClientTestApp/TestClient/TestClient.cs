@@ -364,7 +364,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new ChipIOCommand(RequestId.NewID(),
-                new ChipIOCommand.PayloadData(10_0000, "chipT0", Convert.ToBase64String(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 })));
+                new ChipIOCommand.PayloadData(10_0000, ChipIOCommand.PayloadData.ChipProtocolEnum.ChipT0, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }));
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -395,7 +395,7 @@ namespace TestClient
                             Payload:    new 
                                         (
                                         Timeout: 10_000, 
-                                        To: ResetCommand.PayloadData.ToEnum.Transport
+                                        To: ResetCommand.PayloadData.ToEnum.CurrentPosition
                                         )
                             );
 
@@ -428,7 +428,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new SetKeyCommand(RequestId.NewID(),
-                new SetKeyCommand.PayloadData(10_000, Convert.ToBase64String(new byte[] { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 })));
+                new SetKeyCommand.PayloadData(10_000, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }));
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -446,8 +446,8 @@ namespace TestClient
             var command = new WriteRawDataCommand(RequestId.NewID(),
                 new WriteRawDataCommand.PayloadData(10_000, new()
                 {
-                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, "12345678", WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
-                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, "12345678", WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
+                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }, WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
+                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }, WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
                 }));
 
             Logger.LogMessage(command);

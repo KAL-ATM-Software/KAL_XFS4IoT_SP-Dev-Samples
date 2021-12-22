@@ -271,7 +271,7 @@ namespace TestClientForms.Devices
             var cmd = new PrintRawCommand(RequestId.NewID(),
                                               new PrintRawCommand.PayloadData(CommandTimeout,
                                                                               PrintRawCommand.PayloadData.InputDataEnum.No,
-                                                                              Convert.ToBase64String(rawdata)));
+                                                                              rawdata.ToList()));
             CmdBox.Text = cmd.Serialise();
 
             await printer.SendCommandAsync(cmd);

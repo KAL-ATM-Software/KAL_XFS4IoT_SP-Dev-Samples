@@ -49,7 +49,8 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                                  CommonStatusClass.PositionStatusEnum.InPosition,
                                                  0,
                                                  CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported);
+                                                 CommonStatusClass.ExchangeEnum.NotSupported,
+                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
                                                                KeyManagementStatusClass.CertificateStateEnum.Unknown);
@@ -1138,7 +1139,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             {
                 return new CryptoDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
                                             $"Smaple SP only supports encryption.",
-                                            CryptoDataCompletion.PayloadData.ErrorCodeEnum.ModeNotSupported);
+                                            CryptoDataCompletion.PayloadData.ErrorCodeEnum.ModeOfUseNotSupported);
             }
 
             Dictionary<string, LoadedKeyInfo> keysLoaded = GetKeys();

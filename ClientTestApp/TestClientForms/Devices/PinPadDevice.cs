@@ -379,7 +379,7 @@ namespace TestClientForms.Devices
                                                                                 Padding: 0xf,
                                                                                 Format: GetPinBlockCommand.PayloadData.FormatEnum.Ansi,
                                                                                 Key: "PinKey",
-                                                                                PinBlockAttributes: new GetPinBlockCommand.PayloadData.PinBlockAttributesClass(GetPinBlockCommand.PayloadData.PinBlockAttributesClass.CryptoMethodEnum.Ecb)));
+                                                                                CryptoMethod: GetPinBlockCommand.PayloadData.CryptoMethodEnum.Ecb));
 
             CmdBox.Text = cmd.Serialise();
 

@@ -152,7 +152,7 @@ namespace TestClientForms.Devices
             var cmd = new ImportKeyCommand(RequestId.NewID(), new ImportKeyCommand.PayloadData(CommandTimeout, 
                                                                                                keyName, 
                                                                                                new ImportKeyCommand.PayloadData.KeyAttributesClass(keyUsage, "T", modeOfUse),
-                                                                                               Value: Convert.ToBase64String(data.ToArray()),
+                                                                                               Value:data,
                                                                                                DecryptKey: "MASTERKEY",
                                                                                                DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb));
 
@@ -183,7 +183,7 @@ namespace TestClientForms.Devices
 
             var cmd = new GenerateAuthenticationCommand(RequestId.NewID(), new GenerateAuthenticationCommand.PayloadData(CommandTimeout, 
                                                                                                                          keyName,
-                                                                                                                         AuthenticationData: Convert.ToBase64String(data.ToArray())));
+                                                                                                                         data));
 
             CmdBox.Text = cmd.Serialise();
 
@@ -239,8 +239,8 @@ namespace TestClientForms.Devices
 
             var cmd = new CryptoDataCommand(RequestId.NewID(), new CryptoDataCommand.PayloadData(CommandTimeout,
                                                                                                  Key: keyName,
-                                                                                                 CryptData: Convert.ToBase64String(Data.ToArray()),
-                                                                                                 CryptoAttributes: new CryptoDataCommand.PayloadData.CryptoAttributesClass(CryptoDataCommand.PayloadData.CryptoAttributesClass.CryptoMethodEnum.Ecb)));
+                                                                                                 Data: Data,
+                                                                                                 CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb));
 
             CmdBox.Text = cmd.Serialise();
 
