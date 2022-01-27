@@ -1002,7 +1002,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             }
 
             bool validvalidOption = false;
-            foreach (var option in pinPadServiceProvider.KeyManagementCapabilities.LoadCertificationOptions)
+            foreach (var option in KeyManagementCapabilities.LoadCertificationOptions)
             {
                 if (request.Signer == ImportCertificateRequest.SignerEnum.CA &&
                     option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA ||
@@ -1465,7 +1465,6 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 ));
 
         public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
-        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
         public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
         public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
         public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();

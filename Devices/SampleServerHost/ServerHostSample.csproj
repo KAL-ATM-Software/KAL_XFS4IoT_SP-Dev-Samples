@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup Label="Globals">
         <SccProjectName>SAK</SccProjectName>
@@ -27,12 +27,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\AuxiliariesSample\AuxiliariesSample.csproj" />
       <ProjectReference Include="..\SampleCardReader\CardReaderSample.csproj" />
       <ProjectReference Include="..\SampleCashDispenser\CashDispenserSample.csproj" />
       <ProjectReference Include="..\SampleEncryptor\EncryptorSample.csproj" />
       <ProjectReference Include="..\SampleLights\LightsSample.csproj" />
       <ProjectReference Include="..\SamplePinPad\PinPadSample.csproj" />
       <ProjectReference Include="..\SamplePrinter\PrinterSample.csproj" />
+      <ProjectReference Include="..\SampleVendorApplication\VendorApplicationSample.csproj" />
+      <ProjectReference Include="..\SampleVendorMode\VendorModeSample.csproj" />
       <ProjectReference Include="..\TextTerminalSample\TextTerminalSample.csproj" />
     </ItemGroup>
 

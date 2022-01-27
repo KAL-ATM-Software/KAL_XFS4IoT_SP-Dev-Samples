@@ -30,6 +30,9 @@ namespace TestClientForms
             PinPadServiceURI.Text = "ws://localhost";
             PrinterServiceURI.Text = "ws://localhost";
             LightsServiceURI.Text = "ws://localhost";
+            AuxiliariesServiceURI.Text = "ws://localhost";
+            VendorModeServiceURI.Text = "ws://localhost";
+            VendorAppServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
@@ -38,9 +41,15 @@ namespace TestClientForms
             PinPadDev = new("PinPad", PinPadCmdBox, PinPadRspBox, PinPadEvtBox, PinPadServiceURI, PinPadPortNum, PinPadURI);
             PrinterDev = new("Printer", PrinterCmdBox, PrinterRspBox, PrinterEvtBox, PrinterServiceURI, PrinterPortNum, PrinterURI);
             LightsDev = new("Lights", LightsCmdBox, LightsRspBox, LightsEvtBox, LightsServiceURI, LightsPortNum, LightsURI);
+            AuxDev = new("Auxiliaries", AuxiliariesCmdBox, AuxiliariesRspBox, AuxiliariesEvtBox, AuxiliariesServiceURI, AuxiliariesPortNum, AuxiliariesURI);
+            VendorModeDev = new("VendorMode", VendorModeCmdBox, VendorModeRspBox, VendorModeEvtBox, VendorModeServiceURI, VendorModePortNum, VendorModeURI);
+            VendorAppDev = new("VendorApplication", VendorAppCmdBox, VendorAppRspBox, VendorAppEvtBox, VendorAppServiceURI, VendorAppPortNum, VendorAppURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
+
+            comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum));
+            comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Clear;
         }
         
         private DispenserDevice DispenserDev { get; init; }
@@ -50,6 +59,9 @@ namespace TestClientForms
         private PinPadDevice PinPadDev { get; init; }
         private PrinterDevice PrinterDev { get; init; }
         private LightsDevice LightsDev { get; init; }
+        private AuxiliariesDevice AuxDev { get; init; }
+        private VendorModeDevice VendorModeDev { get; init; }
+        private VendorAppDevice VendorAppDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
@@ -674,6 +686,105 @@ namespace TestClientForms
         {
             await LightsDev.DoServiceDiscovery();
         }
+        #endregion
+
+        #region Auxiliaries
+        private async void btnAuxiliariesServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await AuxDev.DoServiceDiscovery();
+        }
+
+        private async void btnAuxiliariesStatus_Click(object sender, EventArgs e)
+        {
+            var status = await AuxDev.GetStatus();
+            AuxiliariesStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
+        }
+
+        private async void btnAuxiliariesCapabilities_Click(object sender, EventArgs e)
+        {
+            await AuxDev.GetCapabilities();
+        }
+
+        private async void btnSetAutoStartup_Click(object sender, EventArgs e)
+        {
+            await AuxDev.SetAutoStartupTime(autoStartupDateTime.Value, (XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum)comboAutoStartupModes.SelectedItem);
+        }
+
+        private async void btnGetAutoStartup_Click(object sender, EventArgs e)
+        {
+            await AuxDev.GetAutoStartupTime();
+        }
+
+        private async void btnClearAutoStartup_Click(object sender, EventArgs e)
+        {
+            await AuxDev.ClearAutoStartupTime();
+        }
+
+        private async void btnRegister_Click(object sender, EventArgs e)
+        {
+            await AuxDev.Register();
+        }
+
+        private async void btnSetAuxiliaries_Click(object sender, EventArgs e)
+        {
+            await AuxDev.SetAuxiliaries();
+        }
+        #endregion
+
+        #region VendorMode
+
+        private async void btnVendorModeServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await VendorModeDev.DoServiceDiscovery();
+        }
+
+        private async void btnVendorModeStatus_Click(object sender, EventArgs e)
+        {
+            var status = await VendorModeDev.GetStatus();
+            VendorModeStStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
+            VendorModeServiceStatus.Text = status?.Payload?.VendorMode?.Service.ToString() ?? string.Empty;
+        }
+
+        private async void buttonVDMEnter_Click(object sender, EventArgs e)
+        {
+            await VendorModeDev.EnterModeRequest();
+        }
+
+        private async void buttonVDMExit_Click(object sender, EventArgs e)
+        {
+            await VendorModeDev.ExitModeRequest();
+        }
+
+        #endregion
+
+        #region VendorApp
+        private async void btnVendorAppServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await VendorAppDev.DoServiceDiscovery();
+        }
+
+        private async void btnVendorAppStatus_Click(object sender, EventArgs e)
+        {
+            var status = await VendorAppDev.GetStatus();
+            VendorAppStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
+        }
+
+        private async void btnVendorAppCapabilities_Click(object sender, EventArgs e)
+        {
+            await VendorAppDev.GetCapabilities();
+        }
+
+        private async void buttonStartLocalApplication_Click(object sender, EventArgs e)
+        {
+            await VendorAppDev.StartLocalApplication(textAppName.Text);
+        }
+
+        private async void buttonGetActiveInterface_Click(object sender, EventArgs e)
+        {
+            var activeInterface = await VendorAppDev.GetActiveInterface();
+            textActiveInterface.Text = activeInterface?.Payload.ActiveInterface.ToString();
+        }
+
         #endregion
     }
 }

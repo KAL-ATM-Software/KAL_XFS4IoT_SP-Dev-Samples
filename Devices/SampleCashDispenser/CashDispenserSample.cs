@@ -941,7 +941,6 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 ));
 
         public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
-        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
         public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
         public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
         public Task<GetCommandNonceResult> GetCommandNonce()

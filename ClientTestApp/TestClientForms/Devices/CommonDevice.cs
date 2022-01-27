@@ -42,7 +42,7 @@ namespace TestClientForms.Devices
         /// Get a reference to the required text boxes for the device.
         /// Use separate text box per device to enable using more than one device at a time.
         /// </summary>
-        public CommonDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+        public CommonDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox, bool useSingleConnection = false)
         {
             ServiceName = serviceName;
             CmdBox = cmdBox;
@@ -51,6 +51,7 @@ namespace TestClientForms.Devices
             UriBox = uriBox;
             PortBox = portBox;
             ServiceUriBox = serviceUriBox;
+            UseSingleConnection = useSingleConnection;
         }
 
         protected string ServiceName { get; init; }
@@ -61,6 +62,8 @@ namespace TestClientForms.Devices
         protected TextBox UriBox { get; init; }
         protected TextBox PortBox { get; init; }
         protected TextBox ServiceUriBox { get; init; }
+        protected bool UseSingleConnection { get; init; }
+        protected XFS4IoTClient.ClientConnection SingleConnection {get; private set;}
 
         private int? ServicePort { get; set; }
 
@@ -150,6 +153,7 @@ namespace TestClientForms.Devices
             ServicePort = null;
 
             await Task.WhenAll(from port in XFSConstants.PortRanges select ServiceDiscoveryForPort(UriBox.Text, port, serviceClasses));
+            SingleConnection = null;
 
             if (ServicePort is null || string.IsNullOrWhiteSpace(ServiceUriBox.Text))
             {
@@ -157,20 +161,42 @@ namespace TestClientForms.Devices
                 ServiceUriBox.Text = "";
                 MessageBox.Show("Failed on finding services.");
             }
+            else if (UseSingleConnection)
+            {
+                SingleConnection = new(new Uri($"{ServiceUriBox.Text}"));
+                try
+                {
+                    await SingleConnection.ConnectAsync();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Failed when setting up single connection.");
+                    SingleConnection = null;
+                }
+            }
         }
 
-        public async Task<StatusCompletion> GetStatus()
+        public async Task<XFS4IoTClient.ClientConnection> GetConnection()
         {
+            if (UseSingleConnection && SingleConnection != null && SingleConnection.IsConnected)
+                return SingleConnection;
+
             var device = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
 
             try
             {
                 await device.ConnectAsync();
+                return device;
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+
+        public async Task<StatusCompletion> GetStatus()
+        {
+            var device = await GetConnection();
 
             var statusCmd = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(CommandTimeout));
             CmdBox.Text = statusCmd.Serialise();

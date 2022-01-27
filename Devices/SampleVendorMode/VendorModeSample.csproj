@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.VendorMode</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.VendorMode.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.VendorMode" Version="0.0.9-alpha.1" />
+  </ItemGroup>
+
+</Project>

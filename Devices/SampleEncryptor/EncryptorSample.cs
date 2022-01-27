@@ -554,7 +554,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             }
 
             bool validvalidOption = false;
-            foreach (var option in cryptoServiceProvider.KeyManagementCapabilities.LoadCertificationOptions)
+            foreach (var option in KeyManagementCapabilities.LoadCertificationOptions)
             {
                 if (request.Signer == ImportCertificateRequest.SignerEnum.CA &&
                     option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA ||
@@ -971,7 +971,6 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 ));
 
         public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel) => throw new NotImplementedException();
-        public Task<DeviceResult> SynchronizeCommand(SynchronizeCommandRequest request) => throw new NotImplementedException();
         public Task<DeviceResult> SetTransactionState(SetTransactionStateRequest request) => throw new NotImplementedException();
         public Task<GetTransactionStateResult> GetTransactionState() => throw new NotImplementedException();
         public Task<GetCommandNonceResult> GetCommandNonce() => throw new NotImplementedException();

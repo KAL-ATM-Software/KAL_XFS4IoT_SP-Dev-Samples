@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="0.0.8-alpha.1" />
+      <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="0.0.9-alpha.1" />
     </ItemGroup>
 
 </Project>

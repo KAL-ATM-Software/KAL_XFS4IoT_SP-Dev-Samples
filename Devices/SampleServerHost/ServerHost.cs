@@ -88,7 +88,7 @@ namespace Server
                 simPrinterDevice.SetServiceProvider = printerService;
                 Publisher.Add(printerService);
 
-                /// SIU Service Provider
+                /// Lights Service Provider
                 var simLightsDevice = new KAL.XFS4IoTSP.Lights.Sample.LightsSample(Logger);
                 var lightsService = new LightsServiceProvider(EndpointDetails,
                                                               ServiceName: "SimLights",
@@ -97,6 +97,36 @@ namespace Server
 
                 simLightsDevice.SetServiceProvider = lightsService;
                 Publisher.Add(lightsService);
+
+                /// Auxiliaries Service Provider
+                var simAuxDevice = new KAL.XFS4IoTSP.Auxiliaries.Sample.AuxiliariesSample(Logger);
+                var auxService = new AuxiliariesServiceProvider(EndpointDetails,
+                                                                ServiceName: "SimAuxiliaries",
+                                                                simAuxDevice,
+                                                                Logger);
+
+                simAuxDevice.SetServiceProvider = auxService;
+                Publisher.Add(auxService);
+
+                /// VendorApplication Service Provider
+                var simVendorAppDevice = new KAL.XFS4IoTSP.VendorApplication.Sample.VendorApplicationSample(Logger);
+                var vendorAppService = new VendorApplicationServiceProvider(EndpointDetails,
+                                                                            ServiceName: "SimVendorApplication",
+                                                                            simVendorAppDevice,
+                                                                            Logger);
+
+                simVendorAppDevice.SetServiceProvider = vendorAppService;
+                Publisher.Add(vendorAppService);
+
+                /// VendorMode Service Provider
+                var simVendorModeDevice = new KAL.XFS4IoTSP.VendorMode.Sample.VendorModeSample(Logger);
+                var vendorModeService = new VendorModeServiceProvider(EndpointDetails,
+                                                                      ServiceName: "SimVendorMode",
+                                                                      simVendorModeDevice,
+                                                                      Logger);
+
+                simVendorModeDevice.SetServiceProvider = vendorModeService;
+                Publisher.Add(vendorModeService);
 
                 // TODO: adding other services
 
