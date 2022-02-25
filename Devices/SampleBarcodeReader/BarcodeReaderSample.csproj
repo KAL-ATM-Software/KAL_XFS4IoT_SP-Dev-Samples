@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.BarcodeReader</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.BarcodeReader.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.BarcodeReader" Version="0.0.10-alpha.1" />
+  </ItemGroup>
+
+</Project>

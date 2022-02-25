@@ -87,7 +87,7 @@ namespace Server
 
                 simPrinterDevice.SetServiceProvider = printerService;
                 Publisher.Add(printerService);
-
+                
                 /// Lights Service Provider
                 var simLightsDevice = new KAL.XFS4IoTSP.Lights.Sample.LightsSample(Logger);
                 var lightsService = new LightsServiceProvider(EndpointDetails,
@@ -97,7 +97,7 @@ namespace Server
 
                 simLightsDevice.SetServiceProvider = lightsService;
                 Publisher.Add(lightsService);
-
+                
                 /// Auxiliaries Service Provider
                 var simAuxDevice = new KAL.XFS4IoTSP.Auxiliaries.Sample.AuxiliariesSample(Logger);
                 var auxService = new AuxiliariesServiceProvider(EndpointDetails,
@@ -107,7 +107,7 @@ namespace Server
 
                 simAuxDevice.SetServiceProvider = auxService;
                 Publisher.Add(auxService);
-
+                
                 /// VendorApplication Service Provider
                 var simVendorAppDevice = new KAL.XFS4IoTSP.VendorApplication.Sample.VendorApplicationSample(Logger);
                 var vendorAppService = new VendorApplicationServiceProvider(EndpointDetails,
@@ -127,6 +127,26 @@ namespace Server
 
                 simVendorModeDevice.SetServiceProvider = vendorModeService;
                 Publisher.Add(vendorModeService);
+
+                /// BarcodeReader Service Provider
+                var simBarcodeReaderDevice = new KAL.XFS4IoTSP.BarcodeReader.Sample.BarcodeReaderSample(Logger);
+                var barcodeReaderService = new BarcodeReaderServiceProvider(EndpointDetails,
+                                                                            ServiceName: "SimBarcodeReader",
+                                                                            simBarcodeReaderDevice,
+                                                                            Logger);
+
+                simBarcodeReaderDevice.SetServiceProvider = barcodeReaderService;
+                Publisher.Add(barcodeReaderService);
+
+                /// Biometric Service Provider
+                var simBiometricDevice = new KAL.XFS4IoTSP.Biometric.Sample.BiometricSample(Logger);
+                var biometricService = new BiometricServiceProvider(EndpointDetails,
+                                                                    ServiceName: "SimBiometric",
+                                                                    simBiometricDevice,
+                                                                    Logger);
+
+                simBiometricDevice.SetServiceProvider = biometricService;
+                Publisher.Add(biometricService);
 
                 // TODO: adding other services
 

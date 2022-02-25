@@ -53,7 +53,7 @@ namespace XFS4IoTClient
                     await Socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by the application.", CancellationToken.None);
                 }
             }
-            catch (WebSocketException ex) when (ex.InnerException is SocketException)
+            catch (WebSocketException ex)
             { }
             catch (Exception ex)
             {

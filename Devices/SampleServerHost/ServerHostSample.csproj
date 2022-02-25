@@ -28,6 +28,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AuxiliariesSample\AuxiliariesSample.csproj" />
+      <ProjectReference Include="..\BiometricSample\BiometricSample.csproj" />
+      <ProjectReference Include="..\SampleBarcodeReader\BarcodeReaderSample.csproj" />
       <ProjectReference Include="..\SampleCardReader\CardReaderSample.csproj" />
       <ProjectReference Include="..\SampleCashDispenser\CashDispenserSample.csproj" />
       <ProjectReference Include="..\SampleEncryptor\EncryptorSample.csproj" />

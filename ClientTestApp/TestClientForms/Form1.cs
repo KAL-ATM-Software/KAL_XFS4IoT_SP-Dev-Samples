@@ -33,6 +33,8 @@ namespace TestClientForms
             AuxiliariesServiceURI.Text = "ws://localhost";
             VendorModeServiceURI.Text = "ws://localhost";
             VendorAppServiceURI.Text = "ws://localhost";
+            BarcodeReaderServiceURI.Text = "ws://localhost";
+            BiometricServiceURI.Text = "ws://localhost";
 
             DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
@@ -44,6 +46,8 @@ namespace TestClientForms
             AuxDev = new("Auxiliaries", AuxiliariesCmdBox, AuxiliariesRspBox, AuxiliariesEvtBox, AuxiliariesServiceURI, AuxiliariesPortNum, AuxiliariesURI);
             VendorModeDev = new("VendorMode", VendorModeCmdBox, VendorModeRspBox, VendorModeEvtBox, VendorModeServiceURI, VendorModePortNum, VendorModeURI);
             VendorAppDev = new("VendorApplication", VendorAppCmdBox, VendorAppRspBox, VendorAppEvtBox, VendorAppServiceURI, VendorAppPortNum, VendorAppURI);
+            BarcodeReaderDev = new("BarcodeReader", BarcodeReaderCmdBox, BarcodeReaderRspBox, BarcodeReaderEvtBox, BarcodeReaderServiceURI, BarcodeReaderPortNum, BarcodeReaderURI);
+            BiometricDev = new("Biometric", BiometricCmdBox, BiometricRspBox, BiometricEvtBox, BiometricServiceURI, BiometricPortNum, BiometricURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
@@ -62,6 +66,8 @@ namespace TestClientForms
         private AuxiliariesDevice AuxDev { get; init; }
         private VendorModeDevice VendorModeDev { get; init; }
         private VendorAppDevice VendorAppDev { get; init; }
+        private BarcodeReaderDevice BarcodeReaderDev { get; init; }
+        private BiometricDevice BiometricDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
@@ -741,8 +747,8 @@ namespace TestClientForms
         private async void btnVendorModeStatus_Click(object sender, EventArgs e)
         {
             var status = await VendorModeDev.GetStatus();
-            VendorModeStStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
-            VendorModeServiceStatus.Text = status?.Payload?.VendorMode?.Service.ToString() ?? string.Empty;
+            VendorModeStStatus.Text = status?.Payload?.Common?.Device?.ToString() ?? string.Empty;
+            VendorModeServiceStatus.Text = status?.Payload?.VendorMode?.Service?.ToString() ?? string.Empty;
         }
 
         private async void buttonVDMEnter_Click(object sender, EventArgs e)
@@ -766,7 +772,7 @@ namespace TestClientForms
         private async void btnVendorAppStatus_Click(object sender, EventArgs e)
         {
             var status = await VendorAppDev.GetStatus();
-            VendorAppStatus.Text = status?.Payload?.Common?.Device.ToString() ?? string.Empty;
+            VendorAppStatus.Text = status?.Payload?.Common?.Device?.ToString() ?? string.Empty;
         }
 
         private async void btnVendorAppCapabilities_Click(object sender, EventArgs e)
@@ -786,5 +792,105 @@ namespace TestClientForms
         }
 
         #endregion
+
+        #region BarcodeReader
+        private async void btnBarcodeReaderServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await BarcodeReaderDev.DoServiceDiscovery();
+        }
+
+        private async void BarcodeReaderStatus_Click(object sender, EventArgs e)
+        {
+            var status = await BarcodeReaderDev.GetStatus();
+            BarcodeReaderStDevice.Text = status?.Payload?.Common?.Device?.ToString() ?? string.Empty;
+            BarcodeReaderScannerStatus.Text = status?.Payload?.BarcodeReader?.Scanner?.ToString() ?? string.Empty;
+        }
+
+        private async void BarcodeReaderCapabilities_Click(object sender, EventArgs e)
+        {
+            await BarcodeReaderDev.GetCapabilities();
+        }
+
+        private async void BarcodeReaderRead_Click(object sender, EventArgs e)
+        {
+            await BarcodeReaderDev.Read();
+        }
+
+        private async void BarcodeReaderReset_Click(object sender, EventArgs e)
+        {
+            await BarcodeReaderDev.Reset();
+        }
+        #endregion
+
+        #region Biometric
+        private async void btnBiometricStatus_Click(object sender, EventArgs e)
+        {
+            var status = await BiometricDev.GetStatus();
+            BiometricStatus.Text = status?.Payload?.Common?.Device?.ToString() ?? "";
+        }
+
+        private async void btnBiometricCapabilities_Click(object sender, EventArgs e)
+        {
+            var capabilities = await BiometricDev.GetCapabilities();
+        }
+
+        private async void btnBiometricClear_Click(object sender, EventArgs e)
+        {
+            await BiometricDev.Clear();
+        }
+
+        private async void btnBiometricRead_Click(object sender, EventArgs e)
+        {
+            txtBiometricTemplateData.Text = "";
+            var read = await BiometricDev.Read();
+
+            txtBiometricTemplateData.Text = read;
+        }
+
+        private async void btnBiometricMatch_Click(object sender, EventArgs e)
+        {
+            if(BiometricStorageInfo.SelectedIndex < 0 || string.IsNullOrWhiteSpace(BiometricStorageInfo.SelectedItem as string))
+            {
+                MessageBox.Show("Select template to match with.");
+                return;
+            }
+            await BiometricDev.Match(BiometricStorageInfo.SelectedItem as string);
+        }
+
+        private async void btnBiometricReset_Click(object sender, EventArgs e)
+        {
+            await BiometricDev.Reset();
+        }
+
+        private async void btnBiometricImport_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtBiometricTemplateData.Text))
+            {
+                MessageBox.Show("Must call Read(Scan) first to get template data for import.");
+                return;
+            }
+
+            await BiometricDev.Import(txtBiometricTemplateData.Text);
+        }
+
+        private async void btnBiometricServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await BiometricDev.DoServiceDiscovery();
+        }
+
+        private async void btnBiometricReadMatch_Click(object sender, EventArgs e)
+        {
+            await BiometricDev.ReadMatch();
+        }
+
+        private async void btnBiometricGetStorageInfo_Click(object sender, EventArgs e)
+        {
+            var storageInfo = await BiometricDev.GetStorageInfo();
+            BiometricStorageInfo.Items.Clear();
+            foreach (var item in storageInfo)
+                BiometricStorageInfo.Items.Add(item);
+        }
+        #endregion
+
     }
 }
