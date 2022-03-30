@@ -1,5 +1,5 @@
 ﻿/***********************************************************************************************\
- * (C) KAL ATM Software GmbH, 2021
+ * (C) KAL ATM Software GmbH, 2022
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
@@ -556,33 +556,33 @@ namespace TestClient
         public async Task DoSetCashUnitInfo(ClientConnection cashDispenser)
         {
             XFS4IoT.CashManagement.StorageCashCountsClass unit3 = new(0);
-            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit3Counts = new() { { "EUR5", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit3Counts = new() { { "typeEUR5", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
             unit3.ExtendedProperties = unit3Counts;
             XFS4IoT.CashManagement.StorageCashCountsClass unit4 = new(0);
-            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit4Counts = new() { { "EUR10", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit4Counts = new() { { "typeEUR10", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
             unit4.ExtendedProperties = unit4Counts;
             XFS4IoT.CashManagement.StorageCashCountsClass unit5 = new(0);
-            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit5Counts = new() { { "EUR20", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
+            Dictionary<string, XFS4IoT.CashManagement.StorageCashCountClass> unit5Counts = new() { { "typeEUR20", new XFS4IoT.CashManagement.StorageCashCountClass(Fit: 1000) } };
             unit5.ExtendedProperties = unit5Counts;
 
             Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> storage = new()
             {
                 {
-                    "PHP3",
+                    "unit3",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
                                                                    new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit3)),
                     null)
                 },
                 {
-                    "PHP4",
+                    "unit4",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
                                                                    new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit4)),
                     null)
                 },
                 {
-                    "PHP5",
+                    "unit5",
                     new XFS4IoT.Storage.SetStorageUnitClass(
                     new XFS4IoT.CashManagement.StorageSetCashClass(null,
                                                                    new XFS4IoT.CashManagement.StorageSetCashStatusClass(unit5)),

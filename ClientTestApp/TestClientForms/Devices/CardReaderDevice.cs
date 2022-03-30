@@ -1,5 +1,5 @@
 ﻿/***********************************************************************************************\
- * (C) KAL ATM Software GmbH, 2021
+ * (C) KAL ATM Software GmbH, 2022
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
@@ -163,7 +163,7 @@ namespace TestClientForms.Devices
                 RequestId.NewID(), new MoveCommand.PayloadData(
                     Timeout: CommandTimeout,
                     From: "transport",
-                    To: "BIN1"));
+                    To: "unitBIN1"));
 
             CmdBox.Text = captureCmd.Serialise();
 
@@ -301,7 +301,7 @@ namespace TestClientForms.Devices
             Dictionary<string, XFS4IoT.Storage.SetStorageUnitClass> setStorage = new()
             {
                 {
-                    "BIN1",
+                    "unitBIN1",
                     new XFS4IoT.Storage.SetStorageUnitClass(null,
                                                             new XFS4IoT.CardReader.StorageSetClass(new XFS4IoT.CardReader.StorageConfigurationClass("BIN1", 45),
                                                                                                    new XFS4IoT.CardReader.StorageStatusSetClass(0)))

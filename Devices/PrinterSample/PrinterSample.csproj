@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.Printer</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.Printer.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Printer" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

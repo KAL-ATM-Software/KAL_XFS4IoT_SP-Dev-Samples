@@ -1,5 +1,5 @@
 ﻿/***********************************************************************************************\
- * (C) KAL ATM Software GmbH, 2021
+ * (C) KAL ATM Software GmbH, 2022
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
@@ -35,8 +35,9 @@ namespace TestClientForms
             VendorAppServiceURI.Text = "ws://localhost";
             BarcodeReaderServiceURI.Text = "ws://localhost";
             BiometricServiceURI.Text = "ws://localhost";
+            CashAcceptorServiceURI.Text = "ws://localhost";
 
-            DispenserDev = new("Dispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
+            CashDispenserDev = new("CashDispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
             CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
             EncryptorDev = new("Encryptor", EncryptorCmdBox, EncryptorRspBox, EncryptorEvtBox, EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
@@ -48,6 +49,7 @@ namespace TestClientForms
             VendorAppDev = new("VendorApplication", VendorAppCmdBox, VendorAppRspBox, VendorAppEvtBox, VendorAppServiceURI, VendorAppPortNum, VendorAppURI);
             BarcodeReaderDev = new("BarcodeReader", BarcodeReaderCmdBox, BarcodeReaderRspBox, BarcodeReaderEvtBox, BarcodeReaderServiceURI, BarcodeReaderPortNum, BarcodeReaderURI);
             BiometricDev = new("Biometric", BiometricCmdBox, BiometricRspBox, BiometricEvtBox, BiometricServiceURI, BiometricPortNum, BiometricURI);
+            CashAcceptorDev = new("CashAcceptor", CashAcceptorCmdBox, CashAcceptorRspBox, CashAcceptorEvtBox, CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
@@ -56,7 +58,7 @@ namespace TestClientForms
             comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Clear;
         }
         
-        private DispenserDevice DispenserDev { get; init; }
+        private CashDispenserDevice CashDispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
         private TextTerminalDevice TextTerminalDev { get; init; }
         private EncryptorDevice EncryptorDev { get; init; }
@@ -68,10 +70,12 @@ namespace TestClientForms
         private VendorAppDevice VendorAppDev { get; init; }
         private BarcodeReaderDevice BarcodeReaderDev { get; init; }
         private BiometricDevice BiometricDev { get; init; }
+        private CashAcceptorDevice CashAcceptorDev { get; init; }
 
         private void Form1_Load(object sender, EventArgs e)
         { }
 
+        #region CardReader
         private async void AcceptCard_Click(object sender, EventArgs e)
         {
             await CardReaderDev.AcceptCard();
@@ -131,112 +135,111 @@ namespace TestClientForms
         {
             await CardReaderDev.ResetBinCount();
         }
+        #endregion
 
-        #region Dispenser Tab
+        #region CashDispenser
 
         private async void DispenserServiceDiscovery_Click(object sender, EventArgs e)
         {
-            await DispenserDev.DoServiceDiscovery();
+            await CashDispenserDev.DoServiceDiscovery();
         }
 
         private async void DispenserGetCashUnitInfo_Click(object sender, EventArgs e)
         {
-            await DispenserDev.GetCashUnitInfo();
+            await CashDispenserDev.GetCashUnitInfo();
         }
 
         private async void DispenserStatus_Click(object sender, EventArgs e)
         {
-            var status = await DispenserDev.GetStatus();
-            if (status != null)
-                DispenserStDevice.Text = status.Payload?.Common?.Device?.ToString();
+            var status = await CashDispenserDev.GetStatus();
+            DispenserStDevice.Text = status?.Payload?.Common?.Device?.ToString();
         }
 
         private async void DispenserCapabilities_Click(object sender, EventArgs e)
         {
-            var capabilities = await DispenserDev.GetCapabilities();
-            if (capabilities != null)
-                DispenserDeviceType.Text = capabilities.Payload?.CashDispenser?.Type?.ToString();
+            var capabilities = await CashDispenserDev.GetCapabilities();
+            DispenserDeviceType.Text = capabilities?.Payload?.CashDispenser?.Type?.ToString();
         }
 
         private async void DispenserGetMixTypes_Click(object sender, EventArgs e)
         {
-            await DispenserDev.GetMixTypes();
+            await CashDispenserDev.GetMixTypes();
         }
 
         private async void DispenserGetPresentStatus_Click(object sender, EventArgs e)
         {
-            await DispenserDev.GetPresentStatus();
+            await CashDispenserDev.GetPresentStatus();
         }
 
         private async void DispenserReset_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Reset();
+            await CashDispenserDev.Reset();
         }
 
         private async void DispenserStartExchange_Click(object sender, EventArgs e)
         {
-            await DispenserDev.StartExchange();
+            await CashDispenserDev.StartExchange();
         }
 
         private async void DispenserEndExchange_Click(object sender, EventArgs e)
         {
-            await DispenserDev.EndExchange();
+            await CashDispenserDev.EndExchange();
         }
 
         private async void DispenserPresent_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Present();
+            await CashDispenserDev.Present();
         }
 
         private async void DispenserDenominate_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Denominate();
+            await CashDispenserDev.Denominate();
         }
 
         private async void DispenserDispense_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Dispense(TokenTextBox.Text);
+            await CashDispenserDev.Dispense(TokenTextBox.Text);
         }
 
         private async void DispenserOpenShutter_Click(object sender, EventArgs e)
         {
-            await DispenserDev.OpenShutter();
+            await CashDispenserDev.OpenShutter();
         }
 
         private async void DispenserCloseShutter_Click(object sender, EventArgs e)
         {
-            await DispenserDev.CloseShutter();
+            await CashDispenserDev.CloseShutter();
         }
         private async void DispenserReject_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Reject();
+            await CashDispenserDev.Reject();
         }
 
         private async void DispenserRetract_Click(object sender, EventArgs e)
         {
-            await DispenserDev.Retract();
+            await CashDispenserDev.Retract();
         }
 
         private async void SetCashUnitInfo_Click(object sender, EventArgs e)
         {
-            await DispenserDev.SetCashUnitInfo();
+            await CashDispenserDev.SetCashUnitInfo();
         }
 
         private async void DispenserGetCommandNonce_Click(object sender, EventArgs e)
         {
-            string Nonce = await DispenserDev.GetCommandNonce();
+            string Nonce = await CashDispenserDev.GetCommandNonce();
             TokenTextBox.Text = Nonce; 
         }
 
         private async void DispenserClearCommandNonce_Click(object sender, EventArgs e)
         {
-            await DispenserDev.ClearCommandNonce();
+            await CashDispenserDev.ClearCommandNonce();
         }
 
 
         #endregion
 
-        #region TextTerminal Tab
+        #region TextTerminal
 
         private async void TextTerminalServiceDiscovery_Click(object sender, EventArgs e)
         {
@@ -295,7 +298,7 @@ namespace TestClientForms
 
         #endregion
 
-        #region Encryptor Tab
+        #region Encryptor
 
         private async void EncryptorServiceDiscovery_Click(object sender, EventArgs e)
         {
@@ -388,7 +391,7 @@ namespace TestClientForms
 
         #endregion
 
-        #region PinPad Tab
+        #region PinPad
         private async void PinPadServiceDiscovery_Click(object sender, EventArgs e)
         {
             await PinPadDev.DoServiceDiscovery();
@@ -892,5 +895,88 @@ namespace TestClientForms
         }
         #endregion
 
+        #region CashAcceptor
+        private async void CashAcceptorServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.DoServiceDiscovery();
+        }
+
+        private async void CashAccStatus_Click(object sender, EventArgs e)
+        {
+            var status = await CashAcceptorDev.GetStatus();
+            CashAccStDevice.Text = status?.Payload?.Common?.Device?.ToString() ?? "";
+        }
+
+        private async void CashAccCapabilities_Click(object sender, EventArgs e)
+        {
+            var capabilities = await CashAcceptorDev.GetCapabilities();
+            CashAccDeviceType.Text = capabilities?.Payload?.CashAcceptor?.Type?.ToString();
+        }
+
+        private async void CashAccSetCashUnitInfo_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.SetCashUnitInfo();
+        }
+
+        private async void CashAccGetCashUnitInfo_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.GetCashUnitInfo();
+        }
+
+        private async void CashAccPositionCapabilities_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.GetPositionCapabilities();
+        }
+
+        private async void CashAccCashInStatus_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.GetCashInStatus();
+        }
+
+        private async void CashAccReset_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.Reset();
+        }
+
+        private async void CashAccConfigureNoteTypes_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.ConfigureBanknoteTypes();
+        }
+
+        private async void CashAccCashInStart_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.CashInStart();
+        }
+
+        private async void CashAccRetract_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.Retract();
+        }
+
+        private async void CashAccStartExchange_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.StartExchange();
+        }
+
+        private async void CashAccEndExchange_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.EndExchange();
+        }
+
+        private async void CashAccCashIn_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.CashIn();
+        }
+
+        private async void CashAccCashInEnd_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.CashInEnd();
+        }
+
+        private async void CashAccCashInRollback_Click(object sender, EventArgs e)
+        {
+            await CashAcceptorDev.CashInRollback();
+        }
+        #endregion
     }
 }

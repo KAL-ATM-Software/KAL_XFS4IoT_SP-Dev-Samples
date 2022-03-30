@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.CashAcceptor</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.CashAcceptor.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <Compile Remove="CashDispenserFirmware\**" />
+	  <EmbeddedResource Remove="CashDispenserFirmware\**" />
+	  <None Remove="CashDispenserFirmware\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="1.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="1.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

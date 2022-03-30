@@ -1,5 +1,5 @@
 ﻿/***********************************************************************************************\
- * (C) KAL ATM Software GmbH, 2021
+ * (C) KAL ATM Software GmbH, 2022
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
@@ -15,14 +15,12 @@ using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.KeyManagement.Events;
 using XFS4IoT.Crypto.Commands;
 using XFS4IoT.Crypto.Completions;
-using XFS4IoT.Crypto.Events;
 using XFS4IoT.Keyboard.Commands;
 using XFS4IoT.Keyboard.Completions;
 using XFS4IoT.Keyboard.Events;
 using XFS4IoT.Keyboard;
 using XFS4IoT.PinPad.Commands;
 using XFS4IoT.PinPad.Completions;
-using XFS4IoT.PinPad.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
 

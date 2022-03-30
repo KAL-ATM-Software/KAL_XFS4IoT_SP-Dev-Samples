@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>XFS4IoT.SP.Auxiliaries</AssemblyName>
 		<RootNamespace>KAL.XFS4IoTSP.Auxiliaries.Sample</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Auxiliaries" Version="0.0.10-alpha.1" />
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Auxiliaries" Version="1.0.0" />
 	</ItemGroup>
 
 </Project>

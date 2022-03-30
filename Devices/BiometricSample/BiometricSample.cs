@@ -1,4 +1,11 @@
-﻿using System;
+﻿/***********************************************************************************************\
+ * (C) KAL ATM Software GmbH, 2022
+ * KAL ATM Software GmbH licenses this file to you under the MIT license.
+ * See the LICENSE file in the project root for more information.
+ * 
+\***********************************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +15,12 @@ using XFS4IoT;
 using XFS4IoT.Completions;
 using XFS4IoTFramework.Biometric;
 using XFS4IoTFramework.Common;
+using XFS4IoTFramework.KeyManagement;
 using XFS4IoTServer;
 
 namespace KAL.XFS4IoTSP.Biometric.Sample
 {
-    public class BiometricSample : IBiometricDevice, ICommonDevice
+    public class BiometricSample : IBiometricDevice, ICommonDevice, IKeyManagementDevice
     {
         public BiometricSample(ILogger logger)
         {
@@ -29,6 +37,9 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
                                CommonStatusClass.ExchangeEnum.NotSupported,
                                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+
+            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.NotInitialized,
+                                                               KeyManagementStatusClass.CertificateStateEnum.NotSupported);
         }
 
         private readonly ILogger _logger;
@@ -116,6 +127,27 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 BiometricCapabilitiesClass.ScanModesEnum.Match | BiometricCapabilitiesClass.ScanModesEnum.Scan,
                 BiometricCapabilitiesClass.CompareModesEnum.Verify,
                 BiometricCapabilitiesClass.ClearModesEnum.ImportedData | BiometricCapabilitiesClass.ClearModesEnum.ScannedData);
+        public KeyManagementStatusClass KeyManagementStatus { get; set; }
+        public KeyManagementCapabilitiesClass KeyManagementCapabilities { get; set; } = 
+            new KeyManagementCapabilitiesClass(5,
+                                               KeyManagementCapabilitiesClass.KeyCheckModeEnum.NotSupported,
+                                               "",
+                                               KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.SignatureSchemeEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.NotSupported,
+                                               false,
+                                               KeyManagementCapabilitiesClass.DESKeyLengthEmum.NotSupported,
+                                               KeyManagementCapabilitiesClass.CertificateTypeEnum.NotSupported,
+                                               new(),
+                                               KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
+                                               KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.NotSupported,
+                                               new(),
+                                               new(),
+                                               new());
 
         public Task<DeviceResult> ClearAsync(ClearDataRequest ClearMode, CancellationToken cancellation)
         {
@@ -239,6 +271,59 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
             => throw new NotSupportedException();
 
         public Task<DeviceResult> PowerSaveControl(int MaxPowerSaveRecoveryTime, CancellationToken cancel)
+            => throw new NotSupportedException();
+        #endregion
+
+        #region KeyManagement Device
+
+        public Task<ImportKeyResult> ImportKeyPart(ImportKeyPartRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportKeyResult> AssemblyKeyParts(AssemblyKeyPartsRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportKeyResult> ImportKey(ImportKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<DeviceResult> DeleteKey(DeleteKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<GenerateKCVResult> GenerateKCV(GenerateKCVRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<InitializationResult> Initialization(InitializationRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<DeriveKeyResult> DeriveKey(DeriveKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<DeviceResult> ResetDevice(CancellationToken cancellation)
+        {
+            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+        }
+
+        public Task<RSASignedItemResult> ExportEPPId(ExportEPPIdRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<RSASignedItemResult> ExportRSAPublicKey(ExportRSAPublicKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<GenerateRSAKeyPairResult> GenerateRSAKeyPair(GenerateRSAKeyPairRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ExportCertificateResult> ExportCertificate(ExportCertificateRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ReplaceCertificateResult> ReplaceCertificate(ReplaceCertificateRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<StartKeyExchangeResult> StartKeyExchange(CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportCertificateResult> ImportCertificate(ImportCertificateRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, CancellationToken cancellation)
             => throw new NotSupportedException();
 
         #endregion

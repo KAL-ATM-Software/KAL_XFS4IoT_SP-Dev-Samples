@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup Label="Globals">
+        <SccProjectName>SAK</SccProjectName>
+        <SccProvider>SAK</SccProvider>
+        <SccAuxPath>SAK</SccAuxPath>
+        <SccLocalPath>SAK</SccLocalPath>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0-windows7.0</TargetFramework>
+        <AssemblyName>XFS4IoT.SP.ServerHostSample</AssemblyName>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <OutputPath>..\bin\Debug\</OutputPath>
+      <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+      <OutputPath>..\bin\Release\</OutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="SimulatedServerHost.csproj.vspscc" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AuxiliariesSample\AuxiliariesSample.csproj" />
+      <ProjectReference Include="..\BarcodeReaderSample\BarcodeReaderSample.csproj" />
+      <ProjectReference Include="..\BiometricSample\BiometricSample.csproj" />
+      <ProjectReference Include="..\CardReaderSample\CardReaderSample.csproj" />
+      <ProjectReference Include="..\CasAcceptorSample\CashAcceptorSample.csproj" />
+      <ProjectReference Include="..\CashDispenserSample\CashDispenserSample.csproj" />
+      <ProjectReference Include="..\CasRecyclerSample\CashRecyclerSample.csproj" />
+      <ProjectReference Include="..\EncryptorSample\EncryptorSample.csproj" />
+      <ProjectReference Include="..\LightsSample\LightsSample.csproj" />
+      <ProjectReference Include="..\PinPadSample\PinPadSample.csproj" />
+      <ProjectReference Include="..\PrinterSample\PrinterSample.csproj" />
+      <ProjectReference Include="..\TextTerminalSample\TextTerminalSample.csproj" />
+      <ProjectReference Include="..\VendorApplicationSample\VendorApplicationSample.csproj" />
+      <ProjectReference Include="..\VendorModeSample\VendorModeSample.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="App.config">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>
