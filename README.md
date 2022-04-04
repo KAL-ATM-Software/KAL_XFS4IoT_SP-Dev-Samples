@@ -8,12 +8,12 @@ Find out more about this exciting new project and how you can get involved in sh
 ## Building the sample simulator
 
 1. Clone KAL_XFS4IoT_SP-Dev-Samples repository from https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev-Samples.
-2. Install Visual Studio 2019 and .Net5 SDK or runtime.
-3. Open the solution `Devices/SPs.sln` in Visual Studio 2019.
+2. Install Visual Studio 2022 and .Net6 SDK or runtime.
+3. Open the solution `Devices/SPs.sln` in Visual Studio 2022.
 4. Select Solution SPs in the solution explorer and execute Clean Solution.
 5. Select Solution SPs in the solution explorer and execute Rebuild Solution.
 6. Build complete both projects without errors.
-7. Binaries are created under `Devices/bin/Debug/net5.0-windows7.0` or `Release/net5.0-windows7.0`.
+7. Binaries are created under `Devices/bin/Debug/net6.0-windows7.0` or `Release/net6.0-windows7.0`.
 8. The SP executable **XFS4IoT.SP.ServerHostSample.exe** is created. The executable has dependencies with other DLLs created in the same folder.
 9. The default IP address is the local host 127.0.0.0. If the SP and client application run on the same machine, no configuration changes are required. If the IP address needs to be changed it can be done so remotely with the client application from different machine as follows: 
     1. Open the configuration file of the SP, ***XFS4IoT.SP.ServerHostSample.dll.config***, in the test file editor, for example VS Code.
@@ -24,12 +24,12 @@ Find out more about this exciting new project and how you can get involved in sh
 ## Building the sample client application
 
 1. Clone KAL_XFS4IoT_SP-Dev-Samples repository from https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev-Samples.
-2. Install Visual Studio 2019 and .Net5 SDK or runtime.
-3. Open the solution `ClientTestApp/ClientTestApp.sln` in Visual Studio 2019.
+2. Install Visual Studio 2022 and .Net6 SDK or runtime.
+3. Open the solution `ClientTestApp/ClientTestApp.sln` in Visual Studio 2022.
 4. Select ClientTestApp in the solution explorer and execute Clean Solution.
 5. Select ClientTestApp in the solution explorer and execute Rebuild Solution.
 6. Build complete both projects without errors.
-7. Binaries are created under `ClientTestApp/bin/Debug/net5.0-windows` or `Release/net5.0-windows`.
+7. Binaries are created under `ClientTestApp/bin/Debug/net6.0-windows` or `Release/net6.0-windows`.
 8. The SP executable **TestClientForms.exe** is created. The executable has dependencies with other DLLs created in the same folder.
 9. Run **TestClientForms.exe**
 10. The default IP address is the local host 127.0.0.1. If the SP and client application run on the same machine, no configuration changes are required.  
