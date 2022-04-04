@@ -31,9 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VendorModeSample", "VendorM
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CashDispenserFirmware", "CashDispenserSample\CashDispenserFirmware\CashDispenserFirmware.vcxproj", "{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashAcceptorSample", "CasAcceptorSample\CashAcceptorSample.csproj", "{B941F565-8BDC-40DD-AD33-223287B95F4C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashAcceptorSample", "CashAcceptorSample\CashAcceptorSample.csproj", "{B941F565-8BDC-40DD-AD33-223287B95F4C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashRecyclerSample", "CasRecyclerSample\CashRecyclerSample.csproj", "{EA2169C7-7637-4B16-B6B3-F8FB2EC46B62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashRecyclerSample", "CashRecyclerSample\CashRecyclerSample.csproj", "{EA2169C7-7637-4B16-B6B3-F8FB2EC46B62}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

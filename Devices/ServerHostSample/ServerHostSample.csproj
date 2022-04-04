@@ -31,9 +31,9 @@
       <ProjectReference Include="..\BarcodeReaderSample\BarcodeReaderSample.csproj" />
       <ProjectReference Include="..\BiometricSample\BiometricSample.csproj" />
       <ProjectReference Include="..\CardReaderSample\CardReaderSample.csproj" />
-      <ProjectReference Include="..\CasAcceptorSample\CashAcceptorSample.csproj" />
+      <ProjectReference Include="..\CashAcceptorSample\CashAcceptorSample.csproj" />
       <ProjectReference Include="..\CashDispenserSample\CashDispenserSample.csproj" />
-      <ProjectReference Include="..\CasRecyclerSample\CashRecyclerSample.csproj" />
+      <ProjectReference Include="..\CashRecyclerSample\CashRecyclerSample.csproj" />
       <ProjectReference Include="..\EncryptorSample\EncryptorSample.csproj" />
       <ProjectReference Include="..\LightsSample\LightsSample.csproj" />
       <ProjectReference Include="..\PinPadSample\PinPadSample.csproj" />
