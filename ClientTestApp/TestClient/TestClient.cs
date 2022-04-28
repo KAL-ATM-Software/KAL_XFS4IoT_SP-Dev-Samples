@@ -12,6 +12,8 @@ using System.Linq;
 using System.Threading;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
+using XFS4IoT.ServicePublisher.Commands;
+using XFS4IoT.ServicePublisher.Completions;
 using XFS4IoT.CardReader.Commands;
 using XFS4IoT.CardReader.Completions;
 using XFS4IoT.CashDispenser.Commands;

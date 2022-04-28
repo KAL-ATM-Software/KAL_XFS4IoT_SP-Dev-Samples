@@ -16,6 +16,8 @@ using XFS4IoT;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
+using XFS4IoT.ServicePublisher.Commands;
+using XFS4IoT.ServicePublisher.Completions;
 
 namespace TestClientForms.Devices
 {
