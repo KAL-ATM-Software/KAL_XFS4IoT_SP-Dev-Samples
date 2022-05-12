@@ -89,7 +89,7 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
             }
             else if(request.Heating is SetAuxiliariesRequest.SetAuxiliaryOnOff.Off)
             {
-                AuxiliariesStatus.Heating = AuxiliariesStatus.SensorEnum.On;
+                AuxiliariesStatus.Heating = AuxiliariesStatus.SensorEnum.Off;
             }
 
             sendStatusChangedEventSignal.Release();
