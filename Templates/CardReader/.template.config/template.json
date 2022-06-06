@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.CardReader",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates",
+  "name": "KAL-SP-Dev CardReader Template",
+  "shortName": "spdev-cr",
+  "sourceName": "CardReaderTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Card Reader Template",
+  "defaultName": "CardReader1",
+  "precedence": 6000
+}
