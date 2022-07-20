@@ -27,6 +27,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="1.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\AuxiliariesSample\AuxiliariesSample.csproj" />
       <ProjectReference Include="..\BarcodeReaderSample\BarcodeReaderSample.csproj" />
       <ProjectReference Include="..\BiometricSample\BiometricSample.csproj" />

@@ -79,8 +79,10 @@ namespace KAL.XFS4IoTSP.BarcodeReader.Sample
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync()
-        { }
+        public Task RunAsync(CancellationToken cancel)
+        {
+            return Task.CompletedTask;
+        }
 
         /// <summary>
         /// Stores barcode reader capabilites

@@ -8,6 +8,7 @@ using System;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.IO;
+using System.Configuration;
 using XFS4IoT;
 using XFS4IoTServer;
 
@@ -22,7 +23,7 @@ namespace Server
             {
                 Logger.Log($"Running ServiceProvider Server");
 
-                var Publisher = new ServicePublisher(Logger);
+                var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
                 /// CardReader Service Provider
@@ -35,7 +36,7 @@ namespace Server
 
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
-
+                
                 /// CashDispenser Service Provider
                 var simCashDispenserrDevice = new KAL.XFS4IoTSP.CashDispenser.Sample.CashDispenserSample(Logger);
                 var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
@@ -174,7 +175,9 @@ namespace Server
                 */
                 // TODO: adding other services
 
-                await Publisher.RunAsync();
+                // CancellationSource object allows to restart service when it's signalled.
+                CancellationSource cancelToken = new CancellationSource(Logger);
+                await Publisher.RunAsync(cancelToken);
             }
             catch (Exception e) when (e.InnerException != null)
             {
@@ -212,7 +215,7 @@ namespace Server
 
         private class FilePersistentData : IPersistentData
         {
-            public FilePersistentData(ILogger Logger)
+            public FilePersistentData(ConsoleLogger Logger)
             {
                 this.Logger = Logger;
             }
@@ -279,7 +282,47 @@ namespace Server
             /// <summary>
             /// Logging interface
             /// </summary>
-            public ILogger Logger { get; init; }
+            public ConsoleLogger Logger { get; init; }
+        }
+
+        private class ServiceConfiguration : IServiceConfiguration
+        {
+            public ServiceConfiguration(ConsoleLogger Logger)
+            {
+                this.Logger = Logger;
+                try
+                {
+                    Settings = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None)?.AppSettings?.Settings;
+                }
+                catch (ConfigurationErrorsException ex)
+                {
+                    Logger.Warning(nameof(ServiceConfiguration), $"Exception caught in the constructor {nameof(ServiceConfiguration)}. {ex.Message}");
+                }
+            }
+
+            /// <summary>
+            /// Get configuration value associated with the key specified.
+            /// Returns null if specified value doesn't exist in the configuration. 
+            /// </summary>
+            /// <param name="name">Name of the configuration value</param>
+            /// <returns>Configuration value</returns>
+            public string Get(string name)
+            {
+                var configValue = Settings[name]?.Value;
+                Logger.Log($"Configuration Get({name}={configValue} in {nameof(ServiceConfiguration)}");
+                return configValue;
+            }
+
+            /// <summary>
+            /// Logging interface
+            /// </summary>
+            private ConsoleLogger Logger { get; init; }
+
+
+            /// <summary>
+            /// The collection of configuration value
+            /// </summary>
+            private KeyValueConfigurationCollection Settings { get; init; }
         }
     }
 }

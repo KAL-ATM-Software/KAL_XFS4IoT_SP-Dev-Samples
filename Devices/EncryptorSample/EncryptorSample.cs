@@ -847,7 +847,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         /// Here is an example of handling MediaRemovedEvent after card is ejected successfully.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             for (; ; )
             {

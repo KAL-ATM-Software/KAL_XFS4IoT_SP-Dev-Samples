@@ -34,7 +34,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="cpp.hint" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

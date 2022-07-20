@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31019.35
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextTerminalSample", "TextTerminalSample\TextTerminalSample.csproj", "{41A47965-FA37-4BDF-9468-1A4C5788A4EC}"
 EndProject
@@ -201,12 +201,14 @@ Global
 		{61DA2B2A-B965-40DF-9BCA-2FB85FA86589}.Release|x64.Build.0 = Release|Any CPU
 		{61DA2B2A-B965-40DF-9BCA-2FB85FA86589}.Release|x86.ActiveCfg = Release|Any CPU
 		{61DA2B2A-B965-40DF-9BCA-2FB85FA86589}.Release|x86.Build.0 = Release|Any CPU
-		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|Any CPU.Build.0 = Debug|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|x64.ActiveCfg = Debug|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|x64.Build.0 = Debug|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|x86.ActiveCfg = Debug|Win32
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Debug|x86.Build.0 = Debug|Win32
-		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|Any CPU.ActiveCfg = Release|Win32
+		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|Any CPU.ActiveCfg = Release|x64
+		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|Any CPU.Build.0 = Release|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|x64.ActiveCfg = Release|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|x64.Build.0 = Release|x64
 		{3AB69EE5-FB91-4ED7-B918-57C7E41DB31C}.Release|x86.ActiveCfg = Release|Win32

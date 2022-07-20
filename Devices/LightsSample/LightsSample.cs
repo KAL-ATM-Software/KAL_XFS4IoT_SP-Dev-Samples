@@ -95,7 +95,7 @@ namespace KAL.XFS4IoTSP.Lights.Sample
         /// Handle unsolic events
         /// </summary>
         /// <returns></returns>
-        public Task RunAsync()
+        public Task RunAsync(CancellationToken cancel)
         {
             return Task.CompletedTask;
         }

@@ -36,7 +36,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
         /// Here is an example of handling ItemsTakenEvent after cash is returned and taken by customer.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             CashAcceptorService = SetServiceProvider as CashAcceptorServiceProvider;
             CashAcceptorService.IsNotNull($"Cash Acceptor Service is set to null.");

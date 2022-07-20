@@ -56,7 +56,7 @@ namespace TextTerminalSample
         /// <summary>
         /// Start up the TextTerminal UI in a separate thread to avoid blocking the SP.
         /// </summary>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             UITask = Task.Run(() =>
             {

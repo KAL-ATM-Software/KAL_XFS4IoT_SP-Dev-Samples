@@ -330,7 +330,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// Here is an example of handling MediaRemovedEvent after card is ejected successfully.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             CardReaderServiceProvider cardReaderServiceProvider = SetServiceProvider as CardReaderServiceProvider;
 

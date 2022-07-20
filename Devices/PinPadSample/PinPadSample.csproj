@@ -17,10 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="1.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="1.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="1.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="1.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="1.2.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="1.2.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="1.2.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="1.2.0" />
   </ItemGroup>
 
 </Project>

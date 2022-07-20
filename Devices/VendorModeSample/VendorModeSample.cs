@@ -51,9 +51,9 @@ namespace KAL.XFS4IoTSP.VendorMode.Sample
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync()
+        public Task RunAsync(CancellationToken cancel)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         #endregion

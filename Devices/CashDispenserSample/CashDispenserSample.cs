@@ -36,7 +36,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Here is an example of handling ItemsTakenEvent after cash is presented and taken by customer.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             CashDispenserServiceProvider cashDispenserServiceProvider = SetServiceProvider as CashDispenserServiceProvider;
             for (; ; )

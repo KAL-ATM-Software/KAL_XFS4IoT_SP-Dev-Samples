@@ -58,7 +58,7 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         }
 
 
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             AuxiliariesServiceProvider auxServiceProvider = SetServiceProvider as AuxiliariesServiceProvider;
 

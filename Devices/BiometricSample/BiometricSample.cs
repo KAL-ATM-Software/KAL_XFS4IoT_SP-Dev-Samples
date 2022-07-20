@@ -242,7 +242,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
             return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
         }
 
-        public Task RunAsync()
+        public Task RunAsync(CancellationToken cancel)
         {
             return Task.CompletedTask;
         }

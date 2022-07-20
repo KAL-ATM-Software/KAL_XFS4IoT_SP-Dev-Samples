@@ -88,7 +88,7 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync()
+        public async Task RunAsync(CancellationToken cancel)
         {
             VendorApplicationServiceProvider vendorAppServiceProvider = SetServiceProvider as VendorApplicationServiceProvider;
 
