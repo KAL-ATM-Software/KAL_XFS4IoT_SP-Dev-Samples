@@ -143,10 +143,54 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// Measurements in all tasks are in printer dots.
         /// This method must be implemented if your device is capable or printing.
         /// </summary>
+        /// [SupportedOSPlatform("windows")]
         public async Task<PrintTaskResult> ExecutePrintTasksAsync(PrintTaskRequest request,
                                                                   CancellationToken cancellation)
         {
             await Task.Delay(200, cancellation);
+            /* Example of usage for the Bitmap printing for Windows only for now
+            PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
+            int bitCount = 24;
+
+            bool success = printerServiceProvider.PrintToBitmap(request.PrintJob, bitCount, true, out ImageInfo imageInfo);
+            if (!success)
+            {
+                return new PrintTaskResult(MessagePayload.CompletionCodeEnum.HardwareError, $"Failed on printing form to an image.", PrintFormCompletion.PayloadData.ErrorCodeEnum.FormInvalid);
+            }
+
+            PixelFormat pixelFormat = bitCount switch
+            {
+                24 => PixelFormat.Format24bppRgb,
+                _ => PixelFormat.Format1bppIndexed,
+            };
+
+            Bitmap image = new(imageInfo.Data.Width, imageInfo.Data.Height, pixelFormat);
+
+            if (imageInfo.Data.Palette.Count > 0)
+            {
+                var palette = image.Palette;
+                for (int i = 0; i < imageInfo.Data.Palette.Count; i++)
+                {
+                    palette.Entries[i] = imageInfo.Data.Palette[i] switch
+                    {
+                        0xff000000 => Color.Black,
+                        0xffffffff => Color.White,
+                        _ => throw Contracts.Fail<NotImplementedException>($"Unexpected color supplied for palette. {imageInfo.Data.Palette[i]}")
+                    };
+                }
+                image.Palette = palette;
+            }
+
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly, pixelFormat);
+
+            byte[] formImage = imageInfo.Data.Data.ToArray();
+            Marshal.Copy(formImage, 0, data.Scan0, formImage.Length);
+
+            image.UnlockBits(data);
+
+            image.Save("C:\\temp\\test.bmp", ImageFormat.Bmp);
+            */
+
             return new PrintTaskResult(MessagePayload.CompletionCodeEnum.Success);
         }
 
@@ -166,11 +210,16 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// i.e. width and height of rectangle needed to contain the task when executed.
         /// Normally expected to return true since no hardware action is requested.
         /// </summary>
+        ///[SupportedOSPlatform("windows")]
         public bool GetTaskDimensions(PrintTask task, out int width, out int height)
         {
+            /* Sample of Bitmap printing
+            PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
+            return printerServiceProvider.GetBitmapPrintDimensions(task, out width, out height);
+            */
             width = 0;
             height = 0;
-            
+
             // Text printing only supported
             switch (task.Type)
             {
@@ -342,7 +391,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             MinSkew: 0,
             MaxSkew: 90,
             ValidSide: FieldSideEnum.FRONT,
-            ValidType: FieldTypeEnum.TEXT,
+            ValidType: FieldTypeEnum.TEXT | FieldTypeEnum.GRAPHIC,
             ValidScaling: FieldScalingEnum.BESTFIT |
                           FieldScalingEnum.MAINTAINASPECT |
                           FieldScalingEnum.ASIS,
