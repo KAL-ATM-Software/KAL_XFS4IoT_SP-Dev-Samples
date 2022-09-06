@@ -11,7 +11,7 @@
     "language": "C#",
     "type": "project"
   },
-  "description": "TextTerminal Tempalate",
+  "description": "TextTerminal Template",
   "defaultName": "TextTerminal1",
   "precedence": 6000
 }

@@ -25,12 +25,6 @@ namespace TextTerminal.TextTerminalTemplate
 {
     public class TextTerminalTemplate : ITextTerminalDevice, ICommonDevice
     {
-
-        /// <summary>
-        /// <code>var key = await readPressChannel.Reader.ReadAsync()</code>
-        /// </summary>
-        public static readonly Channel<string> readPressChannel = Channel.CreateUnbounded<string>();
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -229,14 +223,6 @@ namespace TextTerminal.TextTerminalTemplate
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
         private ILogger Logger { get; }
-
-        /// <summary>
-        /// Task for the UI. Started using Task.Run();
-        /// </summary>
-        private Task UITask { get; set; }
-        /// <summary>
-        /// UI form.
-        /// </summary>
 
         /// <summary>
         /// CurrentWidth for the device resolution.
