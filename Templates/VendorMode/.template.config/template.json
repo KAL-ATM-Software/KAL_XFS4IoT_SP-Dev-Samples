@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.VendorMode",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.VendorMode",
+  "name": "KAL-SP-Dev VendorMode Template",
+  "shortName": "spdev-Vdm",
+  "sourceName": "VendorModeTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Vendor Mode Template",
+  "defaultName": "VendorMode1",
+  "precedence": 6000
+}

@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CardReader.CardReaderTemplate
+namespace Biometric.BiometricTemplate
 {
     class Server
     {
@@ -20,16 +20,16 @@ namespace CardReader.CardReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CardReader Service Provider
-                var cardReaderDevice = new CardReaderTemplate(Logger);
-                var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CardReaderTemplate",
-                                                                      cardReaderDevice,
+                /// Biometric Service Provider
+                var biometricDevice = new BiometricTemplate(Logger);
+                var biometricService = new BiometricServiceProvider(EndpointDetails,
+                                                                      ServiceName: "BiometricTemplate",
+                                                                      biometricDevice,
                                                                       Logger,
                                                                       new FilePersistentData(Logger));
 
-                cardReaderDevice.SetServiceProvider = cardReaderService;
-                Publisher.Add(cardReaderService);
+                biometricDevice.SetServiceProvider = biometricService;
+                Publisher.Add(biometricService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }

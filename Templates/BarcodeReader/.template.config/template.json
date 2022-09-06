@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.BarcodeReader",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.BarcodeReader",
+  "name": "KAL-SP-Dev BarcodeReader Template",
+  "shortName": "spdev-Bcr",
+  "sourceName": "BarcodeReaderTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Barcode Reader Template",
+  "defaultName": "BarcodeReader1",
+  "precedence": 6000
+}

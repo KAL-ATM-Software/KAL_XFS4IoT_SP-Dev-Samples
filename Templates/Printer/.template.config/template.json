@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Printer",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Printer",
+  "name": "KAL-SP-Dev Printer Template",
+  "shortName": "spdev-Prn",
+  "sourceName": "PrinterTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Barcode Printer Template",
+  "defaultName": "Printer1",
+  "precedence": 6000
+}

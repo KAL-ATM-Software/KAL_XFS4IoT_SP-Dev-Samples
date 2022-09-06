@@ -5,7 +5,7 @@
   "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.CardReader",
   "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates",
   "name": "KAL-SP-Dev CardReader Template",
-  "shortName": "spdev-cr",
+  "shortName": "spdev-Crd",
   "sourceName": "CardReaderTemplate",
   "tags": {
     "language": "C#",

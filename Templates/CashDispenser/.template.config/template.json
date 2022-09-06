@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.CashDispenser",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.CashDispenser",
+  "name": "KAL-SP-Dev CashDispenser Template",
+  "shortName": "spdev-Cad",
+  "sourceName": "CashDispenserTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "CashDispenser Template",
+  "defaultName": "CashDispenser1",
+  "precedence": 6000
+}

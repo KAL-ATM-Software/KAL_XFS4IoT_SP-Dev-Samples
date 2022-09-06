@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CardReader.CardReaderTemplate
+namespace PinPad.PinPadTemplate
 {
     class Server
     {
@@ -20,16 +20,16 @@ namespace CardReader.CardReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CardReader Service Provider
-                var cardReaderDevice = new CardReaderTemplate(Logger);
-                var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CardReaderTemplate",
-                                                                      cardReaderDevice,
+                /// PinPad Service Provider
+                var pinPadDevice = new PinPadTemplate(Logger);
+                var pinPadService = new PinPadServiceProvider(EndpointDetails,
+                                                                      ServiceName: "PinPadTemplate",
+                                                                      pinPadDevice,
                                                                       Logger,
                                                                       new FilePersistentData(Logger));
 
-                cardReaderDevice.SetServiceProvider = cardReaderService;
-                Publisher.Add(cardReaderService);
+                pinPadDevice.SetServiceProvider = pinPadService;
+                Publisher.Add(pinPadService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }

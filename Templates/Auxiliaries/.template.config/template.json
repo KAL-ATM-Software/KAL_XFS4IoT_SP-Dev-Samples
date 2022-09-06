@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Auxiliaries",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Auxiliaries",
+  "name": "KAL-SP-Dev Auxiliaries Template",
+  "shortName": "spdev-Ax",
+  "sourceName": "AuxiliariesTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Auxiliaries Template",
+  "defaultName": "Auxiliaries1",
+  "precedence": 6000
+}

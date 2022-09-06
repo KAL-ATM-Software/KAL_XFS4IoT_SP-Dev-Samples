@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Biometric",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.Biometric",
+  "name": "KAL-SP-Dev Biometric Template",
+  "shortName": "spdev-Bio",
+  "sourceName": "BiometricTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "Biometric  Template",
+  "defaultName": "Biometric1",
+  "precedence": 6000
+}

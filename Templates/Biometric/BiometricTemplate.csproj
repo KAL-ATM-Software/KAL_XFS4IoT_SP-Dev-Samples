@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>BiometricTemplate</AssemblyName>
+        <RootNamespace>Biometric.BiometricTemplate</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Biometric" Version="1.3.0" />
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="1.3.0" />
+	</ItemGroup>
+
+    <ItemGroup>
+        <None Update="App.config">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>
