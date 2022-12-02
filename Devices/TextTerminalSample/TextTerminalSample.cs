@@ -19,7 +19,6 @@ using XFS4IoTServer;
 using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
 using System.Threading.Channels;
-using TextTerminalProvider;
 
 namespace TextTerminalSample
 {

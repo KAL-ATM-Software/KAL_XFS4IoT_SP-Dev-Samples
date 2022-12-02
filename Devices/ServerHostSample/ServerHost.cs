@@ -49,10 +49,10 @@ namespace Server
 
                 /// Text Terminal Unit Service Provider
                 var simTextTerminalDevice = new TextTerminalSample.TextTerminalSample(Logger);
-                var textTerminalService = new TextTerminalProvider.TextTerminalServiceProvider(EndpointDetails,
-                                                                                               ServiceName: "SimTextTerminal",
-                                                                                               simTextTerminalDevice,
-                                                                                               Logger);
+                var textTerminalService = new TextTerminalServiceProvider(EndpointDetails,
+                                                                          ServiceName: "SimTextTerminal",
+                                                                          simTextTerminalDevice,
+                                                                          Logger);
                 simTextTerminalDevice.SetServiceProvider = textTerminalService;
                 Publisher.Add(textTerminalService);
 
