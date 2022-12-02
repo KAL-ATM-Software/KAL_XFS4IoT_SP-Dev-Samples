@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CardReader.CardReaderTemplate
+namespace CashRecycler.CashRecyclerTemplate
 {
     class Server
     {
@@ -20,16 +20,16 @@ namespace CardReader.CardReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CardReader Service Provider
-                var cardReaderDevice = new CardReaderTemplate(Logger);
-                var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CardReaderTemplate",
-                                                                      cardReaderDevice,
+                /// CashRecycler Service Provider
+                var cashRecyclerDevice = new CashRecyclerTemplate(Logger);
+                var cashRecyclerService = new CashRecyclerServiceProvider(EndpointDetails,
+                                                                      ServiceName: "CashRecyclerTemplate",
+                                                                      cashRecyclerDevice,
                                                                       Logger,
                                                                       new FilePersistentData(Logger));
 
-                cardReaderDevice.SetServiceProvider = cardReaderService;
-                Publisher.Add(cardReaderService);
+                cashRecyclerDevice.SetServiceProvider = cashRecyclerService;
+                Publisher.Add(cashRecyclerService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }

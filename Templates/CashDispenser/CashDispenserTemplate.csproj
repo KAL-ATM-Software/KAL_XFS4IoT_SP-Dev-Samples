@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>CashDispenserTemplate</AssemblyName>
+    <RootNamespace>CashDispenser.CashDispenserTemplate</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="1.3.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="1.3.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="1.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+      <None Update="App.config">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+  </ItemGroup>
+
+</Project>

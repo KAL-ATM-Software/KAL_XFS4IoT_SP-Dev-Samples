@@ -197,7 +197,7 @@ namespace CardReader.CardReaderTemplate
         /// Here is an example of handling MediaRemovedEvent after card is ejected successfully.
         /// </summary>
         /// <returns></returns>
-        public Task RunAsync()
+        public Task RunAsync(CancellationToken Token)
         {
             return Task.CompletedTask;
         }

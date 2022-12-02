@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CardReader.CardReaderTemplate
+namespace TextTerminal.TextTerminalTemplate
 {
     class Server
     {
@@ -20,16 +20,15 @@ namespace CardReader.CardReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CardReader Service Provider
-                var cardReaderDevice = new CardReaderTemplate(Logger);
-                var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CardReaderTemplate",
-                                                                      cardReaderDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                /// TextTerminal Service Provider
+                var textTerminalDevice = new TextTerminalTemplate(Logger);
+                var textTerminalService = new TextTerminalProvider.TextTerminalServiceProvider(EndpointDetails,
+                                                                      ServiceName: "TextTerminalTemplate",
+                                                                      textTerminalDevice,
+                                                                      Logger);
 
-                cardReaderDevice.SetServiceProvider = cardReaderService;
-                Publisher.Add(cardReaderService);
+                textTerminalDevice.SetServiceProvider = textTerminalService;
+                Publisher.Add(textTerminalService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }

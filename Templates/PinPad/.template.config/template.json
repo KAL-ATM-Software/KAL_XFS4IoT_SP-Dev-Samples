@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.PinPad",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.PinPad",
+  "name": "KAL-SP-Dev PinPad Template",
+  "shortName": "spdev-Pin",
+  "sourceName": "PinPadTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "PinPad Template",
+  "defaultName": "PinPad1",
+  "precedence": 6000
+}

@@ -10,7 +10,7 @@
     <ItemGroup>
         <PackageReference
                 Include="KAL.XFS4IoT.SP-Dev.Framework.CardReader"
-                Version="1.1.0" />
+                Version="1.3.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -18,6 +18,5 @@
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>
-
 
 </Project>

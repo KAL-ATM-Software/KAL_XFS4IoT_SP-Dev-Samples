@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "KAL",
+  "classifications": [ "SP-Dev", "Console" ],
+  "identity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.TextTerminal",
+  "groupIdentity": "KAL.XFS4IoT.SP-Dev.Framework.Templates.TextTerminal",
+  "name": "KAL-SP-Dev TextTerminal Template",
+  "shortName": "spdev-Txt",
+  "sourceName": "TextTerminalTemplate",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "description": "TextTerminal Template",
+  "defaultName": "TextTerminal1",
+  "precedence": 6000
+}

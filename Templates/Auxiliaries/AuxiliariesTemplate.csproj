@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+        <OutputType>Exe</OutputType>
+		<TargetFramework>net6.0</TargetFramework>
+		<AssemblyName>AuxiliariesTemplate</AssemblyName>
+		<RootNamespace>Auxiliaries.AuxiliariesTemplate</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Auxiliaries" Version="1.3.0" />
+	</ItemGroup>
+
+    <ItemGroup>
+        <None Update="App.config">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+</Project>

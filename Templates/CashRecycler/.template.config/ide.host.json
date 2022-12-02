@@ -1,0 +1,7 @@
+{
+    "$schema": "http://json.schemastore.org/vs-2017.3.host",
+    "defaultSymbolVisibility": true,
+    "learnMoreLink": "https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev-Samples",
+    "order": 0,
+    "icon": "kal.png"
+  }

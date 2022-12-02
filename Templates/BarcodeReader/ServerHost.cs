@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CardReader.CardReaderTemplate
+namespace BarcodeReader.BarcodeReaderTemplate
 {
     class Server
     {
@@ -20,16 +20,15 @@ namespace CardReader.CardReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CardReader Service Provider
-                var cardReaderDevice = new CardReaderTemplate(Logger);
-                var cardReaderService = new CardReaderServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CardReaderTemplate",
-                                                                      cardReaderDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                /// BarcodeReader Service Provider
+                var barcodeReaderDevice = new BarcodeReaderTemplate(Logger);
+                var barcodeReaderService = new BarcodeReaderServiceProvider(EndpointDetails,
+                                                                      ServiceName: "BarcodeReaderTemplate",
+                                                                      barcodeReaderDevice,
+                                                                      Logger);
 
-                cardReaderDevice.SetServiceProvider = cardReaderService;
-                Publisher.Add(cardReaderService);
+                barcodeReaderDevice.SetServiceProvider = barcodeReaderService;
+                Publisher.Add(barcodeReaderService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }
