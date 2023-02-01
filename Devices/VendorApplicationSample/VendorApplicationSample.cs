@@ -105,6 +105,12 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         /// </summary>
         public VendorApplicationCapabilitiesClass VendorApplicationCapabilities { get; set; } = new VendorApplicationCapabilitiesClass(VendorApplicationCapabilitiesClass.SupportedAccessLevelEnum.Basic);
 
+
+        /// <summary>
+        /// Stores vendor application status 
+        /// </summary>
+        public VendorApplicationStatusClass VendorApplicationStatus { get; set; } = new VendorApplicationStatusClass(VendorApplicationStatusClass.AccessLevelEnum.Basic);
+
         #endregion
 
         #region Common Interface
