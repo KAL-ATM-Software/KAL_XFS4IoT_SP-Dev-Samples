@@ -18,11 +18,12 @@ using XFS4IoT.Common.Commands;
 using XFS4IoTServer;
 using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
+using XFS4IoTFramework.Lights;
 using System.Threading.Channels;
 
 namespace TextTerminalSample
 {
-    public class TextTerminalSample : ITextTerminalDevice, ICommonDevice
+    public class TextTerminalSample : ITextTerminalDevice, ILightsDevice, ICommonDevice
     {
 
         /// <summary>
@@ -214,6 +215,26 @@ namespace TextTerminalSample
             Cursor: true,
             Forms: false
             );
+
+        #endregion
+
+        #region Lights Interface
+
+        /// <summary>
+        /// This command is used to set the status of a light.
+        /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
+        /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
+        /// </summary>
+        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Lights Capabilities
+        /// </summary>
+        public LightsCapabilitiesClass LightsCapabilities { get; set; } = new(null);
+        /// <summary>
+        /// Stores light status
+        /// </summary>
+        public LightsStatusClass LightsStatus { get; set; } = new();
 
         #endregion
 
