@@ -148,6 +148,18 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                                                                   CancellationToken cancellation)
         {
             await Task.Delay(200, cancellation);
+            foreach (var task in request.PrintJob.Tasks)
+            {
+                if (task.Type == FieldTypeEnum.TEXT)
+                {
+                    TextTask textTask = task as TextTask;
+                    Logger.Log("DEVCLASS", $"X in dot:{textTask.x},Y in dot:{textTask.y}, Text to print:{textTask.Text}");
+                    // Send print data to the physical device with position
+
+                    PrinterStatus.Media = PrinterStatusClass.MediaEnum.Present;
+                }
+            }
+
             /* Example of usage for the Bitmap printing for Windows only for now
             PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
             int bitCount = 24;
@@ -202,6 +214,8 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                                                         CancellationToken cancellation)
         {
             await Task.Delay(200, cancellation);
+            PrinterStatus.Media = PrinterStatusClass.MediaEnum.Present;
+
             return new RawPrintResult(MessagePayload.CompletionCodeEnum.Success);
         }
 

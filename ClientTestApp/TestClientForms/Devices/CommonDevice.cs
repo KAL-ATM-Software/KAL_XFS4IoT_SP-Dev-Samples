@@ -71,6 +71,10 @@ namespace TestClientForms.Devices
 
         public static readonly int CommandTimeout = 60000;
 
+        /// <summary>
+        /// Keep capabilities and make it available from an individual derived class if it's needed
+        /// </summary>
+        protected CapabilitiesCompletion Capabilities { get; private set; } = null;
 
         private async Task ServiceDiscoveryForPort(string uri, int port, InterfaceClass.NameEnum[] serviceClasses)
         {
@@ -237,6 +241,7 @@ namespace TestClientForms.Devices
             object cmdResponse = await SendAndWaitForCompletionAsync(device, capabilitiesCmd);
             if (cmdResponse is CapabilitiesCompletion response)
             {
+                Capabilities = response;
                 RspBox.Text = response.Serialise();
                 return response;
             }

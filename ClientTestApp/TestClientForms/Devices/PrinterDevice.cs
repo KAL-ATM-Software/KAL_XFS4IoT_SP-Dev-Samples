@@ -179,6 +179,14 @@ namespace TestClientForms.Devices
 
         public async Task Eject()
         {
+            bool waitUntilTaken = false;
+
+            var status = await GetStatus();
+            if (status?.Payload?.Printer?.Media == StatusClass.MediaEnum.Present)
+            {
+                waitUntilTaken = Capabilities?.Payload?.Printer?.MediaTaken is not null && (bool)Capabilities?.Payload?.Printer?.MediaTaken;
+            }
+
             var printer = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
 
             try
@@ -208,11 +216,22 @@ namespace TestClientForms.Devices
                 if (cmdResponse is ControlMediaCompletion response)
                 {
                     RspBox.Text = response.Serialise();
-                    completed = true;
+                    if (!waitUntilTaken)
+                    {
+                        completed = true;
+                    }
                 }
                 else if (cmdResponse is MediaPresentedEvent presentedEv)
                 {
                     EvtBox.Text = presentedEv.Serialise();
+                }
+                else if (cmdResponse is MediaTakenEvent mediaTakenEv)
+                {
+                    EvtBox.Text = mediaTakenEv.Serialise();
+                    if (waitUntilTaken)
+                    {
+                        completed = true;
+                    }
                 }
             } while (!completed);
         }
