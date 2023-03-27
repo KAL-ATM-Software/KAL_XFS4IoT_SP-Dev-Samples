@@ -321,6 +321,12 @@ namespace CardReader.CardReaderTemplate
         public void GetCashUnitAccuray(string storageId, out CashStatusClass.AccuracyEnum unitAccuracy) => throw new NotSupportedException($"No cash related operation supported in this device.");
 
         /// <summary>
+        /// Return return cash unit initial counts maintained by the device
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetCashUnitInitialCounts(out Dictionary<string, StorageCashCountClass> initialCounts) => throw new NotSupportedException($"No cash related operation supported in this device.");
+
+        /// <summary>
         /// Set new configuration and counters
         /// </summary>
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>

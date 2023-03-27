@@ -587,6 +587,16 @@ namespace CashAcceptor.CashAcceptorTemplate
         }
 
         /// <summary>
+        /// Return cash unit initial counts maintained by the device class and only this method is called on the start of day/
+        /// </summary>
+        /// <returns>Return true if the device class maintained initial counts, otherwise false</returns>
+        public bool GetCashUnitInitialCounts(out Dictionary<string, StorageCashCountClass> initialCounts)
+        {
+            initialCounts = null;
+            return false;
+        }
+
+        /// <summary>
         /// Return return cash storage status
         /// </summary>
         /// <returns>Return true if the device class uses hardware status, otherwise false</returns>

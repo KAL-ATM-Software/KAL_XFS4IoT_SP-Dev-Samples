@@ -22,10 +22,10 @@ namespace TextTerminal.TextTerminalTemplate
 
                 /// TextTerminal Service Provider
                 var textTerminalDevice = new TextTerminalTemplate(Logger);
-                var textTerminalService = new TextTerminalProvider.TextTerminalServiceProvider(EndpointDetails,
-                                                                      ServiceName: "TextTerminalTemplate",
-                                                                      textTerminalDevice,
-                                                                      Logger);
+                var textTerminalService = new TextTerminalServiceProvider(EndpointDetails,
+                                                                          ServiceName: "TextTerminalTemplate",
+                                                                          textTerminalDevice,
+                                                                          Logger);
 
                 textTerminalDevice.SetServiceProvider = textTerminalService;
                 Publisher.Add(textTerminalService);

@@ -14,16 +14,14 @@ using XFS4IoT.Common.Completions;
 using XFS4IoT.Completions;
 using XFS4IoTFramework.Common;
 using XFS4IoTFramework.TextTerminal;
-using XFS4IoT.Common.Commands;
+using XFS4IoTFramework.Lights;
 using XFS4IoTServer;
 using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
-using System.Threading.Channels;
-using TextTerminalProvider;
 
 namespace TextTerminal.TextTerminalTemplate
 {
-    public class TextTerminalTemplate : ITextTerminalDevice, ICommonDevice
+    public class TextTerminalTemplate : ITextTerminalDevice, ILightsDevice, ICommonDevice
     {
         /// <summary>
         /// Constructor
@@ -49,9 +47,9 @@ namespace TextTerminal.TextTerminalTemplate
         /// <summary>
         /// Start up the TextTerminal UI in a separate thread to avoid blocking the SP.
         /// </summary>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
 
@@ -108,7 +106,7 @@ namespace TextTerminal.TextTerminalTemplate
         /// A KeyPress event should be triggered for each valid key.
         /// The method will return once a termination key is pressed or if the numChars is reached when AutoEnd is true.
         /// </summary>
-        public async Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest readInfo, CancellationToken cancellation)
+        public Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest readInfo, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -221,6 +219,25 @@ namespace TextTerminal.TextTerminalTemplate
 
         #endregion
 
+        #region Lights Interface
+
+        /// <summary>
+        /// This command is used to set the status of a light.
+        /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
+        /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
+        /// </summary>
+        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Lights Capabilities
+        /// </summary>
+        public LightsCapabilitiesClass LightsCapabilities { get; set; } = new(null);
+        /// <summary>
+        /// Stores light status
+        /// </summary>
+        public LightsStatusClass LightsStatus { get; set; } = new();
+
+        #endregion
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
         private ILogger Logger { get; }
 
