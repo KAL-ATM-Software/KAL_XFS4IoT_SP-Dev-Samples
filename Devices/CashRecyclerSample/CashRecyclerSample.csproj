@@ -13,10 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="1.5.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="1.5.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="1.5.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="1.5.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="1.6.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>
