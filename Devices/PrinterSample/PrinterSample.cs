@@ -414,7 +414,8 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             ValidStyle: FieldStyleEnum.BOLD |
                         FieldStyleEnum.CONDENSED |
                         FieldStyleEnum.ITALIC |
-                        FieldStyleEnum.NORMAL,
+                        FieldStyleEnum.NORMAL |
+                        FieldStyleEnum.DOUBLE,
             ValidBarcode: 0,
             ValidColor: FieldColorEnum.BLACK,
             ValidFonts: "ALL",
