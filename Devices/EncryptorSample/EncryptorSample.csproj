@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="1.6.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="1.6.2" />
   </ItemGroup>
 
 </Project>
