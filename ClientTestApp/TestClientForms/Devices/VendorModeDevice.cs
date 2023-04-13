@@ -19,8 +19,8 @@ namespace TestClientForms.Devices
 {
     internal class VendorModeDevice : CommonDevice
     {
-        public VendorModeDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox, true)
+        public VendorModeDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox, true)
         {
         }
 
@@ -34,12 +34,12 @@ namespace TestClientForms.Devices
             var cmd = new EnterModeRequestCommand(RequestId.NewID(),
                                                   new EnterModeRequestCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             bool enteredEventReceived = false;
@@ -48,14 +48,14 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is EnterModeRequestCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                     if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
                         return;
                 }
                 else if (cmdResponse is ModeEnteredEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                     enteredEventReceived = true;
                 }
             } while (!completed);
@@ -66,12 +66,12 @@ namespace TestClientForms.Devices
                 switch (await device.ReceiveMessageAsync())
                 {
                     case ModeEnteredEvent response:
-                        EvtBox.Text = response.Serialise();
+                        base.OnXFS4IoTMessages(this, response.Serialise());
                         enteredEventReceived = true;
                         break;
 
                     default:
-                        EvtBox.Text += "<Unknown Event>";
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
                 }
             }
@@ -84,12 +84,12 @@ namespace TestClientForms.Devices
             var cmd = new ExitModeRequestCommand(RequestId.NewID(),
                                                  new ExitModeRequestCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             bool exitEventReceived = false;
@@ -98,14 +98,14 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is ExitModeRequestCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                     if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
                         return;
                 }
                 else if (cmdResponse is ModeExitedEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                     exitEventReceived = true;
                 }
             } while (!completed);
@@ -115,12 +115,12 @@ namespace TestClientForms.Devices
                 switch (await device.ReceiveMessageAsync())
                 {
                     case ModeExitedEvent response:
-                        EvtBox.Text = response.Serialise();
+                        base.OnXFS4IoTMessages(this, response.Serialise());
                         exitEventReceived = true;
                         break;
 
                     default:
-                        EvtBox.Text += "<Unknown Event>";
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
                 }
             }

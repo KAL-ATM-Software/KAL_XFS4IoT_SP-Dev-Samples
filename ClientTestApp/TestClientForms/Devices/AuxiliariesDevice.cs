@@ -19,8 +19,8 @@ namespace TestClientForms.Devices
 {
     public class AuxiliariesDevice : CommonDevice
     {
-        public AuxiliariesDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox, true)
+        public AuxiliariesDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox, true)
         {
         }
 
@@ -34,12 +34,12 @@ namespace TestClientForms.Devices
 
             var cmd = new RegisterCommand(RequestId.NewID(), new RegisterCommand.PayloadData(CommandTimeout, HandsetSensor: RegisterCommand.PayloadData.HandsetSensorEnum.Register));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -47,12 +47,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is RegisterCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is AuxiliaryStatusEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -73,12 +73,12 @@ namespace TestClientForms.Devices
                 _ => throw new NotImplementedException($"Unexpected DayOfWeek in {nameof(SetAutoStartupTime)}")
             }, time.Day, time.Hour, time.Minute)));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -86,12 +86,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is SetAutoStartupTimeCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is AuxiliaryStatusEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -102,12 +102,12 @@ namespace TestClientForms.Devices
 
             var cmd = new ClearAutoStartupTimeCommand(RequestId.NewID(), new ClearAutoStartupTimeCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -115,12 +115,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is ClearAutoStartupTimeCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is AuxiliaryStatusEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -131,12 +131,12 @@ namespace TestClientForms.Devices
 
             var cmd = new GetAutoStartupTimeCommand(RequestId.NewID(), new GetAutoStartupTimeCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -144,12 +144,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is GetAutoStartupTimeCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is AuxiliaryStatusEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -160,12 +160,12 @@ namespace TestClientForms.Devices
 
             var cmd = new SetAuxiliariesCommand(RequestId.NewID(), new SetAuxiliariesCommand.PayloadData(CommandTimeout, Heating: SetAuxiliariesCommand.PayloadData.HeatingEnum.On));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -173,12 +173,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await device.ReceiveMessageAsync();
                 if (cmdResponse is SetAuxiliariesCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is AuxiliaryStatusEvent eventResp)
                 {
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }

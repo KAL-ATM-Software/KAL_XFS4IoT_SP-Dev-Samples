@@ -28,8 +28,8 @@ namespace TestClientForms.Devices
 {
     public class PinPadDevice : EncryptorDevice
     {
-        public PinPadDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
+        public PinPadDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox)
         {
         }
 
@@ -70,12 +70,12 @@ namespace TestClientForms.Devices
                                                                                 { "clear", new KeyClass(false) }
                                                                             }));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -83,12 +83,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is DataEntryCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is KeyEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -108,12 +108,12 @@ namespace TestClientForms.Devices
 
             var cmd = new GetLayoutCommand(RequestId.NewID(), new GetLayoutCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -121,12 +121,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is GetLayoutCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is InitializedEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -170,12 +170,12 @@ namespace TestClientForms.Devices
                                                                             KeyAttributes: new ImportKeyCommand.PayloadData.KeyAttributesClass("K0", "T", "B"),
                                                                             VerifyAttributes: new ImportKeyCommand.PayloadData.VerifyAttributesClass(ImportKeyCommand.PayloadData.VerifyAttributesClass.CryptoMethodEnum.KcvZero)));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -183,12 +183,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is ImportKeyCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is InitializedEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
 
@@ -237,12 +237,12 @@ namespace TestClientForms.Devices
                                                                                       SecureKeyEntryCommand.PayloadData.VerificationTypeEnum.Zero,
                                                                                       SecureKeyEntryCommand.PayloadData.CryptoMethodEnum.TripleDes));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -250,12 +250,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is SecureKeyEntryCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is KeyEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
 
@@ -265,12 +265,12 @@ namespace TestClientForms.Devices
                                                                                      KeyAttributes: new ImportKeyCommand.PayloadData.KeyAttributesClass("K0", "T", "B"),
                                                                                      Constructing: true));
 
-            CmdBox.Text = importKeyCmd.Serialise();
+            base.OnXFS4IoTMessages(this, importKeyCmd.Serialise());
 
             await pinpad.SendCommandAsync(importKeyCmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             completed = false;
             do
@@ -278,12 +278,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is ImportKeyCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is InitializedEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -327,12 +327,12 @@ namespace TestClientForms.Devices
                                                                               { "clear", new KeyClass(false) }
                                                                           }));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -340,12 +340,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is PinEntryCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is KeyEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
 
@@ -379,12 +379,12 @@ namespace TestClientForms.Devices
                                                                                 Key: "PinKey",
                                                                                 CryptoMethod: GetPinBlockCommand.PayloadData.CryptoMethodEnum.Ecb));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await pinpad.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -392,7 +392,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await pinpad.ReceiveMessageAsync();
                 if (cmdResponse is GetPinBlockCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
 

@@ -28,8 +28,8 @@ namespace TestClientForms.Devices
 {
     public class CashAcceptorDevice : CommonDevice
     {
-        public CashAcceptorDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox) 
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
+        public CashAcceptorDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox) 
+            : base(serviceName, uriBox, portBox, serviceUriBox)
         {
         }
 		
@@ -51,14 +51,14 @@ namespace TestClientForms.Devices
 
             var cmd = new GetStorageCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
             if (cmdResponse is GetStorageCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
 
@@ -129,42 +129,42 @@ namespace TestClientForms.Devices
             };
             var cmd = new SetStorageCommand(RequestId.NewID(), new(CommandTimeout, storage));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is SetStorageCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is IncompleteRetractEvent incompleteRetractEv)
                 {
-                    EvtBox.Text = incompleteRetractEv.Serialise();
+                    base.OnXFS4IoTMessages(this, incompleteRetractEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -184,15 +184,15 @@ namespace TestClientForms.Devices
 
             var cmd = new GetPositionCapabilitiesCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
             if (cmdResponse is GetPositionCapabilitiesCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
 
@@ -211,14 +211,14 @@ namespace TestClientForms.Devices
 
             var cmd = new GetCashInStatusCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
             if (cmdResponse is GetCashInStatusCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
         public async Task ConfigureBanknoteTypes()
@@ -247,15 +247,15 @@ namespace TestClientForms.Devices
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR500", true),
                                                     }));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
             if (cmdResponse is ConfigureNoteTypesCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
 
@@ -275,34 +275,34 @@ namespace TestClientForms.Devices
             var cmd = new StartExchangeCommand(RequestId.NewID(), 
                                         new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is StartExchangeCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is NoteErrorEvent noteErrorEv)
                 {
-                    EvtBox.Text = noteErrorEv.Serialise();
+                    base.OnXFS4IoTMessages(this, noteErrorEv.Serialise());
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -322,34 +322,34 @@ namespace TestClientForms.Devices
 
             var cmd = new EndExchangeCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is EndExchangeCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is NoteErrorEvent noteErrorEv)
                 {
-                    EvtBox.Text = noteErrorEv.Serialise();
+                    base.OnXFS4IoTMessages(this, noteErrorEv.Serialise());
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -373,14 +373,14 @@ namespace TestClientForms.Devices
                                                                            InputPosition: InputPositionEnum.InDefault, 
                                                                            TotalItemsLimit: 200));
 
-            CmdBox.Text = cmd.Serialise();
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
             if (cmdResponse is CashInStartCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
         public async Task Reset()
@@ -398,42 +398,42 @@ namespace TestClientForms.Devices
 
             var cmd = new ResetCommand(RequestId.NewID(), new(CommandTimeout, null, null, OutputPositionEnum.OutDefault));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is ResetCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is IncompleteRetractEvent incompleteRetractEv)
                 {
-                    EvtBox.Text = incompleteRetractEv.Serialise();
+                    base.OnXFS4IoTMessages(this, incompleteRetractEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -453,54 +453,54 @@ namespace TestClientForms.Devices
 
             var cmd = new CashInCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is CashInCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is ItemsInsertedEvent itemsInsertedEv)
                 {
-                    EvtBox.Text = itemsInsertedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, itemsInsertedEv.Serialise());
                 }
                 else if (cmdResponse is InsertItemsEvent insertItemEv)
                 {
-                    EvtBox.Text = insertItemEv.Serialise();
+                    base.OnXFS4IoTMessages(this, insertItemEv.Serialise());
                 }
                 else if (cmdResponse is InputRefuseEvent inputRefusedEv)
                 {
-                    EvtBox.Text = inputRefusedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, inputRefusedEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
-                    EvtBox.Text += shutterEv.Serialise();
+                    base.OnXFS4IoTMessages(this, shutterEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -520,42 +520,42 @@ namespace TestClientForms.Devices
 
             var cmd = new CashInEndCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is CashInEndCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
-                    EvtBox.Text += shutterEv.Serialise();
+                    base.OnXFS4IoTMessages(this, shutterEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -575,49 +575,49 @@ namespace TestClientForms.Devices
 
             var cmd = new CashInRollbackCommand(RequestId.NewID(), new(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is CashInRollbackCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
                         break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
-                    EvtBox.Text += shutterEv.Serialise();
+                    base.OnXFS4IoTMessages(this, shutterEv.Serialise());
                     if (shutterEv.Payload.Shutter == ShutterEnum.Closed)
                         break;
                 }
                 else if (cmdResponse is ItemsTakenEvent itemsTakenEv)
                 {
-                    EvtBox.Text += itemsTakenEv.Serialise();
+                    base.OnXFS4IoTMessages(this, itemsTakenEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }
@@ -637,42 +637,42 @@ namespace TestClientForms.Devices
 
             var cmd = new RetractCommand(RequestId.NewID(), new(CommandTimeout, null, RetractAreaEnum.Retract, 1));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             for (; ; )
             {
                 object cmdResponse = await client.ReceiveMessageAsync();
                 if (cmdResponse is RetractCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     break;
                 }
                 else if (cmdResponse is InfoAvailableEvent infoAvailableEv)
                 {
-                    EvtBox.Text = infoAvailableEv.Serialise();
+                    base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
                 else if (cmdResponse is IncompleteRetractEvent incompleteRetractEv)
                 {
-                    EvtBox.Text = incompleteRetractEv.Serialise();
+                    base.OnXFS4IoTMessages(this, incompleteRetractEv.Serialise());
                 }
                 else if (cmdResponse is StorageChangedEvent storageChangedEv)
                 {
-                    EvtBox.Text = storageChangedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
                 }
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
-                    EvtBox.Text += storageThresholdEv.Serialise();
+                    base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
-                    EvtBox.Text += "<Unknown Event>";
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             }
         }

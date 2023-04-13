@@ -21,6 +21,8 @@ using XFS4IoT.ServicePublisher.Completions;
 
 namespace TestClientForms.Devices
 {
+    public delegate void XFS4IoTMessagesDelegate(object sender, string msg);
+
     public class CommonDevice
     {
         static readonly int[] PortRanges = new int[]
@@ -44,12 +46,9 @@ namespace TestClientForms.Devices
         /// Get a reference to the required text boxes for the device.
         /// Use separate text box per device to enable using more than one device at a time.
         /// </summary>
-        public CommonDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox, bool useSingleConnection = false)
+        public CommonDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox, bool useSingleConnection = false)
         {
-            ServiceName = serviceName;
-            CmdBox = cmdBox;
-            RspBox = rspBox;
-            EvtBox = evtBox;
+            ServiceName = serviceName;         
             UriBox = uriBox;
             PortBox = portBox;
             ServiceUriBox = serviceUriBox;
@@ -58,9 +57,17 @@ namespace TestClientForms.Devices
 
         protected string ServiceName { get; init; }
 
-        protected TextBox CmdBox { get; init; }
-        protected TextBox RspBox { get; init; }
-        protected TextBox EvtBox { get; init; }
+        /// <summary>
+        /// the event is raised when XFS4IoT message is sent or received
+        /// </summary>
+        public event XFS4IoTMessagesDelegate XFS4IoTMessages;
+
+        protected virtual void OnXFS4IoTMessages(object sender, string msg)
+        {
+            XFS4IoTMessages?.Invoke(this, msg);
+        }
+
+        
         protected TextBox UriBox { get; init; }
         protected TextBox PortBox { get; init; }
         protected TextBox ServiceUriBox { get; init; }
@@ -105,6 +112,7 @@ namespace TestClientForms.Devices
 
                 var getServiceCommand = new GetServicesCommand(RequestId.NewID(), new GetServicesCommand.PayloadData(CommandTimeout));
                 string commandString = getServiceCommand.Serialise();
+                XFS4IoTMessages?.Invoke(this, commandString);
                 string responseString = string.Empty;
 
                 object cmdResponse = await SendAndWaitForCompletionAsync(Discovery, getServiceCommand);
@@ -112,6 +120,7 @@ namespace TestClientForms.Devices
                 if (cmdResponse is GetServicesCompletion response)
                 {
                     responseString = response.Serialise();
+                    XFS4IoTMessages?.Invoke(this, responseString);
 
                     var serviceURI = string.Empty;
 
@@ -134,8 +143,6 @@ namespace TestClientForms.Devices
                     {
                         ServicePort = port;
                         PortBox.Text = ServicePort.ToString();
-                        CmdBox.Text = commandString;
-                        RspBox.Text = responseString;
                         ServiceUriBox.Text = serviceURI;
                     }
                 }
@@ -151,11 +158,7 @@ namespace TestClientForms.Devices
 
         public async Task DoServiceDiscovery(XFS4IoT.Common.InterfaceClass.NameEnum[] serviceClasses)
         {
-            CmdBox.Text = string.Empty;
-            RspBox.Text = string.Empty;
             ServiceUriBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
-
             ServicePort = null;
 
             await Task.WhenAll(from port in XFSConstants.PortRanges select ServiceDiscoveryForPort(UriBox.Text, port, serviceClasses));
@@ -205,15 +208,12 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var statusCmd = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(CommandTimeout));
-            CmdBox.Text = statusCmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            XFS4IoTMessages?.Invoke(this, statusCmd.Serialise());
 
             object cmdResponse = await SendAndWaitForCompletionAsync(device, statusCmd);
             if (cmdResponse is StatusCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                XFS4IoTMessages?.Invoke(this, response.Serialise());
                 return response;
             }
             return null;
@@ -233,16 +233,14 @@ namespace TestClientForms.Devices
             }
 
             var capabilitiesCmd = new CapabilitiesCommand(RequestId.NewID(), new CapabilitiesCommand.PayloadData(CommandTimeout));
-            CmdBox.Text = capabilitiesCmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            XFS4IoTMessages?.Invoke(this, capabilitiesCmd.Serialise());
+                      
 
             object cmdResponse = await SendAndWaitForCompletionAsync(device, capabilitiesCmd);
             if (cmdResponse is CapabilitiesCompletion response)
             {
                 Capabilities = response;
-                RspBox.Text = response.Serialise();
+                XFS4IoTMessages?.Invoke(this, response.Serialise());
                 return response;
             }
             return null;

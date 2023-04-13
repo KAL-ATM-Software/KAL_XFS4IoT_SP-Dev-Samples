@@ -19,8 +19,8 @@ namespace TestClientForms.Devices
 {
     internal class BarcodeReaderDevice : CommonDevice
     {
-        public BarcodeReaderDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox, true)
+        public BarcodeReaderDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox, true)
         {
         }
 
@@ -34,26 +34,26 @@ namespace TestClientForms.Devices
             var cmd = new ReadCommand(RequestId.NewID(),
                                       new ReadCommand.PayloadData(CommandTimeout, new XFS4IoT.BarcodeReader.SymbologiesPropertiesClass(QrCode: true)));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             while (true)
             {
                 switch (await device.ReceiveMessageAsync())
                 {
                     case ReadCompletion response:
-                        RspBox.Text = response.Serialise();
+                        base.OnXFS4IoTMessages(this,response.Serialise());
                         return;
 
                     case Acknowledge ack:
                         break;
 
                     default:
-                        EvtBox.Text += "<Unknown Event>";
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
                 }
             }
@@ -66,26 +66,26 @@ namespace TestClientForms.Devices
             var cmd = new ResetCommand(RequestId.NewID(),
                                        new ResetCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             while (true)
             {
                 switch (await device.ReceiveMessageAsync())
                 {
                     case ResetCompletion response:
-                        RspBox.Text = response.Serialise();
+                        base.OnXFS4IoTMessages(this,response.Serialise());
                         return;
 
                     case Acknowledge ack:
                         break;
 
                     default:
-                        EvtBox.Text += "<Unknown Event>";
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
                 }
             }
