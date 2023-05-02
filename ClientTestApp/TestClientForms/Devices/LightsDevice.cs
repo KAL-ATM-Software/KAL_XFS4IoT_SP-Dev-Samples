@@ -18,8 +18,8 @@ namespace TestClientForms.Devices
 {
     internal class LightsDevice : CommonDevice
     {
-        public LightsDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
+        public LightsDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox)
         {
         }
 
@@ -44,15 +44,12 @@ namespace TestClientForms.Devices
 
             var cmd = new SetLightCommand(RequestId.NewID(), payload);
 
-            CmdBox.Text = cmd.Serialise();
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             object cmdResponse = await SendAndWaitForCompletionAsync(lights, cmd);
             if (cmdResponse is SetLightCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
     }

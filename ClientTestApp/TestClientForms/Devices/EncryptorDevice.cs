@@ -22,8 +22,8 @@ namespace TestClientForms.Devices
 {
     public class EncryptorDevice : CommonDevice
     {
-        public EncryptorDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
+        public EncryptorDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox)
         {
         }
 
@@ -45,12 +45,9 @@ namespace TestClientForms.Devices
 
             var cmd = new InitializationCommand(RequestId.NewID(), new InitializationCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await encryptor.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -58,12 +55,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await encryptor.ReceiveMessageAsync();
                 if (cmdResponse is InitializationCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is InitializedEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -83,15 +80,15 @@ namespace TestClientForms.Devices
 
             var cmd = new GetKeyDetailCommand(RequestId.NewID(), new GetKeyDetailCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is GetKeyDetailCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }
 
             return (GetKeyDetailCompletion)cmdResponse;
@@ -112,12 +109,12 @@ namespace TestClientForms.Devices
 
             var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await encryptor.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
        
             bool completed = false;
             do
@@ -125,12 +122,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await encryptor.ReceiveMessageAsync();
                 if (cmdResponse is ResetCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
                 else if (cmdResponse is InitializedEvent eventResp)
                 { 
-                    EvtBox.Text = eventResp.Serialise();
+                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
@@ -155,15 +152,15 @@ namespace TestClientForms.Devices
                                                                                                DecryptKey: "MASTERKEY",
                                                                                                DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is ImportKeyCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }            
         }
 
@@ -184,15 +181,15 @@ namespace TestClientForms.Devices
                                                                                                                          keyName,
                                                                                                                          data));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is GenerateAuthenticationCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }            
         }
 
@@ -211,15 +208,15 @@ namespace TestClientForms.Devices
 
             var cmd = new GenerateRandomCommand(RequestId.NewID(), new GenerateRandomCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is GenerateRandomCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }            
         }
 
@@ -241,15 +238,15 @@ namespace TestClientForms.Devices
                                                                                                  Data: Data,
                                                                                                  CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is CryptoDataCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }            
         }
 
@@ -268,15 +265,15 @@ namespace TestClientForms.Devices
 
             var cmd = new DeleteKeyCommand(RequestId.NewID(), new DeleteKeyCommand.PayloadData(CommandTimeout, Key: keyName));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
             if (cmdResponse is DeleteKeyCompletion response)
             {
-                RspBox.Text = response.Serialise();
+                base.OnXFS4IoTMessages(this,response.Serialise());
             }            
         }
     }

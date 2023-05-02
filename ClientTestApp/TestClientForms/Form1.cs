@@ -14,6 +14,10 @@ using System.Threading;
 using System.Windows.Forms;
 using TestClientForms.Devices;
 using System.IO;
+using System.Drawing;
+using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
 
 namespace TestClientForms
 {
@@ -37,19 +41,19 @@ namespace TestClientForms
             BiometricServiceURI.Text = "ws://localhost";
             CashAcceptorServiceURI.Text = "ws://localhost";
 
-            CashDispenserDev = new("CashDispenser", DispenserCmdBox, DispenserRspBox, DispenserEvtBox, DispenserServiceURI, DispenserPortNum, DispenserDispURI);
-            TextTerminalDev = new("TextTerminal", TextTerminalCmdBox, TextTerminalRspBox, TextTerminalEvtBox, TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
-            CardReaderDev = new("CardReader", textBoxCommand, textBoxResponse, textBoxEvent, textBoxServiceURI, textBoxPort, textBoxCardReader);
-            EncryptorDev = new("Encryptor", EncryptorCmdBox, EncryptorRspBox, EncryptorEvtBox, EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
-            PinPadDev = new("PinPad", PinPadCmdBox, PinPadRspBox, PinPadEvtBox, PinPadServiceURI, PinPadPortNum, PinPadURI);
-            PrinterDev = new("Printer", PrinterCmdBox, PrinterRspBox, PrinterEvtBox, PrinterServiceURI, PrinterPortNum, PrinterURI);
-            LightsDev = new("Lights", LightsCmdBox, LightsRspBox, LightsEvtBox, LightsServiceURI, LightsPortNum, LightsURI);
-            AuxDev = new("Auxiliaries", AuxiliariesCmdBox, AuxiliariesRspBox, AuxiliariesEvtBox, AuxiliariesServiceURI, AuxiliariesPortNum, AuxiliariesURI);
-            VendorModeDev = new("VendorMode", VendorModeCmdBox, VendorModeRspBox, VendorModeEvtBox, VendorModeServiceURI, VendorModePortNum, VendorModeURI);
-            VendorAppDev = new("VendorApplication", VendorAppCmdBox, VendorAppRspBox, VendorAppEvtBox, VendorAppServiceURI, VendorAppPortNum, VendorAppURI);
-            BarcodeReaderDev = new("BarcodeReader", BarcodeReaderCmdBox, BarcodeReaderRspBox, BarcodeReaderEvtBox, BarcodeReaderServiceURI, BarcodeReaderPortNum, BarcodeReaderURI);
-            BiometricDev = new("Biometric", BiometricCmdBox, BiometricRspBox, BiometricEvtBox, BiometricServiceURI, BiometricPortNum, BiometricURI);
-            CashAcceptorDev = new("CashAcceptor", CashAcceptorCmdBox, CashAcceptorRspBox, CashAcceptorEvtBox, CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
+            CashDispenserDev = new("CashDispenser", DispenserServiceURI, DispenserPortNum, DispenserDispURI);
+            TextTerminalDev = new("TextTerminal", TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
+            CardReaderDev = new("CardReader", textBoxServiceURI, textBoxPort, textBoxCardReader);
+            EncryptorDev = new("Encryptor", EncryptorServiceURI, EncryptorPortNum, EncryptorURI);
+            PinPadDev = new("PinPad", PinPadServiceURI, PinPadPortNum, PinPadURI);
+            PrinterDev = new("Printer", PrinterServiceURI, PrinterPortNum, PrinterURI);
+            LightsDev = new("Lights", LightsServiceURI, LightsPortNum, LightsURI);
+            AuxDev = new("Auxiliaries", AuxiliariesServiceURI, AuxiliariesPortNum, AuxiliariesURI);
+            VendorModeDev = new("VendorMode", VendorModeServiceURI, VendorModePortNum, VendorModeURI);
+            VendorAppDev = new("VendorApplication", VendorAppServiceURI, VendorAppPortNum, VendorAppURI);
+            BarcodeReaderDev = new("BarcodeReader", BarcodeReaderServiceURI, BarcodeReaderPortNum, BarcodeReaderURI);
+            BiometricDev = new("Biometric", BiometricServiceURI, BiometricPortNum, BiometricURI);
+            CashAcceptorDev = new("CashAcceptor", CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
@@ -57,7 +61,9 @@ namespace TestClientForms
             comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum));
             comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Clear;
         }
-        
+
+                
+
         private CashDispenserDevice CashDispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
         private TextTerminalDevice TextTerminalDev { get; init; }
@@ -72,8 +78,95 @@ namespace TestClientForms
         private BiometricDevice BiometricDev { get; init; }
         private CashAcceptorDevice CashAcceptorDev { get; init; }
 
+
+
+
+
+        #region init Form Windows
+
         private void Form1_Load(object sender, EventArgs e)
-        { }
+        {            
+            this.FormClosing += Form1_FormClosing;
+            RegisterEvents(true);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            RegisterEvents(false);
+        }
+
+        private void RegisterEvents(bool bRegister = true)
+        {
+            try
+            {
+                if (bRegister)
+                {
+                    cashDispenserTreeView.AfterSelect += TreeView_AfterSelect;
+                    textTerminalTreeView.AfterSelect += TreeView_AfterSelect;
+                    cardReaderTreeView.AfterSelect += TreeView_AfterSelect;
+                    encryptorTreeView.AfterSelect += TreeView_AfterSelect;
+                    pinPadTreeView.AfterSelect += TreeView_AfterSelect;
+                    printerTreeView.AfterSelect += TreeView_AfterSelect;
+                    lightsTreeView.AfterSelect += TreeView_AfterSelect;
+                    auxiliariesTreeView.AfterSelect += TreeView_AfterSelect;
+                    vendorModeTreeView.AfterSelect += TreeView_AfterSelect;
+                    vendorApplicationTreeView.AfterSelect += TreeView_AfterSelect;
+                    barcodeReaderTreeView.AfterSelect += TreeView_AfterSelect;
+                    biometricTreeView.AfterSelect += TreeView_AfterSelect;
+                    cashAcceptorTreeView.AfterSelect += TreeView_AfterSelect;
+
+                    CashDispenserDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    TextTerminalDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    CardReaderDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    EncryptorDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    PinPadDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    PrinterDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    LightsDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    AuxDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    VendorModeDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    VendorAppDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    BarcodeReaderDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    BiometricDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    CashAcceptorDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                }
+                else
+                {
+                    cashDispenserTreeView.AfterSelect -= TreeView_AfterSelect;
+                    textTerminalTreeView.AfterSelect -= TreeView_AfterSelect;
+                    cardReaderTreeView.AfterSelect -= TreeView_AfterSelect;
+                    encryptorTreeView.AfterSelect -= TreeView_AfterSelect;
+                    pinPadTreeView.AfterSelect -= TreeView_AfterSelect;
+                    printerTreeView.AfterSelect -= TreeView_AfterSelect;
+                    lightsTreeView.AfterSelect -= TreeView_AfterSelect;
+                    auxiliariesTreeView.AfterSelect -= TreeView_AfterSelect;
+                    vendorModeTreeView.AfterSelect -= TreeView_AfterSelect;
+                    vendorApplicationTreeView.AfterSelect -= TreeView_AfterSelect;
+                    barcodeReaderTreeView.AfterSelect -= TreeView_AfterSelect;
+                    biometricTreeView.AfterSelect -= TreeView_AfterSelect;
+                    cashAcceptorTreeView.AfterSelect -= TreeView_AfterSelect;
+
+                    CashDispenserDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    TextTerminalDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    CardReaderDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    EncryptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    PinPadDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    PrinterDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    LightsDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    AuxDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    VendorModeDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    VendorAppDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    BarcodeReaderDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    BiometricDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    CashAcceptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                }
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show($"'RegisterEvents' method exception {Environment.NewLine} {ex.Message}");
+            }
+        }
+        #endregion
+
 
         #region CardReader
         private async void AcceptCard_Click(object sender, EventArgs e)
@@ -97,7 +190,7 @@ namespace TestClientForms
             }
             else
                 MessageBox.Show("Failed to get CardReader status.");
-            
+
         }
 
         private async void Reset_Click(object sender, EventArgs e)
@@ -228,7 +321,7 @@ namespace TestClientForms
         private async void DispenserGetCommandNonce_Click(object sender, EventArgs e)
         {
             string Nonce = await CashDispenserDev.GetCommandNonce();
-            TokenTextBox.Text = Nonce; 
+            TokenTextBox.Text = Nonce;
         }
 
         private async void DispenserClearCommandNonce_Click(object sender, EventArgs e)
@@ -344,18 +437,18 @@ namespace TestClientForms
         private async void EncryptorImportKey_Click(object sender, EventArgs e)
         {
             List<byte> data = new() { 0xb1, 0x88, 0x68, 0x12, 0x3c, 0x16, 0x57, 0x9f, 0x52, 0x78, 0x3f, 0x2e, 0x5a, 0x00, 0x1f, 0xfe };
-            await EncryptorDev.LoadKey("CryptKey", "D0", "E", data); 
-            await EncryptorDev.LoadKey("MACKey", "M0", "G", data); 
+            await EncryptorDev.LoadKey("CryptKey", "D0", "E", data);
+            await EncryptorDev.LoadKey("MACKey", "M0", "G", data);
         }
         private async void EncryptorReset_Click(object sender, EventArgs e)
         {
-            await EncryptorDev.Reset(); 
+            await EncryptorDev.Reset();
         }
 
         private async void EncryptorEncrypt_Click(object sender, EventArgs e)
         {
             List<byte> data = new() { 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 };
-            await EncryptorDev.Encrypt("CryptKey", data); 
+            await EncryptorDev.Encrypt("CryptKey", data);
         }
 
         private async void EncryptorDeleteKey_Click(object sender, EventArgs e)
@@ -375,18 +468,18 @@ namespace TestClientForms
                 return;
             }
 
-            await EncryptorDev.DeleteKey(keyName); 
+            await EncryptorDev.DeleteKey(keyName);
         }
 
         private async void EncryptorGenerateMAC_Click(object sender, EventArgs e)
         {
             List<byte> data = new() { 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8 };
-            await EncryptorDev.GenerateMAC("MACKey", data); 
+            await EncryptorDev.GenerateMAC("MACKey", data);
         }
 
         private async void EncryptorGenerateRandom_Click(object sender, EventArgs e)
         {
-            await EncryptorDev.GenerateRandom(); 
+            await EncryptorDev.GenerateRandom();
         }
 
         #endregion
@@ -427,12 +520,12 @@ namespace TestClientForms
 
             string keyName = (string)PinPadKeyNamelistBox.Items[index];
 
-            await PinPadDev.DeleteKey(keyName); 
+            await PinPadDev.DeleteKey(keyName);
         }
 
         private async void PinPadReset_Click(object sender, EventArgs e)
         {
-            await PinPadDev.Reset(); 
+            await PinPadDev.Reset();
         }
 
         private async void PinPadEnterData_Click(object sender, EventArgs e)
@@ -474,7 +567,7 @@ namespace TestClientForms
         private async void PinPadLoadPinKey_Click(object sender, EventArgs e)
         {
             List<byte> data = new() { 0xb1, 0x88, 0x68, 0x12, 0x3c, 0x16, 0x57, 0x9f, 0x52, 0x78, 0x3f, 0x2e, 0x5a, 0x00, 0x1f, 0xfe };
-            await PinPadDev.LoadKey("PinKey", "P0", "E", data); 
+            await PinPadDev.LoadKey("PinKey", "P0", "E", data);
         }
 
         private async void PinPadEnterPin_Click(object sender, EventArgs e)
@@ -618,7 +711,7 @@ namespace TestClientForms
                 foreach (string pair in pairs)
                 {
                     var split = pair.Split('=');
-                    if(split.Length != 2)
+                    if (split.Length != 2)
                     {
                         MessageBox.Show($"Invalid form field \"{pair}\"");
                         return;
@@ -645,7 +738,7 @@ namespace TestClientForms
         {
             await PrinterDev.Reset();
         }
-        
+
         private async void PrinterServiceDiscovery_Click(object sender, EventArgs e)
         {
             await PrinterDev.DoServiceDiscovery();
@@ -852,7 +945,7 @@ namespace TestClientForms
 
         private async void btnBiometricMatch_Click(object sender, EventArgs e)
         {
-            if(BiometricStorageInfo.SelectedIndex < 0 || string.IsNullOrWhiteSpace(BiometricStorageInfo.SelectedItem as string))
+            if (BiometricStorageInfo.SelectedIndex < 0 || string.IsNullOrWhiteSpace(BiometricStorageInfo.SelectedItem as string))
             {
                 MessageBox.Show("Select template to match with.");
                 return;
@@ -976,6 +1069,267 @@ namespace TestClientForms
         private async void CashAccCashInRollback_Click(object sender, EventArgs e)
         {
             await CashAcceptorDev.CashInRollback();
+        }
+        #endregion
+
+
+        #region TreeViews manage 
+        private void LoadXFS4IoTMsgToTreeView(System.Windows.Forms.TreeView jsonTreeView, string jsonString)
+        {
+            try
+            {
+                if (jsonTreeView != null)
+                {
+                    // Deserializza il testo JSON in un oggetto JObject
+                    JObject jsonObject = JObject.Parse(jsonString);
+                    (string Description, Color FontColor) tDecoration = NodeDecoration(jsonObject);
+                    // Aggiunge un nodo radice alla TreeView
+                    TreeNode rootNode = new TreeNode($"[{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss.fff")}] {tDecoration.Description}");
+                    rootNode.Tag = (JToken)jsonObject;
+                    rootNode.ForeColor = tDecoration.FontColor;
+                    jsonTreeView.Nodes.Add(rootNode);
+
+                    // Aggiunge l'albero JSON come sottoalbero del nodo radice
+                    AddNode(jsonObject, rootNode);
+
+                    if (jsonTreeView.Nodes.Count > 0)
+                    {
+                        jsonTreeView.SelectedNode = jsonTreeView.Nodes[jsonTreeView.Nodes.Count - 1];
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"'LoadXFS4IoTMsgToTreeView' method exception {Environment.NewLine} {ex.Message}");
+            }
+        }
+
+        private (string Description, Color FontColor) NodeDecoration(JToken jsonObject)
+        {
+            (string Description, Color FontColor) tDecoration = ("unknown", Color.Red);
+
+            try
+            {
+                JToken jHeader = jsonObject["header"];
+
+                switch (jHeader["type"].ToString())
+                {
+                    case "command":
+                        tDecoration.FontColor = Color.Black;
+                        break;
+                    case "completion":
+                        tDecoration.FontColor = Color.Blue;
+                        break;
+                    case "event":
+                        tDecoration.FontColor = Color.Orange;
+                        break;
+                    default:
+                        break;
+                }
+
+                tDecoration.Description = $"{jHeader["name"]} - {jHeader["type"]} - {jHeader["requestId"]}";
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show($"'NodeDecoration' method exception {Environment.NewLine} {ex.Message}");
+            }
+
+            return tDecoration;
+        }
+
+        private void AddNode(JToken token, TreeNode parentNode)
+        {
+            try
+            {
+                switch (token.Type)
+                {
+                    case JTokenType.Object:
+                        JObject obj = (JObject)token;
+                        // for each object property add a new tree node 
+                        // for primitive type show the keypair 'property : bvalue' on node description
+                        foreach (JProperty childProperty in obj.Properties())
+                        {
+                            string descriptioNode = childProperty.Name;
+                            if (IsPrimitiveType(childProperty.Value.Type))
+                                descriptioNode += $" : {childProperty.Value}";
+
+                            TreeNode childNode = new TreeNode(descriptioNode);
+                            childNode.Tag = childProperty.Value;
+                            parentNode.Nodes.Add(childNode);
+
+                            if (!IsPrimitiveType(childProperty.Value.Type))
+                                AddNode(childProperty.Value, childNode);
+                        }
+                        break;
+
+                    case JTokenType.Array:
+                        JArray array = (JArray)token;
+                        // for each array element add a new tree node 
+                        for (int i = 0; i < array.Count; i++)
+                        {
+                            TreeNode childNode = new TreeNode("[" + i + "]");
+                            childNode.Tag = array[i];
+                            parentNode.Nodes.Add(childNode);
+
+                            AddNode(array[i], childNode);
+                        }
+                        break;
+
+                    case JTokenType.Property:
+                        /*
+                        JProperty property = (JProperty)token;
+                        TreeNode propertyNode = new TreeNode(property.Name);
+                        propertyNode.Tag = property.Value;
+                        parentNode.Nodes.Add(propertyNode);
+
+                        AddNode(property.Value, propertyNode);*/
+                        break;
+
+                    case JTokenType.String:
+                    case JTokenType.Integer:
+                    case JTokenType.Float:
+                    case JTokenType.Boolean:
+                    case JTokenType.Null:
+                    default:
+                        // no action
+                        break;
+                }
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show($"'AddNode' method exception {Environment.NewLine} {ex.Message}");
+            }
+        }
+
+        private bool IsPrimitiveType(JTokenType typeJson)
+        {
+            bool isPrimitiveType = false;
+
+            switch (typeJson)
+            {
+                case JTokenType.String:
+                case JTokenType.Integer:
+                case JTokenType.Float:
+                case JTokenType.Boolean:
+                case JTokenType.Null:
+                    isPrimitiveType = true;
+                    break;
+                default:
+                    break;
+            }
+
+            return isPrimitiveType;
+        }
+
+        private void Device_XFS4IoTMessages(object sender, string msg)
+        {
+            try
+            {
+                if (sender != null)
+                {
+                    TreeView treeViewToUpdate = null;
+                    if (sender is CashDispenserDevice)
+                        treeViewToUpdate = cashDispenserTreeView;
+                    else if (sender is TextTerminalDevice)
+                        treeViewToUpdate = textTerminalTreeView;
+                    else if (sender is CardReaderDevice)
+                        treeViewToUpdate = cardReaderTreeView;
+                    else if (sender is PinPadDevice)
+                        treeViewToUpdate = pinPadTreeView;
+                    else if (sender is EncryptorDevice)
+                        treeViewToUpdate = encryptorTreeView;
+                    else if (sender is PrinterDevice)
+                        treeViewToUpdate = printerTreeView;
+                    else if (sender is LightsDevice)
+                        treeViewToUpdate = lightsTreeView;
+                    else if (sender is AuxiliariesDevice)
+                        treeViewToUpdate = auxiliariesTreeView;
+                    else if (sender is VendorModeDevice)
+                        treeViewToUpdate = vendorModeTreeView;
+                    else if (sender is VendorAppDevice)
+                        treeViewToUpdate = vendorApplicationTreeView;
+                    else if (sender is BarcodeReaderDevice)
+                        treeViewToUpdate = barcodeReaderTreeView;
+                    else if (sender is BiometricDevice)
+                        treeViewToUpdate = biometricTreeView;
+                    else if (sender is CashAcceptorDevice)
+                        treeViewToUpdate = cashAcceptorTreeView;
+                    else
+                        treeViewToUpdate = null;
+
+                    if (treeViewToUpdate != null)
+                        LoadXFS4IoTMsgToTreeView(treeViewToUpdate, msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"'Device_XFS4IoTMessages' method exception {Environment.NewLine} {ex.Message}");
+            }
+        }
+
+        private void TreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            try
+            {
+                //Show the content of tree node to multiline textbox
+                JToken selectedNode = (JToken)e.Node.Tag;
+
+                if (sender != null)
+                {
+                    TreeView treeViewSelected = sender as TreeView;
+
+                    switch (treeViewSelected.Name)
+                    {
+                        case "cashDispenserTreeView":
+                            cashDispenserRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "textTerminalTreeView":
+                            textTerminalRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "cardReaderTreeView":
+                            cardReaderRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "encryptorTreeView":
+                            encryptorRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "pinPadTreeView":
+                            pinPadRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "printerTreeView":
+                            printerRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "lightsTreeView":
+                            lightsRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "auxiliariesTreeView":
+                            auxiliariesRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "vendorModeTreeView":
+                            vendorModeRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "vendorApplicationTreeView":
+                            vendorApplicationRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "barcodeReaderTreeView":
+                            barcodeReaderRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "biometricTreeView":
+                            biometricRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        case "cashAcceptorTreeView":
+                            cashAcceptorRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"'TreeView_AfterSelect' method exception {Environment.NewLine} {ex.Message}");
+            }
         }
         #endregion
     }

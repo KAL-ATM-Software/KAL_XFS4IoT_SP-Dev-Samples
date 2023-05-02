@@ -21,8 +21,8 @@ namespace TestClientForms.Devices
 {
     public class PrinterDevice : CommonDevice
     {
-        public PrinterDevice(string serviceName, TextBox cmdBox, TextBox rspBox, TextBox evtBox, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
-            : base(serviceName, cmdBox, rspBox, evtBox, uriBox, portBox, serviceUriBox)
+        public PrinterDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox)
+            : base(serviceName, uriBox, portBox, serviceUriBox)
         {
         }
 
@@ -44,12 +44,9 @@ namespace TestClientForms.Devices
 
             var cmd = new GetMediaListCommand(RequestId.NewID(), new GetMediaListCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             GetMediaListCompletion cmdCompletion = null;
@@ -58,7 +55,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is GetMediaListCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                     cmdCompletion = response;
                 }
@@ -83,12 +80,9 @@ namespace TestClientForms.Devices
 
             var cmd = new GetFormListCommand(RequestId.NewID(), new GetFormListCommand.PayloadData(CommandTimeout));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             GetFormListCompletion cmdCompletion = null;
@@ -97,7 +91,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is GetFormListCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                     cmdCompletion = response;
                 }
@@ -123,12 +117,9 @@ namespace TestClientForms.Devices
             var cmd = new GetQueryFormCommand(RequestId.NewID(), 
                                               new GetQueryFormCommand.PayloadData(CommandTimeout, formName));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -136,7 +127,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is GetQueryFormCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
             } while (!completed);
@@ -158,12 +149,9 @@ namespace TestClientForms.Devices
             var cmd = new GetQueryMediaCommand(RequestId.NewID(),
                                                new GetQueryMediaCommand.PayloadData(CommandTimeout, mediaName));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -171,7 +159,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is GetQueryMediaCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
             } while (!completed);
@@ -202,12 +190,9 @@ namespace TestClientForms.Devices
                                               new ControlMediaCommand.PayloadData(CommandTimeout, 
                                                     new ControlMediaCommand.PayloadData.MediaControlClass(Eject: true, Cut:true, Flush:true)));
 
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -215,7 +200,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is ControlMediaCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     if (!waitUntilTaken)
                     {
                         completed = true;
@@ -223,11 +208,11 @@ namespace TestClientForms.Devices
                 }
                 else if (cmdResponse is MediaPresentedEvent presentedEv)
                 {
-                    EvtBox.Text = presentedEv.Serialise();
+                    base.OnXFS4IoTMessages(this, presentedEv.Serialise());
                 }
                 else if (cmdResponse is MediaTakenEvent mediaTakenEv)
                 {
-                    EvtBox.Text = mediaTakenEv.Serialise();
+                    base.OnXFS4IoTMessages(this, mediaTakenEv.Serialise());
                     if (waitUntilTaken)
                     {
                         completed = true;
@@ -255,12 +240,9 @@ namespace TestClientForms.Devices
                                                                                MediaName: mediaName, 
                                                                                Fields: fields,
                                                                                Alignment: PrintFormCommand.PayloadData.AlignmentEnum.FormDefinition));
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -268,7 +250,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is PrintFormCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
             } while (!completed);
@@ -291,12 +273,9 @@ namespace TestClientForms.Devices
                                               new PrintRawCommand.PayloadData(CommandTimeout,
                                                                               PrintRawCommand.PayloadData.InputDataEnum.No,
                                                                               rawdata.ToList()));
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
-
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -304,7 +283,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is PrintRawCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
             } while (!completed);
@@ -325,12 +304,12 @@ namespace TestClientForms.Devices
 
             var cmd = new ResetCommand(RequestId.NewID(),
                                        new ResetCommand.PayloadData(CommandTimeout));
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
+            
+            
 
             bool completed = false;
             do
@@ -338,7 +317,7 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is ResetCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
             } while (!completed);
@@ -359,12 +338,10 @@ namespace TestClientForms.Devices
 
             var cmd = new LoadDefinitionCommand(RequestId.NewID(),
                                               new LoadDefinitionCommand.PayloadData(CommandTimeout, contents, true));
-            CmdBox.Text = cmd.Serialise();
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
 
-            RspBox.Text = string.Empty;
-            EvtBox.Text = string.Empty;
 
             bool completed = false;
             do
@@ -372,12 +349,12 @@ namespace TestClientForms.Devices
                 object cmdResponse = await printer.ReceiveMessageAsync();
                 if (cmdResponse is LoadDefinitionCompletion response)
                 {
-                    RspBox.Text = response.Serialise();
+                    base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
                 else if(cmdResponse is DefinitionLoadedEvent dle)
                 {
-                    EvtBox.Text = dle.Serialise();
+                    base.OnXFS4IoTMessages(this, dle.Serialise());
                 }
             } while (!completed);
         }
