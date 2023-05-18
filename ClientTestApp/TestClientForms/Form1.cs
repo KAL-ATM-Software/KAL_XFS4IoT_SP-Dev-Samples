@@ -16,8 +16,11 @@ using TestClientForms.Devices;
 using System.IO;
 using System.Drawing;
 using System.Xml.Linq;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text;
+using System.Text.Json.Nodes;
 
 namespace TestClientForms
 {
@@ -1076,27 +1079,24 @@ namespace TestClientForms
         #region TreeViews manage 
         private void LoadXFS4IoTMsgToTreeView(System.Windows.Forms.TreeView jsonTreeView, string jsonString)
         {
+            if (jsonString == null || jsonString.Equals(string.Empty) || jsonString.Equals("<Unknown Event>"))
+                return;
+
             try
             {
                 if (jsonTreeView != null)
                 {
-                    // Deserializza il testo JSON in un oggetto JObject
-                    JObject jsonObject = JObject.Parse(jsonString);
-                    (string Description, Color FontColor) tDecoration = NodeDecoration(jsonObject);
-                    // Aggiunge un nodo radice alla TreeView
+                    JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
+                    (string Description, Color FontColor) tDecoration = NodeDecoration(jsonDocument);
                     TreeNode rootNode = new TreeNode($"[{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss.fff")}] {tDecoration.Description}");
-                    rootNode.Tag = (JToken)jsonObject;
+                    rootNode.Tag = ReturnPretifiedJson(jsonDocument);
                     rootNode.ForeColor = tDecoration.FontColor;
                     jsonTreeView.Nodes.Add(rootNode);
-
-                    // Aggiunge l'albero JSON come sottoalbero del nodo radice
-                    AddNode(jsonObject, rootNode);
-
+                    AddNode(jsonDocument.RootElement, rootNode);
                     if (jsonTreeView.Nodes.Count > 0)
                     {
                         jsonTreeView.SelectedNode = jsonTreeView.Nodes[jsonTreeView.Nodes.Count - 1];
                     }
-
                 }
             }
             catch (Exception ex)
@@ -1105,15 +1105,27 @@ namespace TestClientForms
             }
         }
 
-        private (string Description, Color FontColor) NodeDecoration(JToken jsonObject)
+        private string ReturnPretifiedJson(JsonDocument jsonDocument)
+        {
+            string json = string.Empty;
+            using (var stream = new MemoryStream())
+            {
+                Utf8JsonWriter writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
+                jsonDocument.WriteTo(writer);
+                writer.Flush();
+                json = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            return json;
+        }
+
+        private (string Description, Color FontColor) NodeDecoration(JsonDocument jsonObject)
         {
             (string Description, Color FontColor) tDecoration = ("unknown", Color.Red);
-
             try
             {
-                JToken jHeader = jsonObject["header"];
-
-                switch (jHeader["type"].ToString())
+                JsonElement jHeader = jsonObject.RootElement.GetProperty("header");
+                switch (jHeader.GetProperty("type").ToString())
                 {
                     case "command":
                         tDecoration.FontColor = Color.Black;
@@ -1128,7 +1140,17 @@ namespace TestClientForms
                         break;
                 }
 
-                tDecoration.Description = $"{jHeader["name"]} - {jHeader["type"]} - {jHeader["requestId"]}";
+                tDecoration.Description = string.Empty;
+                if (jHeader.TryGetProperty("name", out JsonElement element))
+                    tDecoration.Description += element + " - ";
+
+                if (jHeader.TryGetProperty("type", out JsonElement element2))
+                    tDecoration.Description += element2 + " - ";
+
+                if (jHeader.TryGetProperty("requestId", out JsonElement element3))
+                    tDecoration.Description += element3 + " - ";
+
+                tDecoration.Description = tDecoration.Description.Substring(0, tDecoration.Description.Length - 3);
             }
             catch (Exception ex) 
             {
@@ -1138,59 +1160,39 @@ namespace TestClientForms
             return tDecoration;
         }
 
-        private void AddNode(JToken token, TreeNode parentNode)
+        private void AddNode(JsonElement token, TreeNode parentNode)
         {
             try
             {
-                switch (token.Type)
+                switch (token.ValueKind)
                 {
-                    case JTokenType.Object:
-                        JObject obj = (JObject)token;
+                    case JsonValueKind.Object:
                         // for each object property add a new tree node 
                         // for primitive type show the keypair 'property : bvalue' on node description
-                        foreach (JProperty childProperty in obj.Properties())
+                        foreach (var childProperty in token.EnumerateObject())
                         {
                             string descriptioNode = childProperty.Name;
-                            if (IsPrimitiveType(childProperty.Value.Type))
+                            if (IsPrimitiveType(childProperty.Value))
                                 descriptioNode += $" : {childProperty.Value}";
 
                             TreeNode childNode = new TreeNode(descriptioNode);
                             childNode.Tag = childProperty.Value;
                             parentNode.Nodes.Add(childNode);
-
-                            if (!IsPrimitiveType(childProperty.Value.Type))
+                            if (!IsPrimitiveType(childProperty.Value))
                                 AddNode(childProperty.Value, childNode);
                         }
                         break;
 
-                    case JTokenType.Array:
-                        JArray array = (JArray)token;
+                    case JsonValueKind.Array:
                         // for each array element add a new tree node 
-                        for (int i = 0; i < array.Count; i++)
+                        for (int i = 0; i < token.GetArrayLength(); i++)
                         {
                             TreeNode childNode = new TreeNode("[" + i + "]");
-                            childNode.Tag = array[i];
+                            childNode.Tag = token[i];
                             parentNode.Nodes.Add(childNode);
-
-                            AddNode(array[i], childNode);
+                            AddNode(token[i], childNode);
                         }
                         break;
-
-                    case JTokenType.Property:
-                        /*
-                        JProperty property = (JProperty)token;
-                        TreeNode propertyNode = new TreeNode(property.Name);
-                        propertyNode.Tag = property.Value;
-                        parentNode.Nodes.Add(propertyNode);
-
-                        AddNode(property.Value, propertyNode);*/
-                        break;
-
-                    case JTokenType.String:
-                    case JTokenType.Integer:
-                    case JTokenType.Float:
-                    case JTokenType.Boolean:
-                    case JTokenType.Null:
                     default:
                         // no action
                         break;
@@ -1202,17 +1204,17 @@ namespace TestClientForms
             }
         }
 
-        private bool IsPrimitiveType(JTokenType typeJson)
+        private bool IsPrimitiveType(JsonElement typeJson)
         {
             bool isPrimitiveType = false;
 
-            switch (typeJson)
+            switch (typeJson.ValueKind)
             {
-                case JTokenType.String:
-                case JTokenType.Integer:
-                case JTokenType.Float:
-                case JTokenType.Boolean:
-                case JTokenType.Null:
+                case JsonValueKind.String:
+                case JsonValueKind.Number:
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                case JsonValueKind.Null:
                     isPrimitiveType = true;
                     break;
                 default:
@@ -1270,55 +1272,59 @@ namespace TestClientForms
 
         private void TreeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            var selectedNode = e.Node.Tag;
+            string stringifySelectedNode = string.Empty;
             try
             {
-                //Show the content of tree node to multiline textbox
-                JToken selectedNode = (JToken)e.Node.Tag;
+                if (selectedNode.GetType() == typeof(string))
+                    stringifySelectedNode = (string)selectedNode;
+                else if (selectedNode.GetType() == typeof(JsonElement))
+                    stringifySelectedNode = selectedNode.ToString();
 
+                //Show the content of tree node to multiline textbox
                 if (sender != null)
                 {
                     TreeView treeViewSelected = sender as TreeView;
-
                     switch (treeViewSelected.Name)
                     {
                         case "cashDispenserTreeView":
-                            cashDispenserRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            cashDispenserRawBox.Text = stringifySelectedNode;
                             break;
                         case "textTerminalTreeView":
-                            textTerminalRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            textTerminalRawBox.Text = stringifySelectedNode;
                             break;
                         case "cardReaderTreeView":
-                            cardReaderRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            cardReaderRawBox.Text = stringifySelectedNode;
                             break;
                         case "encryptorTreeView":
-                            encryptorRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            encryptorRawBox.Text = stringifySelectedNode;
                             break;
                         case "pinPadTreeView":
-                            pinPadRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            pinPadRawBox.Text = stringifySelectedNode;
                             break;
                         case "printerTreeView":
-                            printerRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            printerRawBox.Text = stringifySelectedNode;
                             break;
                         case "lightsTreeView":
-                            lightsRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            lightsRawBox.Text = stringifySelectedNode;
                             break;
                         case "auxiliariesTreeView":
-                            auxiliariesRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            auxiliariesRawBox.Text = stringifySelectedNode;
                             break;
                         case "vendorModeTreeView":
-                            vendorModeRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            vendorModeRawBox.Text = stringifySelectedNode;
                             break;
                         case "vendorApplicationTreeView":
-                            vendorApplicationRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            vendorApplicationRawBox.Text = stringifySelectedNode;
                             break;
                         case "barcodeReaderTreeView":
-                            barcodeReaderRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            barcodeReaderRawBox.Text = stringifySelectedNode;
                             break;
                         case "biometricTreeView":
-                            biometricRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            biometricRawBox.Text = stringifySelectedNode;
                             break;
                         case "cashAcceptorTreeView":
-                            cashAcceptorRawBox.Text = selectedNode.ToString(Newtonsoft.Json.Formatting.Indented);
+                            cashAcceptorRawBox.Text = stringifySelectedNode;
                             break;
                         default:
                             break;
