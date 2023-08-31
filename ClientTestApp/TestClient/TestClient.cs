@@ -109,6 +109,11 @@ namespace TestClient
 
                     await DoSetCashUnitInfo(connection);
 
+                    // Test GetPresentStatus before any dispenses
+                    string responceNonce = "123";
+                    var presentStatus = await DoGetPresentStatus(connection, responceNonce);
+                    Logger.LogLine($"Token: {presentStatus.Token}");
+
                     string nonce = await DoGetCommandNonce(connection);
                     Logger.LogLine($"Nonce : {nonce}");
                     nonce = await DoGetCommandNonce(connection);
@@ -153,11 +158,23 @@ namespace TestClient
                     await DoDispenseCash(connection, 100, "EUR", token);
                     await DoPresentCash(connection);
                     await DoDispenseCash(connection, 100, "EUR", token); // Invalid Token
+
+
+                    Logger.LogLine("Dispense : GetPresentStatus with token");
+                    nonce = await DoGetCommandNonce(connection);
+                    token = MakeToken(nonce, "100.00EUR");
+                    Logger.LogLine($"Token: {token}");
+                    await DoDispenseCash(connection, 100, "EUR", token);
+                    await DoPresentCash(connection);
+
+                    responceNonce = "124";
+                    presentStatus = await DoGetPresentStatus(connection, responceNonce);
+                    Logger.LogLine($"Token: {presentStatus.Token}");
                 }
 
                 async Task DoAll()
                 {
-                    //await DoCardReader();
+                    await DoCardReader();
                     await DoCashDispenser(); 
                 }
 
@@ -554,6 +571,23 @@ namespace TestClient
                 Logger.LogWarning($"Present failed: {response.Payload.CompletionCode}");
 
         }
+
+        private async Task<GetPresentStatusCompletion.PayloadData> DoGetPresentStatus(ClientConnection cashDispenser, string nonce)
+        {
+            var command = new GetPresentStatusCommand(RequestId.NewID(), Payload: new(Timeout: 10_000, Nonce:nonce));
+
+            Logger.LogMessage(command);
+            await cashDispenser.SendCommandAsync(command);
+
+            // Wait for a response from the device. 
+            var response = await GetCompletionAsync<GetPresentStatusCompletion>(cashDispenser);
+            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                Logger.LogWarning($"GetPresentStatus failed: {response.Payload.CompletionCode}");
+
+            return response.Payload; 
+        }
+
+
 
         public async Task DoSetCashUnitInfo(ClientConnection cashDispenser)
         {

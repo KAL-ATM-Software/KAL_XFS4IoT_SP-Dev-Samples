@@ -23,11 +23,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="JsonSchema\JsonSchema-2021-1.json" />
     <None Remove="SimulatedServerHost.csproj.vspscc" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="1.6.2" />
+    <EmbeddedResource Include="JsonSchema\JsonSchema-2021-1.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="5.2.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="1.7.1" />
+    <PackageReference Include="NJsonSchema" Version="10.9.0" />
   </ItemGroup>
 
   <ItemGroup>

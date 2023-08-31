@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.IO;
 using System.Configuration;
+using System.Reflection;
 using XFS4IoT;
 using XFS4IoTServer;
+using Json.Schema;
 
 namespace Server
 {
@@ -23,7 +25,9 @@ namespace Server
             {
                 Logger.Log($"Running ServiceProvider Server");
 
-                var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
+                var Publisher = new ServicePublisher(Logger, 
+                                                     new ServiceConfiguration(Logger), 
+                                                     new NJSONSchemaValidator(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
                 /// CardReader Service Provider
@@ -36,7 +40,7 @@ namespace Server
 
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
-                
+
                 /// CashDispenser Service Provider
                 var simCashDispenserrDevice = new KAL.XFS4IoTSP.CashDispenser.Sample.CashDispenserSample(Logger);
                 var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
@@ -66,7 +70,7 @@ namespace Server
 
                 simEncryptorDevice.SetServiceProvider = encryptorService;
                 Publisher.Add(encryptorService);
-  
+
                 /// PinPad Service Provider
                 var simPinPadDevice = new KAL.XFS4IoTSP.PinPad.Sample.PinPadSample(Logger);
                 var pinPadService = new PinPadServiceProvider(EndpointDetails,
@@ -88,7 +92,7 @@ namespace Server
 
                 simPrinterDevice.SetServiceProvider = printerService;
                 Publisher.Add(printerService);
-                
+
                 /// Lights Service Provider
                 var simLightsDevice = new KAL.XFS4IoTSP.Lights.Sample.LightsSample(Logger);
                 var lightsService = new LightsServiceProvider(EndpointDetails,
@@ -98,7 +102,7 @@ namespace Server
 
                 simLightsDevice.SetServiceProvider = lightsService;
                 Publisher.Add(lightsService);
-                
+
                 /// Auxiliaries Service Provider
                 var simAuxDevice = new KAL.XFS4IoTSP.Auxiliaries.Sample.AuxiliariesSample(Logger);
                 var auxService = new AuxiliariesServiceProvider(EndpointDetails,
@@ -108,7 +112,7 @@ namespace Server
 
                 simAuxDevice.SetServiceProvider = auxService;
                 Publisher.Add(auxService);
-                
+
                 /// VendorApplication Service Provider
                 var simVendorAppDevice = new KAL.XFS4IoTSP.VendorApplication.Sample.VendorApplicationSample(Logger);
                 var vendorAppService = new VendorApplicationServiceProvider(EndpointDetails,
@@ -144,7 +148,7 @@ namespace Server
                 var biometricService = new BiometricServiceProvider(EndpointDetails,
                                                                     ServiceName: "SimBiometric",
                                                                     simBiometricDevice,
-                                                                    Logger, 
+                                                                    Logger,
                                                                     new FilePersistentData(Logger));
 
                 simBiometricDevice.SetServiceProvider = biometricService;
@@ -296,7 +300,7 @@ namespace Server
                 }
                 catch (ConfigurationErrorsException ex)
                 {
-                    Logger.Warning(nameof(ServiceConfiguration), $"Exception caught in the constructor {nameof(ServiceConfiguration)}. {ex.Message}");
+                    Logger.Warning(nameof(ServiceConfiguration), $"Exception caught in the constructor {nameof(ServiceConfiguration)}. {ex}");
                 }
             }
 
@@ -323,6 +327,196 @@ namespace Server
             /// The collection of configuration value
             /// </summary>
             private KeyValueConfigurationCollection Settings { get; init; }
+        }
+
+        /// <summary>
+        /// Example of adding JSON validator.
+        /// https://json-everything.net/
+        /// MIT License
+        /// </summary>
+        private class JSONSchemaValidator : IJsonSchemaValidator
+        {
+            public JSONSchemaValidator(ILogger Logger)
+            {
+                this.Logger = Logger;
+            }
+            /// <summary>
+            /// SP framework call once the ServicePublisher object gets created to load 
+            /// any of JSON schema library to validate XFS4 command message
+            /// </summary>
+            public async Task LoadSchemaAsync()
+            {
+                await Task.Run(() => 
+                {
+                    try
+                    {
+                        // Load JsonSchema for current version 
+                        const string resourceSchemaName = "JsonSchema-2021-1.json";
+
+                        string[] resources = Assembly.GetExecutingAssembly().IsNotNull().GetManifestResourceNames();
+
+                        string resourceName = string.Empty;
+                        foreach (string s in resources)
+                        {
+                            if (s.EndsWith(resourceSchemaName))
+                            {
+                                resourceName = s;
+                                break;
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(resourceName))
+                        {
+                            using Stream stream = Assembly.GetExecutingAssembly().IsNotNull().GetManifestResourceStream(resourceName);
+                            if (stream is not null)
+                            {
+                                using StreamReader reader = new(stream);
+                                string schema = reader.ReadToEnd();
+                                JsonSchemaLib = Json.Schema.JsonSchema.FromText(schema);
+                                Logger.Log(nameof(JSONSchemaValidator), $"Json Schema is successfully loaded {nameof(JSONSchemaValidator)}. string length: {schema.Length}");
+                                SchemaLoaded = true;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Warning(nameof(JSONSchemaValidator), $"Exception caught in the constructor {nameof(JSONSchemaValidator)}. {ex}");
+                    }
+                });
+            }
+
+            /// <summary>
+            /// This method will be called when the SP framework receives in-comming command messages.
+            /// </summary>
+            /// <param name="Command"></param>
+            /// <param name="FailedReason"></param>
+            /// <returns></returns>
+            public bool Validate(string Command, out string FailedReason)
+            {
+                FailedReason = string.Empty;
+                try
+                {
+                    JsonDocument json = JsonDocument.Parse(Command);
+
+                    var result = JsonSchemaLib.IsNotNull().Evaluate(json.RootElement);
+
+                    bool valid = result.IsValid;
+
+                    Logger.Log(nameof(JSONSchemaValidator), $"Json Schema validation result. Valid: {valid}");
+
+                    return valid;
+                }
+                catch (Exception ex)
+                {
+                    FailedReason = ex.ToString();
+                    Logger.Warning(nameof(JSONSchemaValidator), $"Exception caught in the Validate {nameof(JSONSchemaValidator)}. {ex}");
+                    return false;
+                }
+            }
+
+            /// <summary>
+            /// This property must set if the XFS4 JSON schema is loaded successfully.
+            /// If this property is set to false, Validate method won't be called from the SP framework.
+            /// </summary>
+            public bool SchemaLoaded { get; set; } = false;
+
+            private Json.Schema.JsonSchema JsonSchemaLib;
+            private readonly ILogger Logger;
+        }
+
+        /// <summary>
+        /// Example of adding JSON validator.
+        /// https://github.com/RicoSuter/NJsonSchema
+        /// MIT License
+        /// </summary>
+        private class NJSONSchemaValidator : IJsonSchemaValidator
+        {
+            public NJSONSchemaValidator(ILogger Logger)
+            {
+                this.Logger = Logger;
+            }
+            /// <summary>
+            /// SP framework call once the ServicePublisher object gets created to load 
+            /// any of JSON schema library to validate XFS4 command message
+            /// </summary>
+            public async Task LoadSchemaAsync()
+            {
+                try
+                {
+                    // Load JsonSchema for current version 
+                    const string resourceSchemaName = "JsonSchema-2021-1.json";
+
+                    string[] resources = Assembly.GetExecutingAssembly().IsNotNull().GetManifestResourceNames();
+
+                    string resourceName = string.Empty;
+                    foreach (string s in resources)
+                    {
+                        if (s.EndsWith(resourceSchemaName))
+                        {
+                            resourceName = s;
+                            break;
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(resourceName))
+                    {
+                        using Stream stream = Assembly.GetExecutingAssembly().IsNotNull().GetManifestResourceStream(resourceName);
+                        if (stream is not null)
+                        {
+                            using StreamReader reader = new(stream);
+                            string schema = reader.ReadToEnd();
+                            JsonSchemaLib = await NJsonSchema.JsonSchema.FromJsonAsync(schema);
+                            Logger.Log(nameof(JSONSchemaValidator), $"Json Schema is successfully loaded {nameof(JSONSchemaValidator)}. string length: {schema.Length}");
+                            SchemaLoaded = true;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Warning(nameof(JSONSchemaValidator), $"Exception caught in the constructor {nameof(JSONSchemaValidator)}. {ex}");
+                }
+            }
+
+            /// <summary>
+            /// This method will be called when the SP framework receives in-comming command messages.
+            /// </summary>
+            /// <param name="Command"></param>
+            /// <param name="FailedReason"></param>
+            /// <returns></returns>
+            public bool Validate(string Command, out string FailedReason)
+            {
+                FailedReason = string.Empty;
+                try
+                {
+                    var result = JsonSchemaLib.IsNotNull().Validate(Command);
+
+                    bool valid = true;
+                    foreach (var error in result)
+                    {
+                        FailedReason += (error.Path + ": " + error.Kind) + "\n";
+                        valid = false;
+                    }
+
+                    Logger.Log(nameof(JSONSchemaValidator), $"Json Schema validation result. valid: {valid}");
+
+                    return valid;
+                }
+                catch (Exception ex)
+                {
+                    FailedReason = ex.ToString();
+                    Logger.Warning(nameof(JSONSchemaValidator), $"Exception caught in the Validate {nameof(JSONSchemaValidator)}. {ex}");
+                    return false;
+                }
+            }
+
+            /// <summary>
+            /// This property must set if the XFS4 JSON schema is loaded successfully.
+            /// If this property is set to false, Validate method won't be called from the SP framework.
+            /// </summary>
+            public bool SchemaLoaded { get; set; } = false;
+
+            private NJsonSchema.JsonSchema JsonSchemaLib;
+            private readonly ILogger Logger;
         }
     }
 }

@@ -197,7 +197,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                              PresentCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
-            // When cash is presented successfully, set StackerStatus, OutputpoistionStatus and shutter status
+            // When cash is presented successfully, set StackerStatus, OutputPositionStatus and shutter status
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashManagementStatusClass.PositionStatusEnum.NotEmpty;
             positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Open;
@@ -293,7 +293,6 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             await Task.Delay(1000, cancellation);
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
-            StorageCashOutCountClass cashOutCount = new();
             if (countInfo.StorageUnitIds is not null)
             {
                 foreach (var id in countInfo.StorageUnitIds)
@@ -344,6 +343,20 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             Denomination Denom = new(Amounts, Values); 
             return new CashDispenserPresentStatus(CashDispenserPresentStatus.PresentStatusEnum.Presented, Denom);
+        }
+
+        /// <summary>
+        /// Calculate the token which will validate the data in the GetPresentStatus result.
+        /// </summary>
+        /// <param name="nonce">Value that will be unique for each token</param>
+        /// <returns>Token string, including nonce and HMAC, or null if E2E is not supported</returns>
+        public async Task<string> GetPresentStatusTokenAsync(string nonce)
+        {
+            string token = await Task.Run(() =>
+            {
+                return Firmware.GetPresentStatusToken(nonce);
+            });
+            return token;
         }
 
         /// <summary>

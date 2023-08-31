@@ -14,12 +14,13 @@ using XFS4IoT.Common.Completions;
 using XFS4IoT.Completions;
 using XFS4IoTFramework.Common;
 using XFS4IoTFramework.TextTerminal;
+using XFS4IoTFramework.Lights;
 using XFS4IoT.Common.Commands;
 using XFS4IoTServer;
 using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
-using XFS4IoTFramework.Lights;
 using System.Threading.Channels;
+using XFS4IoT.Lights.Completions;
 
 namespace TextTerminalSample
 {
@@ -218,26 +219,6 @@ namespace TextTerminalSample
 
         #endregion
 
-        #region Lights Interface
-
-        /// <summary>
-        /// This command is used to set the status of a light.
-        /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
-        /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
-        /// </summary>
-        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation) => throw new NotImplementedException();
-
-        /// <summary>
-        /// Lights Capabilities
-        /// </summary>
-        public LightsCapabilitiesClass LightsCapabilities { get; set; } = new(null);
-        /// <summary>
-        /// Stores light status
-        /// </summary>
-        public LightsStatusClass LightsStatus { get; set; } = new();
-
-        #endregion
-
         #region COMMON interface
 
         /// <summary>
@@ -307,6 +288,27 @@ namespace TextTerminalSample
 
 
         #endregion
+
+        #region Lights Interface
+
+        /// <summary>
+        /// This command is used to set the status of a light.
+        /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
+        /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
+        /// </summary>
+        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Lights Capabilities
+        /// </summary>
+        public LightsCapabilitiesClass LightsCapabilities { get; set; } = new(null);
+        /// <summary>
+        /// Stores light status
+        /// </summary>
+        public LightsStatusClass LightsStatus { get; set; } = new();
+
+        #endregion
+
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
         private ILogger Logger { get; }

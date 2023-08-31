@@ -65,7 +65,7 @@ namespace TestClientForms
             comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Clear;
         }
 
-                
+
 
         private CashDispenserDevice CashDispenserDev { get; init; }
         private CardReaderDevice CardReaderDev { get; init; }
@@ -88,7 +88,7 @@ namespace TestClientForms
         #region init Form Windows
 
         private void Form1_Load(object sender, EventArgs e)
-        {            
+        {
             this.FormClosing += Form1_FormClosing;
             RegisterEvents(true);
         }
@@ -163,7 +163,7 @@ namespace TestClientForms
                     CashAcceptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show($"'RegisterEvents' method exception {Environment.NewLine} {ex.Message}");
             }
@@ -264,7 +264,7 @@ namespace TestClientForms
 
         private async void DispenserGetPresentStatus_Click(object sender, EventArgs e)
         {
-            await CashDispenserDev.GetPresentStatus();
+            await CashDispenserDev.GetPresentStatus(NonceTextBox.Text);
         }
 
         private async void DispenserReset_Click(object sender, EventArgs e)
@@ -1152,7 +1152,7 @@ namespace TestClientForms
 
                 tDecoration.Description = tDecoration.Description.Substring(0, tDecoration.Description.Length - 3);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show($"'NodeDecoration' method exception {Environment.NewLine} {ex.Message}");
             }
@@ -1198,7 +1198,7 @@ namespace TestClientForms
                         break;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show($"'AddNode' method exception {Environment.NewLine} {ex.Message}");
             }
@@ -1338,5 +1338,6 @@ namespace TestClientForms
             }
         }
         #endregion
+
     }
 }

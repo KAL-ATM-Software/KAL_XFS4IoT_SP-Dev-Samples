@@ -13,7 +13,7 @@ namespace KAL { namespace XFS4IoTSP { namespace CashDispenser{ namespace Sample
     public ref class ILogger abstract
     {
     public: 
-        virtual void Log(System::String^ Message) = 0;
+        virtual void Log(String^ Message) = 0;
 
     };
 
@@ -28,19 +28,20 @@ namespace KAL { namespace XFS4IoTSP { namespace CashDispenser{ namespace Sample
         }
         static Firmware^ GetFirmware()
         {
-            if (!TheFirmware) throw gcnew System::Exception("GetFirmware call when there's no firmware. Try calling GetFirmware with a logger first");
+            if (!TheFirmware) throw gcnew Exception("GetFirmware call when there's no firmware. Try calling GetFirmware with a logger first");
             return TheFirmware;
         }
-        void Log(System::String^ Message)
+        void Log(String^ Message)
         {
             Logger->Log(Message);
         }
 
-        System::String^ GetCommandNonce(); 
+        String^ GetCommandNonce(); 
         void ClearCommandNonce(); 
 
-        bool VerifyAndDispense(System::String^ Token, System::String^ Currency, int Value);
+        bool VerifyAndDispense(String^ Token, String^ Currency, int Value);
 
+        String^ GetPresentStatusToken(String^ nonce);
 
     private:
         Firmware(ILogger^ logger)

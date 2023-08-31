@@ -28,11 +28,13 @@ namespace TestClientForms.Devices
 {
     public class CashDispenserDevice : CommonDevice
     {
-        public CashDispenserDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox) 
+        public CashDispenserDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox/*, TextBox getPresentStatusNonce*/) 
             : base(serviceName, uriBox, portBox, serviceUriBox)
         {
+//            GetPresentStatusNonce = getPresentStatusNonce;
         }
-		
+//        private TextBox GetPresentStatusNonce;
+
         public Task DoServiceDiscovery()
             => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.CashDispenser, InterfaceClass.NameEnum.CashManagement, InterfaceClass.NameEnum.Storage, InterfaceClass.NameEnum.Common });
 
@@ -88,7 +90,7 @@ namespace TestClientForms.Devices
             }
         }
 
-        public async Task GetPresentStatus()
+        public async Task GetPresentStatus( string Nonce )
         {
             var dispenser = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
 
@@ -101,7 +103,9 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(CommandTimeout, OutputPositionEnum.OutDefault));
+            var nonce = string.IsNullOrWhiteSpace(Nonce)? null : Nonce;
+
+            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(CommandTimeout, OutputPositionEnum.OutDefault, Nonce: nonce));
 
             base.OnXFS4IoTMessages(this,  getPresentStatusCmd.Serialise());
 
