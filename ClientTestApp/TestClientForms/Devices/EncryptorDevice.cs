@@ -17,6 +17,7 @@ using XFS4IoT.Crypto.Commands;
 using XFS4IoT.Crypto.Completions;
 using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 
 namespace TestClientForms.Devices
 {
@@ -43,7 +44,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new InitializationCommand(RequestId.NewID(), new InitializationCommand.PayloadData(CommandTimeout));
+            var cmd = new InitializationCommand(RequestId.NewID(), new InitializationCommand.PayloadData(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -62,6 +63,13 @@ namespace TestClientForms.Devices
                 { 
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
             } while (!completed);
         }
 
@@ -78,7 +86,7 @@ namespace TestClientForms.Devices
                 return null;
             }
 
-            var cmd = new GetKeyDetailCommand(RequestId.NewID(), new GetKeyDetailCommand.PayloadData(CommandTimeout));
+            var cmd = new GetKeyDetailCommand(RequestId.NewID(), new GetKeyDetailCommand.PayloadData(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -107,7 +115,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData(CommandTimeout));
+            var cmd = new ResetCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -129,6 +137,12 @@ namespace TestClientForms.Devices
                 { 
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
         }
 
@@ -145,12 +159,13 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new ImportKeyCommand(RequestId.NewID(), new ImportKeyCommand.PayloadData(CommandTimeout, 
+            var cmd = new ImportKeyCommand(RequestId.NewID(), new ImportKeyCommand.PayloadData( 
                                                                                                keyName, 
                                                                                                new ImportKeyCommand.PayloadData.KeyAttributesClass(keyUsage, "T", modeOfUse),
                                                                                                Value:data,
                                                                                                DecryptKey: "MASTERKEY",
-                                                                                               DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb));
+                                                                                               DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb),
+                                                                                               CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -177,9 +192,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GenerateAuthenticationCommand(RequestId.NewID(), new GenerateAuthenticationCommand.PayloadData(CommandTimeout, 
-                                                                                                                         keyName,
-                                                                                                                         data));
+            var cmd = new GenerateAuthenticationCommand(RequestId.NewID(), new GenerateAuthenticationCommand.PayloadData(keyName, data), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -206,7 +219,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GenerateRandomCommand(RequestId.NewID(), new GenerateRandomCommand.PayloadData(CommandTimeout));
+            var cmd = new GenerateRandomCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -233,10 +246,11 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CryptoDataCommand(RequestId.NewID(), new CryptoDataCommand.PayloadData(CommandTimeout,
+            var cmd = new CryptoDataCommand(RequestId.NewID(), new CryptoDataCommand.PayloadData(
                                                                                                  Key: keyName,
                                                                                                  Data: Data,
-                                                                                                 CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb));
+                                                                                                 CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb),
+                                                                                                 CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -263,7 +277,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new DeleteKeyCommand(RequestId.NewID(), new DeleteKeyCommand.PayloadData(CommandTimeout, Key: keyName));
+            var cmd = new DeleteKeyCommand(RequestId.NewID(), new DeleteKeyCommand.PayloadData(Key: keyName), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

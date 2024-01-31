@@ -11,8 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using XFS4IoT.Auxiliaries.Commands;
-using XFS4IoT.Auxiliaries.Events;
 using XFS4IoT.Auxiliaries.Completions;
+using XFS4IoT.Common.Events;
 using XFS4IoT.Common;
 
 namespace TestClientForms.Devices
@@ -32,7 +32,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new RegisterCommand(RequestId.NewID(), new RegisterCommand.PayloadData(CommandTimeout, HandsetSensor: RegisterCommand.PayloadData.HandsetSensorEnum.Register));
+            var cmd = new RegisterCommand(RequestId.NewID(), new RegisterCommand.PayloadData(HandsetSensor: RegisterCommand.PayloadData.HandsetSensorEnum.Register), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -50,18 +50,18 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
-                else if (cmdResponse is AuxiliaryStatusEvent eventResp)
+                else if (cmdResponse is StatusChangedEvent eventResp)
                 {
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
             } while (!completed);
         }
 
-        public async Task SetAutoStartupTime(DateTime time, XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum mode)
+        public async Task SetAutoStartupTime(DateTime time, XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum mode)
         {
             var device = await GetConnection();
 
-            var cmd = new SetAutoStartupTimeCommand(RequestId.NewID(), new SetAutoStartupTimeCommand.PayloadData(CommandTimeout, mode, new(time.Year, time.Month, time.DayOfWeek switch
+            var cmd = new SetAutoStartUpTimeCommand(RequestId.NewID(), new SetAutoStartUpTimeCommand.PayloadData(mode, new(time.Year, time.Month, time.DayOfWeek switch
             {
                 DayOfWeek.Monday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Monday,
                 DayOfWeek.Tuesday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Tuesday,
@@ -71,7 +71,8 @@ namespace TestClientForms.Devices
                 DayOfWeek.Saturday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Saturday,
                 DayOfWeek.Sunday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Sunday,
                 _ => throw new NotImplementedException($"Unexpected DayOfWeek in {nameof(SetAutoStartupTime)}")
-            }, time.Day, time.Hour, time.Minute)));
+            }, time.Day, time.Hour, time.Minute)),
+            CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -84,12 +85,12 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is SetAutoStartupTimeCompletion response)
+                if (cmdResponse is SetAutoStartUpTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
-                else if (cmdResponse is AuxiliaryStatusEvent eventResp)
+                else if (cmdResponse is StatusChangedEvent eventResp)
                 {
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
@@ -100,7 +101,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ClearAutoStartupTimeCommand(RequestId.NewID(), new ClearAutoStartupTimeCommand.PayloadData(CommandTimeout));
+            var cmd = new ClearAutoStartUpTimeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -113,12 +114,12 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is ClearAutoStartupTimeCompletion response)
+                if (cmdResponse is ClearAutoStartUpTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
-                else if (cmdResponse is AuxiliaryStatusEvent eventResp)
+                else if (cmdResponse is StatusChangedEvent eventResp)
                 {
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
@@ -129,7 +130,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new GetAutoStartupTimeCommand(RequestId.NewID(), new GetAutoStartupTimeCommand.PayloadData(CommandTimeout));
+            var cmd = new GetAutoStartUpTimeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -142,12 +143,12 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is GetAutoStartupTimeCompletion response)
+                if (cmdResponse is GetAutoStartUpTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
-                else if (cmdResponse is AuxiliaryStatusEvent eventResp)
+                else if (cmdResponse is StatusChangedEvent eventResp)
                 {
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }
@@ -158,7 +159,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new SetAuxiliariesCommand(RequestId.NewID(), new SetAuxiliariesCommand.PayloadData(CommandTimeout, Heating: SetAuxiliariesCommand.PayloadData.HeatingEnum.On));
+            var cmd = new SetAuxiliariesCommand(RequestId.NewID(), new SetAuxiliariesCommand.PayloadData(Heating: SetAuxiliariesCommand.PayloadData.HeatingEnum.On), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -176,7 +177,7 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
-                else if (cmdResponse is AuxiliaryStatusEvent eventResp)
+                else if (cmdResponse is StatusChangedEvent eventResp)
                 {
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                 }

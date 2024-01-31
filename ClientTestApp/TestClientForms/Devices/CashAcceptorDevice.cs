@@ -23,6 +23,7 @@ using XFS4IoT.Storage.Completions;
 using XFS4IoT.Storage.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 
 namespace TestClientForms.Devices
 {
@@ -49,7 +50,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GetStorageCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
             
@@ -127,7 +128,7 @@ namespace TestClientForms.Devices
                     null)
                 },
             };
-            var cmd = new SetStorageCommand(RequestId.NewID(), new(CommandTimeout, storage));
+            var cmd = new SetStorageCommand(RequestId.NewID(), new(storage), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -160,39 +161,16 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
                 {
                     base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
-            }
-        }
-
-        public async Task GetPositionCapabilities()
-        {
-            var client = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
-
-            try
-            {
-                await client.ConnectAsync();
-            }
-            catch (Exception)
-            {
-                return;
-            }
-
-            var cmd = new GetPositionCapabilitiesCommand(RequestId.NewID(), new(CommandTimeout));
-
-            base.OnXFS4IoTMessages(this, cmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is GetPositionCapabilitiesCompletion response)
-            {
-                base.OnXFS4IoTMessages(this,response.Serialise());
             }
         }
 
@@ -209,7 +187,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GetCashInStatusCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new GetCashInStatusCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
             
@@ -235,7 +213,7 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new ConfigureNoteTypesCommand(RequestId.NewID(),
-                                                    new(CommandTimeout,
+                                                    new(
                                                     new List<ConfigureNoteTypesCommand.PayloadData.ItemsClass>() 
                                                     {
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR5", true),
@@ -245,7 +223,7 @@ namespace TestClientForms.Devices
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR100", true),
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR200", true),
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR500", true),
-                                                    }));
+                                                    }), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -273,7 +251,7 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new StartExchangeCommand(RequestId.NewID(), 
-                                        new(CommandTimeout));
+                                        CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -298,6 +276,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -320,7 +302,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new EndExchangeCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new EndExchangeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -345,6 +327,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -367,11 +353,12 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CashInStartCommand(RequestId.NewID(), new(Timeout: CommandTimeout, 
+            var cmd = new CashInStartCommand(RequestId.NewID(), new(
                                                                            UseRecycleUnits: false, 
                                                                            OutputPosition: OutputPositionEnum.OutDefault, 
                                                                            InputPosition: InputPositionEnum.InDefault, 
-                                                                           TotalItemsLimit: 200));
+                                                                           TotalItemsLimit: 200),
+                                                                           CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
             
@@ -396,14 +383,13 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new ResetCommand(RequestId.NewID(), new(CommandTimeout, null, null, OutputPositionEnum.OutDefault));
+            var cmd = new ResetCommand(RequestId.NewID(), new(Position: new(Target: ItemTargetEnumEnum.OutDefault, 
+                                                                            Unit: null, 
+                                                                            Index: null)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await client.SendCommandAsync(cmd);
-
-            
-            
 
             for (; ; )
             {
@@ -429,6 +415,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -451,7 +441,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CashInCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new CashInCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -496,6 +486,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, shutterEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -518,7 +512,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CashInEndCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new CashInEndCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -551,6 +545,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, shutterEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -573,7 +571,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CashInRollbackCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new CashInRollbackCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -613,6 +611,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, itemsTakenEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -635,7 +637,9 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new RetractCommand(RequestId.NewID(), new(CommandTimeout, null, RetractAreaEnum.Retract, 1));
+            var cmd = new RetractCommand(RequestId.NewID(), new(Location: new(OutputPosition: null, 
+                                                                              RetractArea: RetractAreaEnum.Retract, 
+                                                                              Index: 1)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -667,6 +671,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }

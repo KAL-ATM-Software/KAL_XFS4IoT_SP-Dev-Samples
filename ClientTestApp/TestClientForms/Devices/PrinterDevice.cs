@@ -16,6 +16,7 @@ using XFS4IoT.Printer.Completions;
 using XFS4IoT.Printer.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 
 namespace TestClientForms.Devices
 {
@@ -42,7 +43,7 @@ namespace TestClientForms.Devices
                 return null;
             }
 
-            var cmd = new GetMediaListCommand(RequestId.NewID(), new GetMediaListCommand.PayloadData(CommandTimeout));
+            var cmd = new GetMediaListCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -78,7 +79,7 @@ namespace TestClientForms.Devices
                 return null;
             }
 
-            var cmd = new GetFormListCommand(RequestId.NewID(), new GetFormListCommand.PayloadData(CommandTimeout));
+            var cmd = new GetFormListCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -115,7 +116,7 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetQueryFormCommand(RequestId.NewID(), 
-                                              new GetQueryFormCommand.PayloadData(CommandTimeout, formName));
+                                              new GetQueryFormCommand.PayloadData(formName), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -147,7 +148,7 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetQueryMediaCommand(RequestId.NewID(),
-                                               new GetQueryMediaCommand.PayloadData(CommandTimeout, mediaName));
+                                               new GetQueryMediaCommand.PayloadData(mediaName), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -187,8 +188,7 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new ControlMediaCommand(RequestId.NewID(), 
-                                              new ControlMediaCommand.PayloadData(CommandTimeout, 
-                                                    new ControlMediaCommand.PayloadData.MediaControlClass(Eject: true, Cut:true, Flush:true)));
+                                              new ControlMediaCommand.PayloadData(new ControlMediaCommand.PayloadData.MediaControlClass(Eject: true, Cut:true, Flush:true)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -218,6 +218,12 @@ namespace TestClientForms.Devices
                         completed = true;
                     }
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
         }
 
@@ -235,11 +241,10 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new PrintFormCommand(RequestId.NewID(),
-                                              new PrintFormCommand.PayloadData(CommandTimeout, 
-                                                                               FormName: formName, 
+                                              new PrintFormCommand.PayloadData(FormName: formName, 
                                                                                MediaName: mediaName, 
                                                                                Fields: fields,
-                                                                               Alignment: PrintFormCommand.PayloadData.AlignmentEnum.FormDefinition));
+                                                                               Alignment: PrintFormCommand.PayloadData.AlignmentEnum.FormDefinition), CommandTimeout);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
@@ -252,6 +257,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
             } while (!completed);
         }
@@ -270,9 +279,9 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new PrintRawCommand(RequestId.NewID(),
-                                              new PrintRawCommand.PayloadData(CommandTimeout,
-                                                                              PrintRawCommand.PayloadData.InputDataEnum.No,
-                                                                              rawdata.ToList()));
+                                              new PrintRawCommand.PayloadData(PrintRawCommand.PayloadData.InputDataEnum.No,
+                                                                              rawdata.ToList()),
+                                              CommandTimeout);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
@@ -286,6 +295,12 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
         }
 
@@ -302,8 +317,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new ResetCommand(RequestId.NewID(),
-                                       new ResetCommand.PayloadData(CommandTimeout));
+            var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData("eject"), CommandTimeout);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);
@@ -320,6 +334,12 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this, response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
         }
 
@@ -337,7 +357,8 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new LoadDefinitionCommand(RequestId.NewID(),
-                                              new LoadDefinitionCommand.PayloadData(CommandTimeout, contents, true));
+                                              new LoadDefinitionCommand.PayloadData(contents, true),
+                                              CommandTimeout);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await printer.SendCommandAsync(cmd);

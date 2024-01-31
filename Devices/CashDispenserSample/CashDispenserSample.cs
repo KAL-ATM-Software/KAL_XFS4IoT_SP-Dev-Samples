@@ -74,8 +74,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                                                                    { CashManagementCapabilitiesClass.OutputPositionEnum.Default, positionStatus },
                                                                });
 
-            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.SafeDoorEnum.Closed,
-                                                                 CashManagementStatusClass.DispenserEnum.Ok,
+            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.DispenserEnum.Ok,
                                                                  CashManagementStatusClass.AcceptorEnum.NotSupported);
 
                         Firmware = Firmware.GetFirmware(new FirmwareLogger(Logger));
@@ -186,7 +185,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             return new DispenseResult(MessagePayload.CompletionCodeEnum.Success, dispenseInfo.Values, LastDispenseResult);
         }
 
-        public async Task<PresentCashResult> PresentCashAsync(ItemInfoAvailableCommandEvent events, PresentCashRequest presentInfo, CancellationToken cancellation)
+        public async Task<PresentCashResult> PresentCashAsync(PresentCashCommandEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
             
@@ -217,7 +216,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             return new PresentCashResult(MessagePayload.CompletionCodeEnum.Success, 0, LastDispenseResult);
         }
 
-        public async Task<RejectResult> RejectAsync(ItemInfoAvailableCommandEvent events, CancellationToken cancellation)
+        public async Task<RejectResult> RejectAsync(RejectCommandEvents events, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -255,7 +254,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// The method completes with success if the device successfully manages to test all of the testable cash units regardless of the outcome of the test. 
         /// This is the case if all testable cash units could be tested and a dispense was possible from at least one of the cash units.
         /// </summary>
-        public async Task<TestCashUnitsResult> TestCashUnitsAsync(ItemErrorCommandEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
+        public async Task<TestCashUnitsResult> TestCashUnitsAsync(TestCashUnitsCommandEvents events, TestCashUnitsRequest testCashUnitsInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -288,7 +287,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// Perform count operation to empty the specified physical cash unit(s). 
         /// All items dispensed from the cash unit are counted and moved to the specified output location.
         /// </summary>
-        public async Task<CountResult> CountAsync(ItemErrorCommandEvents events, CountRequest countInfo, CancellationToken cancellation)
+        public async Task<CountResult> CountAsync(CountCommandEvents events, CountRequest countInfo, CancellationToken cancellation)
 		{
             await Task.Delay(1000, cancellation);
 
@@ -451,23 +450,9 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         }
 
         /// <summary>
-        /// This method unlocks the safe door or starts the timedelay count down prior to unlocking the safe door, 
-        /// if the device supports it. The command completes when the door is unlocked or the timer has started.
-        /// </summary>
-        public async Task<UnlockSafeResult> UnlockSafeAsync(CancellationToken cancellation)
-        {
-            await Task.Delay(1000, cancellation);
-
-            // Unlock the safe door if it is supported, if door is open after unlock, set SafeDoor status
-            // SafeDoorStatus = StatusClass.SafeDoorEnum.DoorOpen;
-
-            return new UnlockSafeResult(MessagePayload.CompletionCodeEnum.Success);
-        }
-
-        /// <summary>
         /// This method will cause a vendor dependent sequence of hardware events which will calibrate one or more physical cash units associated with a logical cash unit.
         /// </summary>
-        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(ItemErrorCommandEvents events,
+        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(CalibrateCashUnitCommandEvents events,
                                                                     CalibrateCashUnitRequest calibrationInfo,
                                                                     CancellationToken cancellation) => throw new NotSupportedException($"Calibration commans is not supported.");
 
@@ -892,16 +877,24 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
-                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.GetCommandNonce,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.ClearCommandNonce,
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.NonceClearedEvent,
+                    ]
                 ),
                 CashDispenserInterface: new CommonCapabilitiesClass.CashDispenserInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Denominate,
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Dispense,
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Present,
@@ -910,17 +903,17 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.Count,
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.GetMixTypes,
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.CommandEnum.GetMixTable,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.EventEnum.StartDispenseEvent,
                         CommonCapabilitiesClass.CashDispenserInterfaceClass.EventEnum.IncompleteDispenseEvent,
-                    }
+                    ]
                 ),
                 CashManagementInterface: new CommonCapabilitiesClass.CashManagementInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Retract,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.OpenShutter,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.CloseShutter,
@@ -928,34 +921,32 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.GetTellerInfo,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.SetTellerInfo,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorClosedEvent,
-                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorOpenEvent,
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ShutterStatusChangedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.NoteErrorEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsTakenEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsPresentedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsInsertedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.IncompleteRetractEvent,
-                    }
+                    ]
                 ),
                 StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.StartExchange,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.EndExchange,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

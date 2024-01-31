@@ -590,6 +590,12 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                                                digest);
         }
 
+        public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportEMVPublicKeyResult> ImportEMVPublicKey(ImportEMVPublicKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
         /// <summary>
         /// KeyManagement Status
         /// </summary>
@@ -892,16 +898,21 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 KeyManagementInterface: new CommonCapabilitiesClass.KeyManagementInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
@@ -914,31 +925,23 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.StartAuthenticate,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetKeyDetail,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.CertificateChangeEvent,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.InitializedEvent,
-                    },
-                    AuthenticationRequired: new()
-                    {
-                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
-                    }
+                    ]
                 ),
                 CryptoInterface: new CommonCapabilitiesClass.CryptoInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.CryptoData,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.Digest,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateAuthentication,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateRandom,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.CryptoInterfaceClass.EventEnum.IllegalKeyAccessEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

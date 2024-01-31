@@ -110,7 +110,7 @@ namespace TestClientForms.Devices
                     return;
                 }
 
-                var getServiceCommand = new GetServicesCommand(RequestId.NewID(), new GetServicesCommand.PayloadData(CommandTimeout));
+                var getServiceCommand = new GetServicesCommand(RequestId.NewID(), CommandTimeout);
                 string commandString = getServiceCommand.Serialise();
                 XFS4IoTMessages?.Invoke(this, commandString);
                 string responseString = string.Empty;
@@ -207,7 +207,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var statusCmd = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(CommandTimeout));
+            var statusCmd = new StatusCommand(RequestId.NewID(), CommandTimeout);
             XFS4IoTMessages?.Invoke(this, statusCmd.Serialise());
 
             object cmdResponse = await SendAndWaitForCompletionAsync(device, statusCmd);
@@ -232,7 +232,7 @@ namespace TestClientForms.Devices
                 return null;
             }
 
-            var capabilitiesCmd = new CapabilitiesCommand(RequestId.NewID(), new CapabilitiesCommand.PayloadData(CommandTimeout));
+            var capabilitiesCmd = new CapabilitiesCommand(RequestId.NewID(), CommandTimeout);
             XFS4IoTMessages?.Invoke(this, capabilitiesCmd.Serialise());
                       
 

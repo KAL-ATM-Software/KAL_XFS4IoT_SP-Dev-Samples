@@ -10,7 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 using XFS4IoT.VendorApplication.Commands;
 using XFS4IoT.VendorApplication.Completions;
 using XFS4IoT.VendorApplication.Events;
@@ -32,7 +34,7 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var cmd = new StartLocalApplicationCommand(RequestId.NewID(),
-                                                       new StartLocalApplicationCommand.PayloadData(CommandTimeout, appName));
+                                                       new StartLocalApplicationCommand.PayloadData(appName), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -53,6 +55,8 @@ namespace TestClientForms.Devices
                     if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
                         return;
                 }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
 
             while (true)
@@ -62,7 +66,9 @@ namespace TestClientForms.Devices
                     case VendorAppExitedEvent response:
                         base.OnXFS4IoTMessages(this, response.Serialise());
                         return;
-
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
                     default:
                         base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
@@ -75,7 +81,7 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var cmd = new GetActiveInterfaceCommand(RequestId.NewID(),
-                                                    new GetActiveInterfaceCommand.PayloadData(CommandTimeout));
+                                                    CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -94,6 +100,10 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                     resp = (GetActiveInterfaceCompletion)cmdResponse;
+                }
+                else if(cmdResponse is StatusChangedEvent statusChangedEvent)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
                 }
             } while (!completed);
 

@@ -26,8 +26,7 @@ namespace Server
                 Logger.Log($"Running ServiceProvider Server");
 
                 var Publisher = new ServicePublisher(Logger, 
-                                                     new ServiceConfiguration(Logger), 
-                                                     new NJSONSchemaValidator(Logger));
+                                                     new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
                 /// CardReader Service Provider
@@ -40,7 +39,7 @@ namespace Server
 
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
-
+                
                 /// CashDispenser Service Provider
                 var simCashDispenserrDevice = new KAL.XFS4IoTSP.CashDispenser.Sample.CashDispenserSample(Logger);
                 var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
@@ -50,7 +49,7 @@ namespace Server
                                                                             new FilePersistentData(Logger));
                 simCashDispenserrDevice.SetServiceProvider = cashDispenserService;
                 Publisher.Add(cashDispenserService);
-
+                
                 /// Text Terminal Unit Service Provider
                 var simTextTerminalDevice = new TextTerminalSample.TextTerminalSample(Logger);
                 var textTerminalService = new TextTerminalServiceProvider(EndpointDetails,

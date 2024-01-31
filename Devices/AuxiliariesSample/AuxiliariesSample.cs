@@ -35,10 +35,10 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
-        public AuxiliariesCapabilities AuxiliariesCapabilities { get; set; } = new AuxiliariesCapabilities(HandsetSensor: AuxiliariesCapabilities.HandsetSensorCapabilities.Manual | AuxiliariesCapabilities.HandsetSensorCapabilities.Microphone | AuxiliariesCapabilities.HandsetSensorCapabilities.Auto | AuxiliariesCapabilities.HandsetSensorCapabilities.SemiAuto,
-                                                                                                           AutoStartupMode: AuxiliariesCapabilities.AutoStartupModes.Daily | AuxiliariesCapabilities.AutoStartupModes.Weekly | AuxiliariesCapabilities.AutoStartupModes.Specific,
-                                                                                                           AuxiliariesSupported: AuxiliariesCapabilities.AuxiliariesSupportedEnum.Heating);
-        public AuxiliariesStatus AuxiliariesStatus { get; set; } = new AuxiliariesStatus(HandsetSensor: AuxiliariesStatus.HandsetSensorStatusEnum.OffTheHook, Heating: AuxiliariesStatus.SensorEnum.Off);
+        public AuxiliariesCapabilitiesClass AuxiliariesCapabilities { get; set; } = new AuxiliariesCapabilitiesClass(HandsetSensor: AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Manual | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Microphone | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Auto | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.SemiAuto,
+                                                                                                           AutoStartupMode: AuxiliariesCapabilitiesClass.AutoStartupModes.Daily | AuxiliariesCapabilitiesClass.AutoStartupModes.Weekly | AuxiliariesCapabilitiesClass.AutoStartupModes.Specific,
+                                                                                                           AuxiliariesSupported: AuxiliariesCapabilitiesClass.AuxiliariesSupportedEnum.Heating);
+        public AuxiliariesStatusClass AuxiliariesStatus { get; set; } = new AuxiliariesStatusClass(HandsetSensor: AuxiliariesStatusClass.HandsetSensorStatusEnum.OffTheHook, Heating: AuxiliariesStatusClass.SensorEnum.Off);
         private ILogger Logger { get; }
 
         AutoStartupTimeModeEnum AutoStartupTimeModeEnum { get; set; } = AutoStartupTimeModeEnum.Clear;
@@ -58,20 +58,9 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         }
 
 
-        public async Task RunAsync(CancellationToken cancel)
+        public Task RunAsync(CancellationToken cancel)
         {
-            AuxiliariesServiceProvider auxServiceProvider = SetServiceProvider as AuxiliariesServiceProvider;
-
-            while (true)
-            {
-                await sendStatusChangedEventSignal.WaitAsync();
-                // statuc changed event can be sent anytime when registered device status being changed.
-                // Here is an example and events are sent when the client executed SetAuxiliaries command
-                await auxServiceProvider.IsNotNull().HandsetSensorStateChanged(AuxiliariesStatus.HandsetSensorStatusEnum.OnTheHook);
-                await Task.Delay(5000);
-                await auxServiceProvider.IsNotNull().HandsetSensorStateChanged(AuxiliariesStatus.HandsetSensorStatusEnum.OffTheHook);
-                await Task.Delay(5000);
-            }
+            return Task.CompletedTask;
         }
 
         public Task<DeviceResult> SetAutostartupTime(SetAutostartupTimeRequest autoStartupInfo, CancellationToken cancellation)
@@ -85,11 +74,11 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         {
             if(request.Heating is SetAuxiliariesRequest.SetAuxiliaryOnOff.On)
             {
-                AuxiliariesStatus.Heating = AuxiliariesStatus.SensorEnum.On;
+                AuxiliariesStatus.Heating = AuxiliariesStatusClass.SensorEnum.On;
             }
             else if(request.Heating is SetAuxiliariesRequest.SetAuxiliaryOnOff.Off)
             {
-                AuxiliariesStatus.Heating = AuxiliariesStatus.SensorEnum.Off;
+                AuxiliariesStatus.Heating = AuxiliariesStatusClass.SensorEnum.Off;
             }
 
             sendStatusChangedEventSignal.Release();
@@ -109,33 +98,34 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 AuxiliariesInterface: new CommonCapabilitiesClass.AuxiliariesInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAuxiliaries,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.Register,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.EventEnum.AuxiliaryStatusEvent,
-                    }
+                    ]
                 ),
                 LightsInterface: new CommonCapabilitiesClass.LightsInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

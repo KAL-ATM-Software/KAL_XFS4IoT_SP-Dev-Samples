@@ -32,14 +32,11 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var cmd = new ReadCommand(RequestId.NewID(),
-                                      new ReadCommand.PayloadData(CommandTimeout, new XFS4IoT.BarcodeReader.SymbologiesPropertiesClass(QrCode: true)));
+                                      new ReadCommand.PayloadData(new ReadCommand.PayloadData.SymbologiesClass(QrCode: true)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
-
-            
-            
 
             while (true)
             {
@@ -50,6 +47,10 @@ namespace TestClientForms.Devices
                         return;
 
                     case Acknowledge ack:
+                        break;
+
+                    case XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                         break;
 
                     default:
@@ -63,15 +64,11 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ResetCommand(RequestId.NewID(),
-                                       new ResetCommand.PayloadData(CommandTimeout));
+            var cmd = new ResetCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
             await device.SendCommandAsync(cmd);
-
-            
-            
 
             while (true)
             {
@@ -82,6 +79,10 @@ namespace TestClientForms.Devices
                         return;
 
                     case Acknowledge ack:
+                        break;
+                    
+                    case XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                         break;
 
                     default:

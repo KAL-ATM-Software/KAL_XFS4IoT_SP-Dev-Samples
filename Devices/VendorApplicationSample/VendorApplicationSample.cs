@@ -129,25 +129,30 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 VendorApplicationInterface: new CommonCapabilitiesClass.VendorApplicationInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.GetActiveInterface,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.SetActiveInterface,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.StartLocalApplication,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.InterfaceChangedEvent,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.VendorAppExitedEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

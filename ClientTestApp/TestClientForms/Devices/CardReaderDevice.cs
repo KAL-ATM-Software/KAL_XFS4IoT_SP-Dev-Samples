@@ -47,7 +47,6 @@ namespace TestClientForms.Devices
             var readRawDataCmd = new ReadRawDataCommand(
                 RequestId.NewID(),
                 new ReadRawDataCommand.PayloadData(
-                    Timeout: CommandTimeout,
                     Track1: true,
                     Track2: true,
                     Track3: true,
@@ -61,7 +60,8 @@ namespace TestClientForms.Devices
                     BackImage: false,
                     Track1JIS: false,
                     Track3JIS: false,
-                    Ddi: false));
+                    Ddi: false), 
+                CommandTimeout);
 
             base.OnXFS4IoTMessages(this, readRawDataCmd.Serialise());
 
@@ -82,6 +82,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is XFS4IoT.CardReader.Events.InsertCardEvent insertCardEv)
                 {
                     base.OnXFS4IoTMessages(this, insertCardEv.Serialise());
+                }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 {
@@ -108,9 +112,9 @@ namespace TestClientForms.Devices
 
             var ejectCmd = new MoveCommand(
                 RequestId.NewID(), new MoveCommand.PayloadData(
-                    Timeout: CommandTimeout,
                     From: "transport",
-                    To: "exit"));
+                    To: "exit"),
+                CommandTimeout);
 
             base.OnXFS4IoTMessages(this, ejectCmd.Serialise());
 
@@ -129,6 +133,10 @@ namespace TestClientForms.Devices
                     case XFS4IoT.CardReader.Events.MediaRemovedEvent removedEv:
                         base.OnXFS4IoTMessages(this, removedEv.Serialise());
                         return;
+
+                    case XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                        break;
 
                     case Acknowledge ack:
                         break;
@@ -155,9 +163,9 @@ namespace TestClientForms.Devices
 
             var captureCmd = new MoveCommand(
                 RequestId.NewID(), new MoveCommand.PayloadData(
-                    Timeout: CommandTimeout,
                     From: "transport",
-                    To: "unitBIN1"));
+                    To: "unitBIN1"),
+                CommandTimeout);
 
             base.OnXFS4IoTMessages(this, captureCmd.Serialise());
 
@@ -178,6 +186,11 @@ namespace TestClientForms.Devices
                     case XFS4IoT.Storage.Events.StorageThresholdEvent storageThresholdEv:
                         base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                         break;
+
+                    case XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                        break;
+
                     case Acknowledge ack:
                         break;
                     default:
@@ -201,8 +214,7 @@ namespace TestClientForms.Devices
             }
 
             var ejectCmd = new ResetCommand(
-                RequestId.NewID(), new ResetCommand.PayloadData(
-                    Timeout: CommandTimeout));
+                RequestId.NewID(), new ResetCommand.PayloadData(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, ejectCmd.Serialise());
 
@@ -244,8 +256,7 @@ namespace TestClientForms.Devices
             }
 
             var ejectCmd = new GetStorageCommand(
-                RequestId.NewID(), new GetStorageCommand.PayloadData(
-                    Timeout: CommandTimeout));
+                RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, ejectCmd.Serialise());
 
@@ -296,8 +307,8 @@ namespace TestClientForms.Devices
 
             var ejectCmd = new SetStorageCommand(
                 RequestId.NewID(), new SetStorageCommand.PayloadData(
-                    Timeout: CommandTimeout,
-                    Storage: setStorage));
+                    Storage: setStorage),
+                    Timeout: CommandTimeout);
 
             base.OnXFS4IoTMessages(this, ejectCmd.Serialise());
 

@@ -63,16 +63,21 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 BiometricInterface: new CommonCapabilitiesClass.BiometricInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Clear,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.GetStorageInfo,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Import,
@@ -80,16 +85,16 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Read,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.SetDataPersistence
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.PresentSubjectEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.SubjectDetectedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.RemoveSubjectEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.SubjectRemovedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.DataClearedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.OrientationEvent
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
@@ -195,18 +200,18 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 : null));
         }
 
-        public async Task<ReadResult> ReadAsync(ReadRequest request, CancellationToken cancellation)
+        public async Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest request, CancellationToken cancellation)
         {
-            await BiometricService.PresentSubjectEvent();
+            await events.PresentSubjectEvent();
 
             await Task.Delay(1000, cancellation);
 
             BiometricStatus.Subject = BiometricStatusClass.SubjectStatusEnum.Present;
-            await BiometricService.SubjectDetectedEvent();
+            await events.SubjectDetectedEvent();
 
             await Task.Delay(1000, cancellation);
 
-            await BiometricService.RemoveSubjectEvent();
+            await events.RemoveSubjectEvent();
 
             await Task.Delay(1000, cancellation);
 
@@ -324,6 +329,12 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
             => throw new NotSupportedException();
 
         public Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportEMVPublicKeyResult> ImportEMVPublicKey(ImportEMVPublicKeyRequest request, CancellationToken cancellation)
             => throw new NotSupportedException();
 
         #endregion

@@ -10,7 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 using XFS4IoT.VendorMode.Commands;
 using XFS4IoT.VendorMode.Completions;
 using XFS4IoT.VendorMode.Events;
@@ -31,8 +33,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new EnterModeRequestCommand(RequestId.NewID(),
-                                                  new EnterModeRequestCommand.PayloadData(CommandTimeout));
+            var cmd = new EnterModeRequestCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -58,6 +59,12 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                     enteredEventReceived = true;
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
 
 
@@ -69,7 +76,9 @@ namespace TestClientForms.Devices
                         base.OnXFS4IoTMessages(this, response.Serialise());
                         enteredEventReceived = true;
                         break;
-
+                    case StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                        break;
                     default:
                         base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;
@@ -82,7 +91,7 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var cmd = new ExitModeRequestCommand(RequestId.NewID(),
-                                                 new ExitModeRequestCommand.PayloadData(CommandTimeout));
+                                                 CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -108,6 +117,12 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this, eventResp.Serialise());
                     exitEventReceived = true;
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                { }
             } while (!completed);
 
             while (!exitEventReceived)
@@ -118,7 +133,9 @@ namespace TestClientForms.Devices
                         base.OnXFS4IoTMessages(this, response.Serialise());
                         exitEventReceived = true;
                         break;
-
+                    case StatusChangedEvent statusChangedEv:
+                        base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                        break;
                     default:
                         base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;

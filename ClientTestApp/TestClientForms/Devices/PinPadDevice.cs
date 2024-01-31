@@ -50,25 +50,25 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new DataEntryCommand(RequestId.NewID(), 
-                                           new DataEntryCommand.PayloadData(CommandTimeout,
+                                           new DataEntryCommand.PayloadData(
                                                                             0,
                                                                             true,
                                                                             new()
                                                                             {
-                                                                                { "zero", new KeyClass(false) },
-                                                                                { "one", new KeyClass(false) },
-                                                                                { "two", new KeyClass(false) },
-                                                                                { "three", new KeyClass(false) },
-                                                                                { "four", new KeyClass(false) },
-                                                                                { "five", new KeyClass(false) },
-                                                                                { "six", new KeyClass(false) },
-                                                                                { "seven", new KeyClass(false) },
-                                                                                { "eight", new KeyClass(false) },
-                                                                                { "nine", new KeyClass(false) },
-                                                                                { "enter", new KeyClass(true) },
-                                                                                { "cancel", new KeyClass(true) },
-                                                                                { "clear", new KeyClass(false) }
-                                                                            }));
+                                                                                { "zero", new(false) },
+                                                                                { "one", new(false) },
+                                                                                { "two", new(false) },
+                                                                                { "three", new(false) },
+                                                                                { "four", new(false) },
+                                                                                { "five", new(false) },
+                                                                                { "six", new(false) },
+                                                                                { "seven", new(false) },
+                                                                                { "eight", new(false) },
+                                                                                { "nine", new(false) },
+                                                                                { "enter", new(true) },
+                                                                                { "cancel", new(true) },
+                                                                                { "clear", new(false) }
+                                                                            }), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -106,7 +106,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GetLayoutCommand(RequestId.NewID(), new GetLayoutCommand.PayloadData(CommandTimeout));
+            var cmd = new GetLayoutCommand(RequestId.NewID(), new GetLayoutCommand.PayloadData(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -165,10 +165,11 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new ImportKeyCommand(RequestId.NewID(), 
-                                           new ImportKeyCommand.PayloadData(CommandTimeout,
+                                           new ImportKeyCommand.PayloadData(
                                                                             Key: "MASTERKEY",
                                                                             KeyAttributes: new ImportKeyCommand.PayloadData.KeyAttributesClass("K0", "T", "B"),
-                                                                            VerifyAttributes: new ImportKeyCommand.PayloadData.VerifyAttributesClass(ImportKeyCommand.PayloadData.VerifyAttributesClass.CryptoMethodEnum.KcvZero)));
+                                                                            VerifyAttributes: new ImportKeyCommand.PayloadData.VerifyAttributesClass(ImportKeyCommand.PayloadData.VerifyAttributesClass.CryptoMethodEnum.KcvZero)),
+                                                                    CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -210,32 +211,32 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new SecureKeyEntryCommand(RequestId.NewID(), 
-                                                new SecureKeyEntryCommand.PayloadData(CommandTimeout,
-                                                                                      SecureKeyEntryCommand.PayloadData.KeyLenEnum.Number32,
+                                                new SecureKeyEntryCommand.PayloadData(SecureKeyEntryCommand.PayloadData.KeyLenEnum.Number32,
                                                                                       true,
                                                                                       new()
                                                                                       {
-                                                                                        { "one", new KeyClass(false) },
-                                                                                        { "two", new KeyClass(false) },
-                                                                                        { "three", new KeyClass(false) },
-                                                                                        { "four", new KeyClass(false) },
-                                                                                        { "five", new KeyClass(false) },
-                                                                                        { "six", new KeyClass(false) },
-                                                                                        { "seven", new KeyClass(false) },
-                                                                                        { "eight", new KeyClass(false) },
-                                                                                        { "nine", new KeyClass(false) },
-                                                                                        { "enter", new KeyClass(true) },
-                                                                                        { "cancel", new KeyClass(true) },
-                                                                                        { "shift", new KeyClass(false) },
-                                                                                        { "a", new KeyClass(false) },
-                                                                                        { "b", new KeyClass(false) },
-                                                                                        { "c", new KeyClass(false) },
-                                                                                        { "d", new KeyClass(false) },
-                                                                                        { "e", new KeyClass(false) },
-                                                                                        { "f", new KeyClass(false) },
+                                                                                        { "one", new(false) },
+                                                                                        { "two", new(false) },
+                                                                                        { "three", new(false) },
+                                                                                        { "four", new(false) },
+                                                                                        { "five", new(false) },
+                                                                                        { "six", new(false) },
+                                                                                        { "seven", new(false) },
+                                                                                        { "eight", new(false) },
+                                                                                        { "nine", new(false) },
+                                                                                        { "enter", new(true) },
+                                                                                        { "cancel", new(true) },
+                                                                                        { "shift", new(false) },
+                                                                                        { "a", new(false) },
+                                                                                        { "b", new(false) },
+                                                                                        { "c", new(false) },
+                                                                                        { "d", new(false) },
+                                                                                        { "e", new(false) },
+                                                                                        { "f", new(false) },
                                                                                       },
                                                                                       SecureKeyEntryCommand.PayloadData.VerificationTypeEnum.Zero,
-                                                                                      SecureKeyEntryCommand.PayloadData.CryptoMethodEnum.TripleDes));
+                                                                                      SecureKeyEntryCommand.PayloadData.CryptoMethodEnum.TripleDes),
+                                                                                CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -260,10 +261,10 @@ namespace TestClientForms.Devices
             } while (!completed);
 
             var importKeyCmd = new ImportKeyCommand(RequestId.NewID(), 
-                                                    new ImportKeyCommand.PayloadData(CommandTimeout,
+                                                    new ImportKeyCommand.PayloadData(
                                                                                      Key: "MASTERKEY",
                                                                                      KeyAttributes: new ImportKeyCommand.PayloadData.KeyAttributesClass("K0", "T", "B"),
-                                                                                     Constructing: true));
+                                                                                     Constructing: true), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, importKeyCmd.Serialise());
 
@@ -306,26 +307,26 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new PinEntryCommand(RequestId.NewID(), 
-                                          new PinEntryCommand.PayloadData(CommandTimeout,
-                                                                          4,
+                                          new PinEntryCommand.PayloadData(4,
                                                                           4,
                                                                           true,
                                                                           "*",
                                                                           new()
                                                                           {
-                                                                              { "one", new KeyClass(false) },
-                                                                              { "two", new KeyClass(false) },
-                                                                              { "three", new KeyClass(false) },
-                                                                              { "four", new KeyClass(false) },
-                                                                              { "five", new KeyClass(false) },
-                                                                              { "six", new KeyClass(false) },
-                                                                              { "seven", new KeyClass(false) },
-                                                                              { "eight", new KeyClass(false) },
-                                                                              { "nine", new KeyClass(false) },
-                                                                              { "enter", new KeyClass(true) },
-                                                                              { "cancel", new KeyClass(true) },
-                                                                              { "clear", new KeyClass(false) }
-                                                                          }));
+                                                                              { "one", new(false) },
+                                                                              { "two", new(false) },
+                                                                              { "three", new(false) },
+                                                                              { "four", new(false) },
+                                                                              { "five", new(false) },
+                                                                              { "six", new(false) },
+                                                                              { "seven", new(false) },
+                                                                              { "eight", new(false) },
+                                                                              { "nine", new(false) },
+                                                                              { "enter", new(true) },
+                                                                              { "cancel", new(true) },
+                                                                              { "clear", new(false) }
+                                                                          }),
+                                                                    CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -372,12 +373,12 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetPinBlockCommand(RequestId.NewID(), 
-                                             new GetPinBlockCommand.PayloadData(CommandTimeout,
+                                             new GetPinBlockCommand.PayloadData(
                                                                                 CustomerData: "1234567890123456",
                                                                                 Padding: 0xf,
                                                                                 Format: GetPinBlockCommand.PayloadData.FormatEnum.Ansi,
                                                                                 Key: "PinKey",
-                                                                                CryptoMethod: GetPinBlockCommand.PayloadData.CryptoMethodEnum.Ecb));
+                                                                                CryptoMethod: GetPinBlockCommand.PayloadData.CryptoMethodEnum.Ecb), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

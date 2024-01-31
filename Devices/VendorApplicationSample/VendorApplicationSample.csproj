@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>XFS4IoT.SP.VendorApplication</AssemblyName>
     <RootNamespace>KAL.XFS4IoTSP.VendorApplication.Sample</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.VendorApplication" Version="1.7.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.VendorApplication" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

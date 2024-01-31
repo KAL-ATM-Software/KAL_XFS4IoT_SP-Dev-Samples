@@ -1051,6 +1051,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             return new StartAuthenticateResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
         }
 
+        public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportEMVPublicKeyResult> ImportEMVPublicKey(ImportEMVPublicKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
         /// <summary>
         /// KeyManagement Status
         /// </summary>
@@ -1348,16 +1354,21 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 KeyManagementInterface: new CommonCapabilitiesClass.KeyManagementInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
@@ -1370,36 +1381,30 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.StartAuthenticate,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetKeyDetail,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.CertificateChangeEvent,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.InitializedEvent,
-                    },
-                    AuthenticationRequired: new()
-                    {
-                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
-                    }
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.DUKPTKSNEvent,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.IllegalKeyAccessEvent,
+                    ]
                 ),
                 CryptoInterface: new CommonCapabilitiesClass.CryptoInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.CryptoData,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.Digest,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateAuthentication,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateRandom,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.CryptoInterfaceClass.EventEnum.IllegalKeyAccessEvent,
-                    }
+                    ]
                 ),
                 PinPadInterface: new CommonCapabilitiesClass.PinPadInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetPinBlock,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetQueryPCIPTSDeviceId,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.LocalDES,
@@ -1408,17 +1413,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.PresentIDC,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.SetPinBlockData,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.DUKPTKSNEvent,
-                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.IllegalKeyAccessEvent,
-                    }
+                    ]
                 ),
                 KeyboardInterface: new CommonCapabilitiesClass.KeyboardInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DataEntry,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DefineLayout,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.GetLayout,
@@ -1426,13 +1426,13 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.PinEntry,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.SecureKeyEntry,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.EnterDataEvent,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.KeyEvent,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.LayoutEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

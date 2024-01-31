@@ -61,8 +61,8 @@ namespace TestClientForms
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
 
-            comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum));
-            comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Clear;
+            comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum));
+            comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum.Specific;
         }
 
 
@@ -812,7 +812,7 @@ namespace TestClientForms
 
         private async void btnSetAutoStartup_Click(object sender, EventArgs e)
         {
-            await AuxDev.SetAutoStartupTime(autoStartupDateTime.Value, (XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum)comboAutoStartupModes.SelectedItem);
+            await AuxDev.SetAutoStartupTime(autoStartupDateTime.Value, (XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum)comboAutoStartupModes.SelectedItem);
         }
 
         private async void btnGetAutoStartup_Click(object sender, EventArgs e)
@@ -1017,11 +1017,6 @@ namespace TestClientForms
         private async void CashAccGetCashUnitInfo_Click(object sender, EventArgs e)
         {
             await CashAcceptorDev.GetCashUnitInfo();
-        }
-
-        private async void CashAccPositionCapabilities_Click(object sender, EventArgs e)
-        {
-            await CashAcceptorDev.GetPositionCapabilities();
         }
 
         private async void CashAccCashInStatus_Click(object sender, EventArgs e)

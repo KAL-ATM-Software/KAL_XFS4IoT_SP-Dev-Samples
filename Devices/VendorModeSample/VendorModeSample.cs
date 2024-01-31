@@ -76,29 +76,34 @@ namespace KAL.XFS4IoTSP.VendorMode.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 VendorModeInterface: new CommonCapabilitiesClass.VendorModeInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.EnterModeAcknowledge,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.EnterModeRequest,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.ExitModeAcknowledge,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.ExitModeRequest,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.Register,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.EnterModeRequestEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ExitModeRequestEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ModeEnteredEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ModeExitedEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

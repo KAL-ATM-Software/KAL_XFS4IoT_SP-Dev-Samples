@@ -256,8 +256,7 @@ namespace TestClient
 
             Logger.LogLine($"Publisher response on port {port}");
 
-            var command = new GetServicesCommand(RequestId.NewID(),
-                                                 Payload: new(Timeout: 60000));
+            var command = new GetServicesCommand(RequestId.NewID(), 60000);
             Logger.LogMessage(command);
             await publisher.SendCommandAsync(command);
             var response = await GetCompletionAsync<GetServicesCompletion>(publisher);
@@ -332,7 +331,7 @@ namespace TestClient
         {
 
             // Create a new command and send it to the device
-            var command = new StatusCommand(RequestId.NewID(), new StatusCommand.PayloadData(Timeout: 1_000));
+            var command = new StatusCommand(RequestId.NewID(), 1_000);
             Logger.LogMessage(command);
             await service.SendCommandAsync(command);
 
@@ -343,7 +342,7 @@ namespace TestClient
         {
 
             // Create a new command and send it to the device
-            var command = new CapabilitiesCommand(RequestId.NewID(), new CapabilitiesCommand.PayloadData(Timeout: 1_000));
+            var command = new CapabilitiesCommand(RequestId.NewID(), 1_000);
             Logger.LogMessage(command);
             await service.SendCommandAsync(command);
 
@@ -357,7 +356,6 @@ namespace TestClient
             // Create a new command and send it to the device
             var command = new ReadRawDataCommand(RequestId.NewID(),
                                                  new ReadRawDataCommand.PayloadData(
-                                                        60_000,
                                                         Track1: true,
                                                         Track2: true,
                                                         Track3: true,
@@ -371,7 +369,7 @@ namespace TestClient
                                                         BackImage: false,
                                                         Track1JIS: false,
                                                         Track3JIS: false,
-                                                        Ddi: false));
+                                                        Ddi: false), 60_000);
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
 
@@ -383,7 +381,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new ChipIOCommand(RequestId.NewID(),
-                new ChipIOCommand.PayloadData(10_0000, ChipIOCommand.PayloadData.ChipProtocolEnum.ChipT0, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }));
+                new ChipIOCommand.PayloadData(ChipIOCommand.PayloadData.ChipProtocolEnum.ChipT0, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }), 10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -396,7 +394,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new ChipPowerCommand(RequestId.NewID(),
-                new ChipPowerCommand.PayloadData(10_000, ChipPowerCommand.PayloadData.ChipPowerEnum.Warm));
+                new ChipPowerCommand.PayloadData(ChipPowerCommand.PayloadData.ChipPowerEnum.Warm), 10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -413,9 +411,9 @@ namespace TestClient
                             RequestId: RequestId.NewID(),
                             Payload:    new 
                                         (
-                                        Timeout: 10_000, 
-                                        To: ResetCommand.PayloadData.ToEnum.CurrentPosition
-                                        )
+                                            To: ResetCommand.PayloadData.ToEnum.CurrentPosition
+                                        ),
+                            Timeout:   10_000
                             );
 
             Logger.LogMessage(command);
@@ -432,9 +430,9 @@ namespace TestClient
 
             // Create a new command and send it to the device
             var command = new MoveCommand(RequestId.NewID(),
-                new MoveCommand.PayloadData(10_000,
+                new MoveCommand.PayloadData(
                                             From: "transport$",
-                                            To: "exit"));
+                                            To: "exit"), 10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -447,7 +445,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new SetKeyCommand(RequestId.NewID(),
-                new SetKeyCommand.PayloadData(10_000, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }));
+                new SetKeyCommand.PayloadData(new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }), 10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -463,11 +461,10 @@ namespace TestClient
 
             // Create a new command and send it to the device
             var command = new WriteRawDataCommand(RequestId.NewID(),
-                new WriteRawDataCommand.PayloadData(10_000, new()
-                {
-                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }, WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
-                    new(WriteRawDataCommand.PayloadData.DataClass.DestinationEnum.Track1, new List<byte>() { 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7 }, WriteRawDataCommand.PayloadData.DataClass.WriteMethodEnum.Auto),
-                }));
+                new WriteRawDataCommand.PayloadData(
+                Track1: new WriteRawDataCommand.PayloadData.Track1Class([0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7], null),
+                Track2: new WriteRawDataCommand.PayloadData.Track2Class([0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7], null)),
+                10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -483,7 +480,7 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new QueryIFMIdentifierCommand(RequestId.NewID(),
-                new QueryIFMIdentifierCommand.PayloadData(10_000));
+                10_000);
 
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -496,9 +493,10 @@ namespace TestClient
         {
             // Create a new command and send it to the device
             var command = new MoveCommand(RequestId.NewID(), 
-                                                new(10_000,
+                                                new(
                                                 From: "transport$",
-                                                To: "exit")
+                                                To: "exit"), 
+                                                10_000
                                                 );
             Logger.LogMessage(command);
             await cardReader.SendCommandAsync(command);
@@ -511,9 +509,7 @@ namespace TestClient
         private async Task<string> DoGetCommandNonce(ClientConnection cashDispenser)
         {
             // Create a new command and send it to the device
-            var command = new GetCommandNonceCommand(RequestId.NewID(),
-                                                     Payload: new(Timeout: 10_000)
-                                                     );
+            var command = new GetCommandNonceCommand(RequestId.NewID(), 10_000);
             Logger.LogMessage(command);
             await cashDispenser.SendCommandAsync(command);
 
@@ -527,7 +523,7 @@ namespace TestClient
 
         private async Task DoClearCommandNonce(ClientConnection cashDispenser)
         {
-            var command = new ClearCommandNonceCommand(RequestId.NewID(), Payload: new(10_000));
+            var command = new ClearCommandNonceCommand(RequestId.NewID(), 10_000);
 
             Logger.LogMessage(command);
             await cashDispenser.SendCommandAsync(command);
@@ -541,11 +537,16 @@ namespace TestClient
         private async Task DoDispenseCash(ClientConnection cashDispenser, int Amount, string CurrencyID, string Token)
         {
             var command = new DispenseCommand(RequestId.NewID(),
-                                Payload: new(Timeout: 10_000,
-                                             Denomination: new(Denomination: new(new() { { CurrencyID, Amount } }), "mix1"),
+                                Payload: new(
+                                             Denomination: new(
+                                                 Denomination: new(App: null, 
+                                                                   Service: new(Currencies: new() { { CurrencyID, Amount } },
+                                                                                Partial: null,
+                                                                                Mix: "mix1"))),
                                              Position: null,
                                              Token: Token
-                                             )
+                                             ),
+                                Timeout: 10_000
                                 );
 
             Logger.LogMessage(command);
@@ -560,7 +561,7 @@ namespace TestClient
 
         private async Task DoPresentCash(ClientConnection cashDispenser)
         {
-            var command = new PresentCommand(RequestId.NewID(), Payload: new(Timeout: 10_000) );
+            var command = new PresentCommand(RequestId.NewID(), Payload: new(), 10_000);
 
             Logger.LogMessage(command);
             await cashDispenser.SendCommandAsync(command);
@@ -574,7 +575,7 @@ namespace TestClient
 
         private async Task<GetPresentStatusCompletion.PayloadData> DoGetPresentStatus(ClientConnection cashDispenser, string nonce)
         {
-            var command = new GetPresentStatusCommand(RequestId.NewID(), Payload: new(Timeout: 10_000, Nonce:nonce));
+            var command = new GetPresentStatusCommand(RequestId.NewID(), Payload: new(Nonce:nonce), Timeout: 10_000);
 
             Logger.LogMessage(command);
             await cashDispenser.SendCommandAsync(command);
@@ -625,7 +626,7 @@ namespace TestClient
                     null)
                 },
             };
-            var command = new SetStorageCommand(RequestId.NewID(), new(10_000, storage));
+            var command = new SetStorageCommand(RequestId.NewID(), new(storage), 10_000);
             await cashDispenser.SendCommandAsync(command);
 
             // Wait for a response from the device. 

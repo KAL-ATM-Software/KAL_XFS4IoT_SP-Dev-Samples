@@ -209,7 +209,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// <summary>
         /// This method is used to send raw data (a byte string of device dependent data) to the physical device.
         /// </summary>
-        public async Task<RawPrintResult> RawPrintAsync(MediaPresentedCommandEvent events,
+        public async Task<RawPrintResult> RawPrintAsync(RawPrintCommandEvents events,
                                                         RawPrintRequest request,
                                                         CancellationToken cancellation)
         {
@@ -319,7 +319,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// <summary>
         /// This method is used to move paper (which can also be a new passbook) from a paper source into the print position.
         /// </summary>
-        public Task<DispensePaperResult> DispensePaperAsync(MediaPresentedCommandEvent events, DispensePaperRequest request, CancellationToken cancellation) => throw new NotSupportedException();
+        public Task<DispensePaperResult> DispensePaperAsync(DispensePaperCommandEvents events, DispensePaperRequest request, CancellationToken cancellation) => throw new NotSupportedException();
 
         /// <summary>
         /// This method returns image data from the current media. If no media is present, the device waits for the timeout
@@ -373,7 +373,6 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                                                 ImageTypes: PrinterCapabilitiesClass.ImageTypeEnum.NotSupported,
                                                 FrontImageColorFormats: PrinterCapabilitiesClass.FrontImageColorFormatEnum.NotSupported,
                                                 BackImageColorFormats: PrinterCapabilitiesClass.BackImageColorFormatEnum.NotSupported,
-                                                CodelineFormats: PrinterCapabilitiesClass.CodelineFormatEnum.NotSupported,
                                                 ImageSourceTypes: PrinterCapabilitiesClass.ImageSourceTypeEnum.NotSupported,
                                                 DispensePaper: false,
                                                 OSPrinter: null,
@@ -468,16 +467,21 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 PrinterInterface: new CommonCapabilitiesClass.PrinterInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.ControlMedia,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.GetCodelineMapping,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.GetFormList,
@@ -491,16 +495,16 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.SetBlackMarkMode,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.SupplyReplenish,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.DefinitionLoadedEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.FieldErrorEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.FieldWarningEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.MediaTakenEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.NoMediaEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.PaperThresholdEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

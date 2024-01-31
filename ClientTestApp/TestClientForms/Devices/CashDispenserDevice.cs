@@ -23,6 +23,7 @@ using XFS4IoT.Storage.Completions;
 using XFS4IoT.Storage.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
 
 namespace TestClientForms.Devices
 {
@@ -51,7 +52,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getCashUnitInfoCmd = new GetStorageCommand(RequestId.NewID(), new(CommandTimeout));
+            var getCashUnitInfoCmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, getCashUnitInfoCmd.Serialise());
                       
@@ -76,7 +77,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getMixTypesCmd = new GetMixTypesCommand(RequestId.NewID(), new(CommandTimeout));
+            var getMixTypesCmd = new GetMixTypesCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  getMixTypesCmd.Serialise());
 
@@ -105,7 +106,7 @@ namespace TestClientForms.Devices
 
             var nonce = string.IsNullOrWhiteSpace(Nonce)? null : Nonce;
 
-            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(CommandTimeout, OutputPositionEnum.OutDefault, Nonce: nonce));
+            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(OutputPositionEnum.OutDefault, Nonce: nonce), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  getPresentStatusCmd.Serialise());
 
@@ -132,11 +133,19 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var denominateCmd = new DenominateCommand(RequestId.NewID(), new(CommandTimeout,
-                new DenominationClass(new Dictionary<string, double>() {
-                    { "EUR", 50 }
-                }),
-                "mix1"));
+            var denominateCmd = new DenominateCommand(RequestId.NewID(), new(
+                new
+                (
+                    Denomination:
+                    new(App: null, 
+                        Service: 
+                        new(Currencies: new Dictionary<string, double>() { { "EUR", 50 } },
+                            Partial: null,
+                            Mix: "mix1",
+                            CashBox: null)
+                        ),
+                    TellerID: null
+                )), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  denominateCmd.Serialise());
 
@@ -176,15 +185,21 @@ namespace TestClientForms.Devices
             }
 
             var dispenseCommand = new DispenseCommand(RequestId.NewID(),
-                                                      new(CommandTimeout,
-                                                        new DenominateRequestClass(new(new Dictionary<string, double>() 
-                                                        {
-                                                            { "EUR", 100 }
-                                                        }),
-                                                        "mix1"),
-                                                        Token: token
-                                                        ));
+                                                      new(
+                                                          Denomination: new(Denomination: new(App: null,
+                                                               Service:
+                                                                 new(Currencies: new Dictionary<string, double>() { { "EUR", 50 } },
+                                                                     Partial: null,
+                                                                     Mix: "mix1",
+                                                                     CashBox: null)
+                                                            )
+                                                         ),
+                                                         Position: OutputPositionEnum.OutDefault,
+                                                         Token: token), 
+                                                      CommandTimeout)
+                                                      {
 
+            };
             base.OnXFS4IoTMessages(this,  dispenseCommand.Serialise());
 
             
@@ -207,6 +222,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -247,7 +266,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            XFS4IoT.Common.Commands.ClearCommandNonceCommand clearNonceCommand = new(RequestId.NewID(), new(CommandTimeout));
+            XFS4IoT.Common.Commands.ClearCommandNonceCommand clearNonceCommand = new(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  clearNonceCommand.Serialise());
 
@@ -289,7 +308,7 @@ namespace TestClientForms.Devices
                 return "";
             }
 
-            XFS4IoT.Common.Commands.GetCommandNonceCommand getNonceCommand = new(RequestId.NewID(), new(CommandTimeout));
+            XFS4IoT.Common.Commands.GetCommandNonceCommand getNonceCommand = new(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  getNonceCommand.Serialise());
 
@@ -331,7 +350,7 @@ namespace TestClientForms.Devices
             }
 
             var startExchangeCmd = new StartExchangeCommand(RequestId.NewID(), 
-                                        new(CommandTimeout));
+                                        CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  startExchangeCmd.Serialise());
 
@@ -356,6 +375,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -378,7 +401,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var endExchangeCmd = new EndExchangeCommand(RequestId.NewID(), new(CommandTimeout));
+            var endExchangeCmd = new EndExchangeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  endExchangeCmd.Serialise());
 
@@ -403,6 +426,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, infoAvailableEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -425,7 +452,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var presentCmd = new PresentCommand(RequestId.NewID(), new(CommandTimeout));
+            var presentCmd = new PresentCommand(RequestId.NewID(), new(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  presentCmd.Serialise());
 
@@ -462,6 +489,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -483,7 +514,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var resetCmd = new ResetCommand(RequestId.NewID(), new(CommandTimeout, null, null, OutputPositionEnum.OutDefault));
+            var resetCmd = new ResetCommand(RequestId.NewID(), new(new(ItemTargetEnumEnum.OutDefault)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  resetCmd.Serialise());
 
@@ -516,6 +547,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -538,7 +573,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new OpenShutterCommand(RequestId.NewID(), new(CommandTimeout, PositionEnum.OutDefault));
+            var cmd = new OpenShutterCommand(RequestId.NewID(), new(PositionEnum.OutDefault), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  cmd.Serialise());
 
@@ -558,6 +593,10 @@ namespace TestClientForms.Devices
                 if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
                     base.OnXFS4IoTMessages(this, shutterEv.Serialise());
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -581,7 +620,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CloseShutterCommand(RequestId.NewID(), new(CommandTimeout, PositionEnum.OutDefault));
+            var cmd = new CloseShutterCommand(RequestId.NewID(), new(PositionEnum.OutDefault), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  cmd.Serialise());
 
@@ -601,6 +640,10 @@ namespace TestClientForms.Devices
                 if (cmdResponse is ShutterStatusChangedEvent shutterEv)
                 {
                     base.OnXFS4IoTMessages(this, shutterEv.Serialise());
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -624,7 +667,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new RejectCommand(RequestId.NewID(), new(CommandTimeout));
+            var cmd = new RejectCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  cmd.Serialise());
 
@@ -653,6 +696,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                 }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -675,7 +722,9 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new RetractCommand(RequestId.NewID(), new(CommandTimeout, null, RetractAreaEnum.Retract, 1));
+            var cmd = new RetractCommand(RequestId.NewID(), new(Location: new(OutputPosition: null, 
+                                                                              RetractArea: RetractAreaEnum.Retract, 
+                                                                              Index: 1)), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  cmd.Serialise());
 
@@ -707,6 +756,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StorageThresholdEvent storageThresholdEv)
                 {
                     base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
+                }
+                else if (cmdResponse is StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -755,7 +808,7 @@ namespace TestClientForms.Devices
                                             new StorageSetCashStatusClass(unit5)),
                     null) },
             };
-            var cmd = new SetStorageCommand(RequestId.NewID(), new(CommandTimeout, storage));
+            var cmd = new SetStorageCommand(RequestId.NewID(), new(storage), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  cmd.Serialise());
 

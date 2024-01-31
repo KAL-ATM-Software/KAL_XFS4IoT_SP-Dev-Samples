@@ -21,6 +21,7 @@ using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
 using System.Threading.Channels;
 using XFS4IoT.Lights.Completions;
+using static XFS4IoTFramework.TextTerminal.ITextTerminalService;
 
 namespace TextTerminalSample
 {
@@ -75,18 +76,27 @@ namespace TextTerminalSample
         /// Return the valid keys and command keys for the device.
         /// Will be called once and cached within the Framework.
         /// </summary>
-        public GetKeyDetailCompletion.PayloadData GetKeyDetail()
+        public KeyDetails GetKeyDetail()
         {
-            return new GetKeyDetailCompletion.PayloadData(MessagePayload.CompletionCodeEnum.Success,
-                                                          null,
-                                                          "0123456789",
-                                                          new()
-                                                          {
-                                                              "enter", "cancel", "clear",
-                                                              "fdk01", "fdk02", "fdk03",
-                                                              "fdk04", "fdk05", "fdk06",
-                                                              "fdk07", "fdk08",
-                                                          });
+            return new KeyDetails(Keys: new()
+                                    { "zero", "one", "two", "three",
+                                      "four", "five", "six", "seven",
+                                      "eight", "nine", 
+                                    },
+                                  CommandKeys: new()
+                                    {
+                                      { "enter", true },
+                                      { "cancel", true },
+                                      { "clear", false },
+                                      { "fdk01", false },
+                                      { "fdk02", false },
+                                      { "fdk03", false },
+                                      { "fdk04", false },
+                                      { "fdk05", false },
+                                      { "fdk06", false },
+                                      { "fdk07", false },
+                                      { "fdk08", false }
+                                    });
         }
 
         /// <summary>
@@ -165,16 +175,34 @@ namespace TextTerminalSample
                     }
                 }
                 //Check if key is a valid active key.
-                else if (readInfo.ActiveKeys.Contains(key) && buffer.Length < readInfo.NumChars)
-                {
-                    //Add to buffer and write to display.
-                    buffer.Append(key);
-                    TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length - 1, readInfo.PositionY, key);
-                    await events.KeyEvent(key, string.Empty);
-                }
                 else
                 {
-                    //Key is invalid or numChars reached, discard.
+                    string internalKey = key switch
+                    {
+                        "1" => "one",
+                        "2" => "two",
+                        "3" => "three",
+                        "4" => "four",
+                        "5" => "five",
+                        "6" => "six",
+                        "7" => "seven",
+                        "8" => "eight",
+                        "9" => "nine",
+                        "0" => "zero",
+                        _ => string.Empty
+                    };
+
+                    if (readInfo.ActiveKeys.Contains(internalKey) && buffer.Length < readInfo.NumChars)
+                    {
+                        //Add to buffer and write to display.
+                        buffer.Append(key);
+                        TextTerminalUI.WriteAt(readInfo.PositionX + buffer.Length - 1, readInfo.PositionY, key);
+                        await events.KeyEvent(internalKey, string.Empty);
+                    }
+                    else
+                    {
+                        //Key is invalid or numChars reached, discard.
+                    }
                 }
             }
             TextTerminalUI.SetReading(false); //Read complete - stop sending keys to the channel.
@@ -232,16 +260,21 @@ namespace TextTerminalSample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 TextTerminalInterface: new CommonCapabilitiesClass.TextTerminalInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Beep,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.ClearScreen,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.GetKeyDetail,
@@ -249,11 +282,11 @@ namespace TextTerminalSample
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.SetResolution,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Write,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.EventEnum.KeyEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

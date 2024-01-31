@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>XFS4IoT.SP.PinPad</AssemblyName>
     <RootNamespace>KAL.XFS4IoTSP.PinPad.Sample</RootNamespace>
@@ -17,7 +17,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="1.7.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="2.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="2.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="2.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="2.0.0" />
   </ItemGroup>
 
 </Project>

@@ -32,7 +32,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ClearCommand(RequestId.NewID(), new ClearCommand.PayloadData(CommandTimeout, null));
+            var cmd = new ClearCommand(RequestId.NewID(), new ClearCommand.PayloadData(null), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -57,7 +57,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData(CommandTimeout, null));
+            var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData(null), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -82,10 +82,11 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ReadCommand(RequestId.NewID(), new ReadCommand.PayloadData(CommandTimeout, new List<XFS4IoT.Biometric.DataTypeClass>()
+            var cmd = new ReadCommand(RequestId.NewID(), new ReadCommand.PayloadData(new List<XFS4IoT.Biometric.DataTypeClass>()
             {
                 new XFS4IoT.Biometric.DataTypeClass(XFS4IoT.Biometric.DataTypeClass.FormatEnum.ReservedTemplate1, null, null)
-            }, 1, ReadCommand.PayloadData.ModeEnum.Scan));
+            }, 1, ReadCommand.PayloadData.ModeEnum.Scan), 
+            CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -106,6 +107,8 @@ namespace TestClientForms.Devices
                     if (response?.Payload?.DataRead is not null && response.Payload.DataRead.Count > 0 && response.Payload.DataRead[0].Data != null)
                         retVal = Convert.ToBase64String(response.Payload.DataRead[0].Data.ToArray());
                 }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
@@ -118,7 +121,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ReadCommand(RequestId.NewID(), new ReadCommand.PayloadData(CommandTimeout, null, 1, ReadCommand.PayloadData.ModeEnum.Match));
+            var cmd = new ReadCommand(RequestId.NewID(), new ReadCommand.PayloadData(null, 1, ReadCommand.PayloadData.ModeEnum.Match), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -136,6 +139,8 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is Acknowledge)
+                { }
                 else
                 {
                     base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
@@ -147,10 +152,10 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ImportCommand(RequestId.NewID(), new ImportCommand.PayloadData(CommandTimeout, new()
+            var cmd = new ImportCommand(RequestId.NewID(), new ImportCommand.PayloadData(new()
             {
                 new XFS4IoT.Biometric.BioDataClass(new XFS4IoT.Biometric.DataTypeClass(XFS4IoT.Biometric.DataTypeClass.FormatEnum.ReservedTemplate1, null, null), Convert.FromBase64String(base64TemplateData).ToList())
-            }));
+            }), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -179,7 +184,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new MatchCommand(RequestId.NewID(), new MatchCommand.PayloadData(CommandTimeout, MatchCommand.PayloadData.CompareModeEnum.Verify, identifier, null, 50));
+            var cmd = new MatchCommand(RequestId.NewID(), new MatchCommand.PayloadData(MatchCommand.PayloadData.CompareModeEnum.Verify, identifier, null, 50), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -208,7 +213,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new GetStorageInfoCommand(RequestId.NewID(), new GetStorageInfoCommand.PayloadData(CommandTimeout));
+            var cmd = new GetStorageInfoCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

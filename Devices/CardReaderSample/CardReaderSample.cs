@@ -66,7 +66,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// If no card has been inserted, and for all other categories of card readers, the card unit waits for the period of time specified in the call for a card to be either inserted or pulled through.
         /// The InsertCardEvent will be generated when there is no card in the cardreader and the device is ready to accept a card.
         /// </summary>
-        public async Task<AcceptCardResult> AcceptCardAsync(CommonCardCommandEvents events,
+        public async Task<AcceptCardResult> AcceptCardAsync(ReadRawDataCommandEvents events,
                                                             AcceptCardRequest acceptCardInfo,
                                                             CancellationToken cancellation)
         {
@@ -149,7 +149,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// This procedure is followed by data verification.
         /// If power fails during a write the outcome of the operation will be vendor specific, there is no guarantee that thewrite will have succeeded.
         /// </summary>
-        public async Task<WriteCardResult> WriteCardAsync(CommonCardCommandEvents events,
+        public async Task<WriteCardResult> WriteCardAsync(WriteRawDataCommandEvents events,
                                                           WriteCardRequest dataToWrite,
                                                           CancellationToken cancellation)
         {
@@ -197,8 +197,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// If no action is specified the user card will not be moved even if this means that the devicecannot be recovered.
         /// If the device is a permanent chip card unit, this command will power-off the chip.For devices with parking station capability there will be one MediaInsertedEvent for each card found.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events,
-                                                              ResetDeviceRequest cardAction,
+        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetDeviceRequest cardAction,
                                                               CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
@@ -247,7 +246,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                                         EMVContactlessPerformTransactionRequest transactionData,
                                                                                                         CancellationToken cancellation)
         {
-            await events.EMVClessReadStatusEvent(100, EMVClessCommandEvents.StatusEnum.ReadyToRead, 0, EMVClessCommandEvents.ValueQualifierEnum.Amount, string.Empty, "EUR", "EN");
+            await events.EMVClessReadStatusEvent(100, EMVClessCommandEvents.StatusEnum.ReadyToRead, 0, EMVClessCommandEvents.ValueQualifierEnum.Amount, string.Empty, 978, "EN");
 
             await Task.Delay(1000, cancellation);
 
@@ -262,7 +261,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                                                                                                                                              0,
                                                                                                                                                                                                              EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable,
                                                                                                                                                                                                              "0",
-                                                                                                                                                                                                             "EUR",
+                                                                                                                                                                                                             978,
                                                                                                                                                                                                              "EN"),
                                                                                                                               null,
                                                                                                                               0,
@@ -303,7 +302,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                                                                                                                                               0,
                                                                                                                                                                                                               EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable, 
                                                                                                                                                                                                               "0", 
-                                                                                                                                                                                                              "EUR", 
+                                                                                                                                                                                                              978, 
                                                                                                                                                                                                               "EN"), 
                                                                                                                                null, 
                                                                                                                                0, 
@@ -641,16 +640,21 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 CardReaderInterface: new CommonCapabilitiesClass.CardReaderInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.ReadRawData,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.WriteRawData,
@@ -663,9 +667,9 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.QueryIFMIdentifier,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.SetKey,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Move,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InsertCardEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaDetectedEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaInsertedEvent,
@@ -673,21 +677,21 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InvalidMediaEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.EMVClessReadStatusEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.CardActionEvent,
-                    }
+                    ]
                 ),
                 StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {

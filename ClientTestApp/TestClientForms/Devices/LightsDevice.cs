@@ -39,10 +39,10 @@ namespace TestClientForms.Devices
             {
                 return;
             }
-            var payload = new SetLightCommand.PayloadData(CommandTimeout);
-            payload.ExtendedProperties = new() { { lightName, new(null, flashRate, XFS4IoT.Lights.LightStateClass.ColorEnum.Red, null) } };
+            var payload = new SetLightCommand.PayloadData();
+            payload.ExtendedProperties = new() { { lightName, new(XFS4IoT.Lights.LightStateClass.PositionEnum.Default, flashRate, XFS4IoT.Lights.LightStateClass.ColorEnum.Red) } };
 
-            var cmd = new SetLightCommand(RequestId.NewID(), payload);
+            var cmd = new SetLightCommand(RequestId.NewID(), payload, CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
