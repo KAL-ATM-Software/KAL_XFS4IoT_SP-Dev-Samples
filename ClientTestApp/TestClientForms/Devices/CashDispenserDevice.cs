@@ -452,7 +452,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var presentCmd = new PresentCommand(RequestId.NewID(), new(), CommandTimeout);
+            var presentCmd = new PresentCommand(RequestId.NewID(), new(OutputPositionEnum.OutDefault), CommandTimeout);
 
             base.OnXFS4IoTMessages(this,  presentCmd.Serialise());
 

@@ -106,7 +106,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GetLayoutCommand(RequestId.NewID(), new GetLayoutCommand.PayloadData(), CommandTimeout);
+            var cmd = new GetLayoutCommand(RequestId.NewID(), null, CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

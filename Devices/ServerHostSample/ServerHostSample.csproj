@@ -33,7 +33,7 @@
 
   <ItemGroup>
     <PackageReference Include="JsonSchema.Net" Version="5.5.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.0.1" />
     <PackageReference Include="NJsonSchema" Version="11.0.0" />
   </ItemGroup>
 

@@ -32,7 +32,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ClearCommand(RequestId.NewID(), new ClearCommand.PayloadData(null), CommandTimeout);
+            var cmd = new ClearCommand(RequestId.NewID(), null, CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -57,7 +57,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ResetCommand(RequestId.NewID(), new ResetCommand.PayloadData(null), CommandTimeout);
+            var cmd = new ResetCommand(RequestId.NewID(), null, CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

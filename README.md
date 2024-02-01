@@ -8,13 +8,13 @@ Find out more about this exciting new project and how you can get involved in sh
 ## Building the sample simulator
 
 1. Clone KAL_XFS4IoT_SP-Dev-Samples repository from https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev-Samples.
-2. Install Visual Studio 2022 and .Net6 SDK or runtime.
+2. Install Visual Studio 2022 and .Net8 SDK or runtime.
 3. Make sure online nuget package source is configured. Menu->Tools->NuGet Package Manager->Package Manager Settings->Package Sources has online location https://api.nuget.org/v3/index.json. For offline environment, all XFS4IoT framework NuGet packages need to be downloaded first and point offline location where the downloaded packages are stored locally in the package manager settings. The nuget packages are availble from KAL_XFS4IoT_SP-Dev repositry. https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev/releases
 4. Open the solution `Devices/SPs.sln` in Visual Studio 2022.
 5. Select Solution SPs in the solution explorer and execute Clean Solution.
 6. Select Solution SPs in the solution explorer and execute Rebuild Solution.
 7. Build complete both projects without errors.
-8. Binaries are created under `Devices/bin/Debug/net6.0-windows7.0` or `Release/net6.0-windows7.0`.
+8. Binaries are created under `Devices/bin/Debug/net8.0-windows7.0` or `Release/net8.0-windows7.0`.
 9. The SP executable **XFS4IoT.SP.ServerHostSample.exe** is created. The executable has dependencies with other DLLs created in the same folder.
 10. The default IP address is the local host 127.0.0.0. If the SP and client application run on the same machine, no configuration changes are required. If the IP address needs to be changed it can be done so remotely with the client application from different machine as follows: 
     1. Open the configuration file of the SP, ***XFS4IoT.SP.ServerHostSample.dll.config***, in the test file editor, for example VS Code.
@@ -25,13 +25,13 @@ Find out more about this exciting new project and how you can get involved in sh
 ## Building the sample client application
 
 1. Clone KAL_XFS4IoT_SP-Dev-Samples repository from https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev-Samples.
-2. Install Visual Studio 2022 and .Net6 SDK or runtime.
+2. Install Visual Studio 2022 and .Net8 SDK or runtime.
 3. Make sure online nuget package source is configured. Menu->Tools->NuGet Package Manager->Package Manager Settings->Package Sources has online location https://api.nuget.org/v3/index.json. For offline environment, all XFS4IoT framework NuGet packages need to be downloaded first and point offline location where the downloaded packages are stored locally in the package manager settings. The nuget packages are availble from KAL_XFS4IoT_SP-Dev repositry. https://github.com/KAL-ATM-Software/KAL_XFS4IoT_SP-Dev/releases
 4. Open the solution `ClientTestApp/ClientTestApp.sln` in Visual Studio 2022.
 5. Select ClientTestApp in the solution explorer and execute Clean Solution.
 6. Select ClientTestApp in the solution explorer and execute Rebuild Solution.
 7. Build complete both projects without errors.
-8. Binaries are created under `ClientTestApp/bin/Debug/net6.0-windows` or `Release/net6.0-windows`.
+8. Binaries are created under `ClientTestApp/bin/Debug/net8.0-windows` or `Release/net8.0-windows`.
 9. The SP executable **TestClientForms.exe** is created. The executable has dependencies with other DLLs created in the same folder.
 10. Run **TestClientForms.exe**
 11. The default IP address is the local host 127.0.0.1. If the SP and client application run on the same machine, no configuration changes are required.  

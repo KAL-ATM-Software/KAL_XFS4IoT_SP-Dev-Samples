@@ -44,7 +44,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new InitializationCommand(RequestId.NewID(), new InitializationCommand.PayloadData(), CommandTimeout);
+            var cmd = new InitializationCommand(RequestId.NewID(), null, CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 

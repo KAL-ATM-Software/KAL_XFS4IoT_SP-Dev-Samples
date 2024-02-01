@@ -214,7 +214,7 @@ namespace TestClientForms.Devices
             }
 
             var ejectCmd = new ResetCommand(
-                RequestId.NewID(), new ResetCommand.PayloadData(), CommandTimeout);
+                RequestId.NewID(), new(To: ResetCommand.PayloadData.ToEnum.Auto), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, ejectCmd.Serialise());
 
