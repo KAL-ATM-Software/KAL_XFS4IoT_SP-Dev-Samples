@@ -3,12 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>CashAcceptorTemplate</AssemblyName>
-    <RootNamespace>CashAcceptor.CashAcceptorTemplate</RootNamespace>
+    <AssemblyName>CameraTemplate</AssemblyName>
+    <RootNamespace>BarcodeReader.CameraTemplate</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="2.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Camera" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

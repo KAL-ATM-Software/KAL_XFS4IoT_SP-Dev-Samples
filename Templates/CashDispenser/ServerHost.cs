@@ -23,10 +23,10 @@ namespace CashDispenser.CashDispenserTemplate
                 /// CashDispenser Service Provider
                 var cashDispenserDevice = new CashDispenserTemplate(Logger);
                 var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CashDispenserTemplate",
-                                                                      cashDispenserDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                                            ServiceName: "CashDispenserTemplate",
+                                                                            cashDispenserDevice,
+                                                                            Logger,
+                                                                            new FilePersistentData(Logger));
 
                 cashDispenserDevice.SetServiceProvider = cashDispenserService;
                 Publisher.Add(cashDispenserService);

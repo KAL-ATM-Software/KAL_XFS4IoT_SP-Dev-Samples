@@ -51,9 +51,9 @@ namespace VendorMode.VendorModeTemplate
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         #endregion
@@ -76,51 +76,51 @@ namespace VendorMode.VendorModeTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 VendorModeInterface: new CommonCapabilitiesClass.VendorModeInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.EnterModeAcknowledge,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.EnterModeRequest,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.ExitModeAcknowledge,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.ExitModeRequest,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.CommandEnum.Register,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.EnterModeRequestEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ExitModeRequestEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ModeEnteredEvent,
                         CommonCapabilitiesClass.VendorModeInterfaceClass.EventEnum.ModeExitedEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass

@@ -23,10 +23,10 @@ namespace Printer.PrinterTemplate
                 /// Printer Service Provider
                 var printerDevice = new PrinterTemplate(Logger);
                 var printerService = new PrinterServiceProvider(EndpointDetails,
-                                                                      ServiceName: "PrinterTemplate",
-                                                                      printerDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                                ServiceName: "PrinterTemplate",
+                                                                printerDevice,
+                                                                Logger,
+                                                                new FilePersistentData(Logger));
 
                 printerDevice.SetServiceProvider = printerService;
                 Publisher.Add(printerService);

@@ -42,8 +42,8 @@ namespace VendorApplication.VendorApplicationTemplate
         /// It can be used in conjunction with the Vendor Mode interface to manage vendor independent services and start vendor specific services, 
         /// e.g. maintenance oriented applications.
         /// </summary>
-        public async Task<DeviceResult> StartLocalApplication(StartLocalApplicationRequest request,
-                                                              CancellationToken cancellation)
+        public Task<DeviceResult> StartLocalApplication(StartLocalApplicationRequest request,
+                                                        CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -61,8 +61,8 @@ namespace VendorApplication.VendorApplicationTemplate
         /// An application can issue this command to ensure that a vendor dependent application starts on the correct interface, 
         /// or to change the interface while running.
         /// </summary>
-        public async Task<DeviceResult> SetActiveInterface(SetActiveInterfaceRequest request,
-                                                           CancellationToken cancellation)
+        public Task<DeviceResult> SetActiveInterface(SetActiveInterfaceRequest request,
+                                                     CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -71,9 +71,9 @@ namespace VendorApplication.VendorApplicationTemplate
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -105,46 +105,46 @@ namespace VendorApplication.VendorApplicationTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 VendorApplicationInterface: new CommonCapabilitiesClass.VendorApplicationInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.GetActiveInterface,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.SetActiveInterface,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.CommandEnum.StartLocalApplication,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.InterfaceChangedEvent,
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.VendorAppExitedEvent,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
+                    new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
+                            ])
                 },
                 PowerSaveControl: false,
                 AntiFraudModule: false);
@@ -160,10 +160,5 @@ namespace VendorApplication.VendorApplicationTemplate
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
 
         private ILogger Logger { get; }
-
-        private ActiveInterfaceEnum CurrentActiveInterface { get; set; } = ActiveInterfaceEnum.Operator;
-
-        private Process process { get; set; } = null;
-        private readonly SemaphoreSlim appStartedSignal = new(0, 1);
     }
 }

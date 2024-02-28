@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>LightsTemplate</AssemblyName>
     <RootNamespace>Lights.LightsTemplate</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Lights" Version="1.6.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Lights" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

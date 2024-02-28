@@ -2,13 +2,13 @@
 
 	<PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <AssemblyName>BiometricTemplate</AssemblyName>
         <RootNamespace>Biometric.BiometricTemplate</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Biometric" Version="1.6.0" />
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Biometric" Version="2.1.0" />
 	</ItemGroup>
 
     <ItemGroup>

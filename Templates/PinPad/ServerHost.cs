@@ -23,10 +23,10 @@ namespace PinPad.PinPadTemplate
                 /// PinPad Service Provider
                 var pinPadDevice = new PinPadTemplate(Logger);
                 var pinPadService = new PinPadServiceProvider(EndpointDetails,
-                                                                      ServiceName: "PinPadTemplate",
-                                                                      pinPadDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                              ServiceName: "PinPadTemplate",
+                                                              pinPadDevice,
+                                                              Logger,
+                                                              new FilePersistentData(Logger));
 
                 pinPadDevice.SetServiceProvider = pinPadService;
                 Publisher.Add(pinPadService);

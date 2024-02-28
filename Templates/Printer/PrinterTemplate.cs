@@ -66,9 +66,9 @@ namespace Printer.PrinterTemplate
         /// If an eject operation is specified, it completes when the media is moved to the exit slot.An unsolicited event is
         /// generated when the media has been taken by the device capability is true.
         /// </summary>
-        public async Task<ControlMediaResult> ControlMediaAsync(ControlMediaEvent controlMediaEvent,
-                                                                ControlMediaRequest request,
-                                                                CancellationToken cancellation)
+        public Task<ControlMediaResult> ControlMediaAsync(ControlMediaEvent controlMediaEvent,
+                                                          ControlMediaRequest request,
+                                                          CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -77,8 +77,8 @@ namespace Printer.PrinterTemplate
         /// This method is used by the application to perform a hardware reset which will attempt to return the device to a
         /// known good state.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetDeviceRequest request,
-                                                              CancellationToken cancellation)
+        public Task<ResetDeviceResult> ResetDeviceAsync(ResetDeviceRequest request,
+                                                        CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -87,8 +87,8 @@ namespace Printer.PrinterTemplate
         /// This method switches the black mark detection mode and associated functionality on or off. The black mark
         /// detection mode is persistent. If the selected mode is already active this command will complete with success.
         /// </summary>
-        public async Task<DeviceResult> SetBlackMarkModeAsync(BlackMarkModeEnum mode,
-                                                              CancellationToken cancellation)
+        public Task<DeviceResult> SetBlackMarkModeAsync(BlackMarkModeEnum mode,
+                                                        CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -104,8 +104,8 @@ namespace Printer.PrinterTemplate
         /// detected the level and reported the threshold before this command was issued, the command must succeed and no
         /// threshold event is required.
         /// </summary>
-        public async Task<DeviceResult> SupplyReplenishedAsync(SupplyReplenishedRequest request,
-                                                               CancellationToken cancellation)
+        public Task<DeviceResult> SupplyReplenishedAsync(SupplyReplenishedRequest request,
+                                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -117,8 +117,8 @@ namespace Printer.PrinterTemplate
         /// Measurements in all tasks are in printer dots.
         /// This method must be implemented if your device is capable or printing.
         /// </summary>
-        public async Task<PrintTaskResult> ExecutePrintTasksAsync(PrintTaskRequest request,
-                                                                  CancellationToken cancellation)
+        public Task<PrintTaskResult> ExecutePrintTasksAsync(PrintTaskRequest request,
+                                                            CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -126,9 +126,9 @@ namespace Printer.PrinterTemplate
         /// <summary>
         /// This method is used to send raw data (a byte string of device dependent data) to the physical device.
         /// </summary>
-        public async Task<RawPrintResult> RawPrintAsync(MediaPresentedCommandEvent events,
-                                                        RawPrintRequest request,
-                                                        CancellationToken cancellation)
+        public Task<RawPrintResult> RawPrintAsync(RawPrintCommandEvents events,
+                                                  RawPrintRequest request,
+                                                  CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -170,9 +170,9 @@ namespace Printer.PrinterTemplate
         /// Here is an example of handling MediaRemovedEvent after card is ejected successfully.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Printer.PrinterTemplate
         /// <summary>
         /// This method is used to move paper (which can also be a new passbook) from a paper source into the print position.
         /// </summary>
-        public Task<DispensePaperResult> DispensePaperAsync(MediaPresentedCommandEvent events, DispensePaperRequest request, CancellationToken cancellation) => throw new NotSupportedException();
+        public Task<DispensePaperResult> DispensePaperAsync(DispensePaperCommandEvents events, DispensePaperRequest request, CancellationToken cancellation) => throw new NotSupportedException();
 
         /// <summary>
         /// This method returns image data from the current media. If no media is present, the device waits for the timeout
@@ -243,7 +243,6 @@ namespace Printer.PrinterTemplate
                                                 ImageTypes: PrinterCapabilitiesClass.ImageTypeEnum.NotSupported,
                                                 FrontImageColorFormats: PrinterCapabilitiesClass.FrontImageColorFormatEnum.NotSupported,
                                                 BackImageColorFormats: PrinterCapabilitiesClass.BackImageColorFormatEnum.NotSupported,
-                                                CodelineFormats: PrinterCapabilitiesClass.CodelineFormatEnum.NotSupported,
                                                 ImageSourceTypes: PrinterCapabilitiesClass.ImageSourceTypeEnum.NotSupported,
                                                 DispensePaper: false,
                                                 OSPrinter: null,
@@ -259,10 +258,10 @@ namespace Printer.PrinterTemplate
         /// This property must added MediaSpec structures to reflect the media supported by the specific device.
         /// At least one element must be added. If the printer has more than one paper supply, more than one structure may be returned.
         /// </summary>
-        public List<MediaSpec> MediaSpecs { get; set; } = new()
-        {
+        public List<MediaSpec> MediaSpecs { get; set; } =
+        [
             new MediaSpec(0, 0)
-        };
+        ];
 
         /// <summary>
         /// This property must return a FormRules structure which reflects
@@ -334,16 +333,16 @@ namespace Printer.PrinterTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 PrinterInterface: new CommonCapabilitiesClass.PrinterInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.ControlMedia,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.GetCodelineMapping,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.GetFormList,
@@ -357,38 +356,38 @@ namespace Printer.PrinterTemplate
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.SetBlackMarkMode,
                         CommonCapabilitiesClass.PrinterInterfaceClass.CommandEnum.SupplyReplenish,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.DefinitionLoadedEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.FieldErrorEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.FieldWarningEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.MediaTakenEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.NoMediaEvent,
                         CommonCapabilitiesClass.PrinterInterfaceClass.EventEnum.PaperThresholdEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
@@ -400,14 +399,6 @@ namespace Printer.PrinterTemplate
 
         #endregion 
 
-        /// <summary>
-        /// Thread for simulate paper taken event to be fired
-        /// </summary>
-        private void PaperTakenThread()
-        {
-            throw new NotImplementedException();
-        }
-
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
 
         private ILogger Logger { get; }
@@ -415,7 +406,6 @@ namespace Printer.PrinterTemplate
         private PrinterStatusClass.SupplyStatusClass PaperSupplyStatus { get; set; } = new(PrinterStatusClass.PaperSupplyEnum.Full, PrinterStatusClass.PaperTypeEnum.Single);
         private PrinterStatusClass.BlackMarkModeEnum BlackMarkModeStatus { get; set; } = PrinterStatusClass.BlackMarkModeEnum.Off;
         
-        private readonly SemaphoreSlim paperTakenSignal = new(0, 1);
         // Default page size is 10cm = 8 * 10 * 10 dots.
         private int PageSize { get; set; } = 800;
     }

@@ -23,9 +23,9 @@ namespace Auxiliaries.AuxiliariesTemplate
                 /// Auxiliaries Service Provider
                 var auxiliariesDevice = new AuxiliariesTemplate(Logger);
                 var auxiliariesService = new AuxiliariesServiceProvider(EndpointDetails,
-                                                                      ServiceName: "AuxiliariesTemplate",
-                                                                      auxiliariesDevice,
-                                                                      Logger);
+                                                                        ServiceName: "AuxiliariesTemplate",
+                                                                        auxiliariesDevice,
+                                                                        Logger);
 
                 auxiliariesDevice.SetServiceProvider = auxiliariesService;
                 Publisher.Add(auxiliariesService);

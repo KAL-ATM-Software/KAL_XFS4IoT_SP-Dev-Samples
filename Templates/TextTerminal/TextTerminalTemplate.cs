@@ -18,6 +18,7 @@ using XFS4IoTFramework.Lights;
 using XFS4IoTServer;
 using System.Threading;
 using XFS4IoT.TextTerminal.Completions;
+using static XFS4IoTFramework.TextTerminal.ITextTerminalService;
 
 namespace TextTerminal.TextTerminalTemplate
 {
@@ -59,9 +60,27 @@ namespace TextTerminal.TextTerminalTemplate
         /// Return the valid keys and command keys for the device.
         /// Will be called once and cached within the Framework.
         /// </summary>
-        public GetKeyDetailCompletion.PayloadData GetKeyDetail()
+        public KeyDetails GetKeyDetail()
         {
-            throw new NotImplementedException();
+            return new KeyDetails(Keys:
+                                    [ "zero", "one", "two", "three",
+                                      "four", "five", "six", "seven",
+                                      "eight", "nine",
+                                    ],
+                                  CommandKeys: new()
+                                    {
+                                      { "enter", true },
+                                      { "cancel", true },
+                                      { "clear", false },
+                                      { "fdk01", false },
+                                      { "fdk02", false },
+                                      { "fdk03", false },
+                                      { "fdk04", false },
+                                      { "fdk05", false },
+                                      { "fdk06", false },
+                                      { "fdk07", false },
+                                      { "fdk08", false }
+                                    });
         }
 
         /// <summary>
@@ -140,8 +159,7 @@ namespace TextTerminal.TextTerminalTemplate
         public TextTerminalCapabilitiesClass TextTerminalCapabilities { get; set; } 
             = new TextTerminalCapabilitiesClass(
                 Type: TextTerminalCapabilitiesClass.TypeEnum.Fixed,
-                Resolutions: new()
-                { new(32, 16), new(16, 16) },
+                Resolutions: [new(32, 16), new(16, 16)],
                 KeyLock: false,
                 Cursor: true,
                 Forms: false
@@ -162,16 +180,16 @@ namespace TextTerminal.TextTerminalTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 TextTerminalInterface: new CommonCapabilitiesClass.TextTerminalInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Beep,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.ClearScreen,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.GetKeyDetail,
@@ -179,33 +197,33 @@ namespace TextTerminal.TextTerminalTemplate
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.SetResolution,
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.CommandEnum.Write,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.EventEnum.KeyEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
-                                new CommonCapabilitiesClass.FirmwareClass(
+                            Firmware:
+                            [
+                                new(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

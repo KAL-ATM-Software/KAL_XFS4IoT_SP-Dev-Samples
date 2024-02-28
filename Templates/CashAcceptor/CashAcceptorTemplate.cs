@@ -36,9 +36,9 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// Here is an example of handling ItemsTakenEvent after cash is returned and taken by customer.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -69,8 +69,7 @@ namespace CashAcceptor.CashAcceptorTemplate
                                                                    { CashManagementCapabilitiesClass.PositionEnum.OutDefault,positionStatus },
                                                              });
 
-            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.SafeDoorEnum.Closed,
-                                                                 CashManagementStatusClass.DispenserEnum.Ok,
+            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.DispenserEnum.Ok,
                                                                  CashManagementStatusClass.AcceptorEnum.NotSupported);
         }
 
@@ -86,7 +85,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// A hardware failure during the cash-in transaction does not reset the note number list information; 
         /// instead the note number list information will include items that could be accepted and identified up to the point of the hardware failure.
         /// </summary>
-        public async Task<CashInStartResult> CashInStart(CashInStartRequest rquest, CancellationToken cancellation)
+        public Task<CashInStartResult> CashInStart(CashInStartRequest rquest, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -150,9 +149,9 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// CashManagement.Retract or CashManagement.Reset command can be used to
         /// move the remaining bunches, although the ability to do this will be hardware dependent.
         /// </summary>
-        public async Task<CashInResult> CashIn(CashInCommandEvents events,
-                                               CashInRequest request,
-                                               CancellationToken cancellation)
+        public Task<CashInResult> CashIn(CashInCommandEvents events,
+                                         CashInRequest request,
+                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -169,8 +168,8 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// location of the notes retained to be reported in the output parameter.If no items are available for cash-in for any
         /// other reason, the NoItems error code is returned.
         /// </summary>
-        public async Task<CashInEndResult> CashInEnd(ItemErrorCommandEvents events,
-                                                     CancellationToken cancellation)
+        public Task<CashInEndResult> CashInEnd(CashInEndCommandEvents events,
+                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -203,8 +202,8 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// This event will not be generated if no items are returned. If no items are available to rollback for any other reason,
         /// the NoItems error code is returned.
         /// </summary>
-        public async Task<CashInRollbackResult> CashInRollback(ItemInfoAvailableCommandEvent events,
-                                                               CancellationToken cancellation)
+        public Task<CashInRollbackResult> CashInRollback(CashInRollbackCommandEvents events,
+                                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -215,8 +214,8 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// If an unknown note type is given the UnsupportedData will be returned.
         /// The values set by this command are persistent.
         /// </summary>
-        public async Task<ConfigureNoteTypesResult> ConfigureNoteTypes(ConfigureNoteTypesRequest request,
-                                                                       CancellationToken cancellation)
+        public Task<ConfigureNoteTypesResult> ConfigureNoteTypes(ConfigureNoteTypesRequest request,
+                                                                 CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -251,16 +250,16 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// CashAcceptor.InputRefuseEvent](#cashacceptor.inputrefuseevent) will be sent and the command will complete. In this
         /// case, no note specific output properties will be returned.
         /// </summary>
-        public Task<CreateSignatureResult> CreateSignature(CashInCommonCommandEvents events,
-                                                           CashInRequest request,
+        public Task<CreateSignatureResult> CreateSignature(CreateSignatureCommandEvents events,
+                                                           CreateSignatureRequest request,
                                                            CancellationToken cancellation) => throw new NotImplementedException();
 
         /// <summary>
         /// This command is used to configure the currencydescription configuration data into the banknote reader module. 
         /// Theformat and location of the configuration data is vendor and/or hardwaredependent.
         /// </summary>
-        public async Task<ConfigureNoteReaderResult> ConfigureNoteReader(ConfigureNoteReaderRequest request,
-                                                                         CancellationToken cancellation)
+        public Task<ConfigureNoteReaderResult> ConfigureNoteReader(ConfigureNoteReaderRequest request,
+                                                                   CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -309,9 +308,9 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// need to be automatically counted periodically. Upon successful completion, for those storage units that have been
         /// counted, the counts are accurately reported with the Storage.GetStorage command.
         /// </summary>
-        public async Task<CashUnitCountResult> CashUnitCount(ItemErrorCommandEvents events,
-                                                             CashUnitCountRequest request,
-                                                             CancellationToken cancellation)
+        public Task<CashUnitCountResult> CashUnitCount(CashUnitCountCommandEvents events,
+                                                       CashUnitCountRequest request,
+                                                       CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -394,17 +393,9 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// The application can tell whether the additional items were left by using the CashAcceptor.GetPresentStatus command.
         /// This command does not affect the status of the current cash-in transaction.
         /// </summary>
-        public Task<PreparePresentResult> PreparePresent(ItemInfoAvailableCommandEvent events,
+        public Task<PreparePresentResult> PreparePresent(PreparePresentCommandEvents events,
                                                          PreparePresentRequest request,
                                                          CancellationToken cancellation) => throw new NotImplementedException();
-
-        /// <summary>
-        /// This command allows the application to get additional information about the use assigned to each position available in the device.
-        /// </summary>
-        public Dictionary<CashManagementCapabilitiesClass.PositionEnum, PositionCapabilitiesClass> GetPositionCapabilities()
-        {
-            throw new NotImplementedException();
-        }
 
         /// <summary>
         /// The deplete target and destination information
@@ -428,21 +419,55 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// </summary>
         public CashAcceptorCapabilitiesClass CashAcceptorCapabilities { get; set; } = new(
                 Type: CashManagementCapabilitiesClass.TypeEnum.SelfServiceBill,
-                MaxCashInItems: 0,
-                Shutter: false,
-                ShutterControl: false,
-                IntermediateStacker: 0,
-                ItemsTakenSensor: false,
-                Positions: CashManagementCapabilitiesClass.PositionEnum.InCenter | 
-                           CashManagementCapabilitiesClass.PositionEnum.InDefault |
-                           CashManagementCapabilitiesClass.PositionEnum.OutCenter |
-                           CashManagementCapabilitiesClass.PositionEnum.OutDefault,
+                MaxCashInItems: 200,
+                Shutter: true,
+                ShutterControl: true,
+                IntermediateStacker: 200,
+                ItemsTakenSensor: true,
+                Positions: new()
+                {
+                    { CashManagementCapabilitiesClass.PositionEnum.InDefault,
+                        new(Usage: CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.In,
+                            ShutterControl: false,
+                            ItemsTakenSensor: true,
+                            ItemsInsertedSensor: true,
+                            PresentControl: false,
+                            PreparePresent: false,
+                            RetractArea: CashAcceptorCapabilitiesClass.PositionClass.RetractAreaEnum.Retract) },
+                    { CashManagementCapabilitiesClass.PositionEnum.InCenter,
+                        new(Usage: CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.In,
+                            ShutterControl: false,
+                            ItemsTakenSensor: true,
+                            ItemsInsertedSensor: true,
+                            PresentControl: false,
+                            PreparePresent: false,
+                            RetractArea: CashAcceptorCapabilitiesClass.PositionClass.RetractAreaEnum.Retract)},
+                    { CashManagementCapabilitiesClass.PositionEnum.OutDefault,
+                        new(Usage: CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.Refuse |
+                                   CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.Rollback,
+                            ShutterControl: false,
+                            ItemsTakenSensor: true,
+                            ItemsInsertedSensor: true,
+                            PresentControl: false,
+                            PreparePresent: false,
+                            RetractArea: CashAcceptorCapabilitiesClass.PositionClass.RetractAreaEnum.Retract)},
+                    { CashManagementCapabilitiesClass.PositionEnum.OutCenter,
+                        new(Usage: CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.Refuse |
+                                   CashAcceptorCapabilitiesClass.PositionClass.UsageEnum.Rollback,
+                            ShutterControl: false,
+                            ItemsTakenSensor: true,
+                            ItemsInsertedSensor: true,
+                            PresentControl: false,
+                            PreparePresent: false,
+                            RetractArea: CashAcceptorCapabilitiesClass.PositionClass.RetractAreaEnum.Retract)}
+                },
                 RetractAreas: CashManagementCapabilitiesClass.RetractAreaEnum.Retract,
                 RetractTransportActions: CashManagementCapabilitiesClass.RetractTransportActionEnum.Retract,
                 RetractStackerActions: CashManagementCapabilitiesClass.RetractStackerActionEnum.Retract,
                 CashInLimit: CashAcceptorCapabilitiesClass.CashInLimitEnum.NotSupported,
                 CountActions: CashAcceptorCapabilitiesClass.CountActionEnum.All,
-                CounterfeitAction: CashAcceptorCapabilitiesClass.CounterfeitActionEnum.None);
+                RetainCounterfeitAction: CashAcceptorCapabilitiesClass.RetainCounterfeitActionEnum.NotSupported);
+
 
         /// <summary>
         /// Status of current cash-in operation.
@@ -463,7 +488,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// Retracted items will be moved to either a retract cash unit, a reject cash unit, item cash units, the transport or the intermediate stacker. 
         /// After the items are retracted the shutter is closed automatically, even if the ShutterControl capability is set to false.
         /// </summary>
-        public async Task<RetractResult> RetractAsync(RetractCommandEvents events, RetractRequest retractInfo, CancellationToken cancellation)
+        public Task<RetractResult> RetractAsync(RetractCommandEvents events, RetractRequest retractInfo, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -479,16 +504,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// ResetDeviceAsync
         /// Perform a hardware reset which will attempt to return the CashDispenser device to a known good state.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// This method unlocks the safe door or starts the timedelay count down prior to unlocking the safe door, 
-        /// if the device supports it. The command completes when the door is unlocked or the timer has started.
-        /// </summary>
-        public async Task<UnlockSafeResult> UnlockSafeAsync(CancellationToken cancellation)
+        public Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events, ResetDeviceRequest resetDeviceInfo, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -496,7 +512,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// <summary>
         /// This method will cause a vendor dependent sequence of hardware events which will calibrate one or more physical cash units associated with a logical cash unit.
         /// </summary>
-        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(ItemErrorCommandEvents events,
+        public Task<CalibrateCashUnitResult> CalibrateCashUnitAsync(CalibrateCashUnitCommandEvents events,
                                                                     CalibrateCashUnitRequest calibrationInfo,
                                                                     CancellationToken cancellation) => throw new NotSupportedException($"Calibration commans is not supported.");
 
@@ -626,7 +642,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// Set new configuration and counters
         /// </summary>
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
-        public async Task<SetCashStorageResult> SetCashStorageAsync(SetCashStorageRequest request, CancellationToken cancellation)
+        public Task<SetCashStorageResult> SetCashStorageAsync(SetCashStorageRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -634,7 +650,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// <summary>
         /// Start cash unit exchange operation
         /// </summary>
-        public async Task<StartExchangeResult> StartExchangeAsync(CancellationToken cancellation)
+        public Task<StartExchangeResult> StartExchangeAsync(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -642,7 +658,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// <summary>
         /// Complete cash unit exchange operation
         /// </summary>
-        public async Task<EndExchangeResult> EndExchangeAsync(CancellationToken cancellation)
+        public Task<EndExchangeResult> EndExchangeAsync(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -691,16 +707,16 @@ namespace CashAcceptor.CashAcceptorTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 CashAcceptorInterface: new CommonCapabilitiesClass.CashAcceptorInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.CashInStart,
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.CashIn,
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.CashInEnd,
@@ -711,17 +727,17 @@ namespace CashAcceptor.CashAcceptorTemplate
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.GetCashInStatus,
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.GetPositionCapabilities,
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.CommandEnum.GetPresentStatus,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.EventEnum.InputRefuseEvent,
                         CommonCapabilitiesClass.CashAcceptorInterfaceClass.EventEnum.InsertItemsEvent,
-                    }
+                    ]
                 ),
                 CashManagementInterface: new CommonCapabilitiesClass.CashManagementInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Retract,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.OpenShutter,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.CloseShutter,
@@ -729,56 +745,54 @@ namespace CashAcceptor.CashAcceptorTemplate
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.GetTellerInfo,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.CommandEnum.SetTellerInfo,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorClosedEvent,
-                        CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.SafeDoorOpenEvent,
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ShutterStatusChangedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.NoteErrorEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsTakenEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsPresentedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.ItemsInsertedEvent,
                         CommonCapabilitiesClass.CashManagementInterfaceClass.EventEnum.IncompleteRetractEvent,
-                    }
+                    ]
                 ),
                 StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.StartExchange,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.EndExchange,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
+                DeviceInformation:
+                [
+                    new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: null);
@@ -826,18 +840,38 @@ namespace CashAcceptor.CashAcceptorTemplate
             public CashStatusClass.AccuracyEnum Accuracy { get; set; }
         }
 
-        private static readonly Dictionary<string, CashManagementCapabilitiesClass.BanknoteItem> AllBanknoteIDs; 
-
-        /// <summary>
-        /// Thread for simulate cash taken event to be fired
-        /// </summary>
-        private void CashTakenThread()
+        private static readonly Dictionary<string, CashManagementCapabilitiesClass.BanknoteItem> AllBanknoteIDs = new()
         {
-            throw new NotImplementedException();
-        }
+            {
+                "typeEUR5",
+                new CashManagementCapabilitiesClass.BanknoteItem(1, "EUR", 5.0, 1, true)
+            },
+            {
+                "typeEUR10",
+                new CashManagementCapabilitiesClass.BanknoteItem(2, "EUR", 10.0, 1, true)
+            },
+            {
+                "typeEUR20",
+                new CashManagementCapabilitiesClass.BanknoteItem(3, "EUR", 20.0, 1, true)
+            },
+            {
+                "typeEUR50",
+                new CashManagementCapabilitiesClass.BanknoteItem(4, "EUR", 50.0, 1, true)
+            },
+            {
+                "typeEUR100",
+                new CashManagementCapabilitiesClass.BanknoteItem(5, "EUR", 100.0, 1, true)
+            },
+            {
+                "typeEUR200",
+                new CashManagementCapabilitiesClass.BanknoteItem(5, "EUR", 200.0, 1, true)
+            },
+            {
+                "typeEUR500",
+                new CashManagementCapabilitiesClass.BanknoteItem(6, "EUR", 500.0, 1, true)
+            }
+        };
 
         private XFS4IoT.ILogger Logger { get; }
-
-        private readonly SemaphoreSlim cashTakenSignal = new(0, 1);
     }
 }

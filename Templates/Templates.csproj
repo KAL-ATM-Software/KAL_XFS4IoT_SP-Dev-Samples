@@ -6,9 +6,9 @@
         <Title>KAL-SP-Dev Templates</Title>
         <Authors>KAL</Authors>
         <Description>KAL-SP-Dev SP project templates.</Description>
-        <Copyright>Copyright (C) KAL ATM Software GmbH, 2022</Copyright>
+        <Copyright>Copyright (C) KAL ATM Software GmbH, 2024</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
 
         <IncludeContentInPack>true</IncludeContentInPack>
         <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -16,9 +16,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content
-                Include="**\*"
-                Exclude="**\bin\**;**\obj\**" />
+        <Content Include="**\*" Exclude="**\bin\**;**\obj\**" />
         <Compile Remove="**\*" />
     </ItemGroup>
 

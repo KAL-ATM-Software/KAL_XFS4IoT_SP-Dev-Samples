@@ -55,9 +55,9 @@ namespace CardReader.CardReaderTemplate
         /// If no card has been inserted, and for all other categories of card readers, the card unit waits for the period of time specified in the call for a card to be either inserted or pulled through.
         /// The InsertCardEvent will be generated when there is no card in the cardreader and the device is ready to accept a card.
         /// </summary>
-        public async Task<AcceptCardResult> AcceptCardAsync(CommonCardCommandEvents events,
-                                                            AcceptCardRequest acceptCardInfo,
-                                                            CancellationToken cancellation)
+        public Task<AcceptCardResult> AcceptCardAsync(ReadRawDataCommandEvents events,
+                                                      AcceptCardRequest acceptCardInfo,
+                                                      CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -73,9 +73,9 @@ namespace CardReader.CardReaderTemplate
         /// For contactless chip card readers a collision of two or more card signals may happen. 
         /// In this case, if the deviceis not able to pick the strongest signal, errorCardCollision will be returned.
         /// </summary>
-        public async Task<ReadCardResult> ReadCardAsync(ReadCardCommandEvents events,
-                                                        ReadCardRequest dataToRead,
-                                                        CancellationToken cancellation)
+        public Task<ReadCardResult> ReadCardAsync(ReadCardCommandEvents events,
+                                                  ReadCardRequest dataToRead,
+                                                  CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -87,9 +87,9 @@ namespace CardReader.CardReaderTemplate
         /// This procedure is followed by data verification.
         /// If power fails during a write the outcome of the operation will be vendor specific, there is no guarantee that thewrite will have succeeded.
         /// </summary>
-        public async Task<WriteCardResult> WriteCardAsync(CommonCardCommandEvents events,
-                                                          WriteCardRequest dataToWrite,
-                                                          CancellationToken cancellation)
+        public Task<WriteCardResult> WriteCardAsync(WriteRawDataCommandEvents events,
+                                                    WriteCardRequest dataToWrite,
+                                                    CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -105,8 +105,8 @@ namespace CardReader.CardReaderTemplate
         /// For contactless chip card readers a collision of two or more card signals may happen. 
         /// In this case, if the deviceis not able to pick the strongest signal, the cardCollision error code will be returned.
         /// </summary>
-        public async Task<ChipIOResult> ChipIOAsync(ChipIORequest dataToSend,
-                                                    CancellationToken cancellation)
+        public Task<ChipIOResult> ChipIOAsync(ChipIORequest dataToSend,
+                                              CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -120,9 +120,8 @@ namespace CardReader.CardReaderTemplate
         /// If no action is specified the user card will not be moved even if this means that the devicecannot be recovered.
         /// If the device is a permanent chip card unit, this command will power-off the chip.For devices with parking station capability there will be one MediaInsertedEvent for each card found.
         /// </summary>
-        public async Task<ResetDeviceResult> ResetDeviceAsync(ResetCommandEvents events,
-                                                              ResetDeviceRequest cardAction,
-                                                              CancellationToken cancellation)
+        public Task<ResetDeviceResult> ResetDeviceAsync(ResetDeviceRequest cardAction,
+                                                        CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -130,8 +129,8 @@ namespace CardReader.CardReaderTemplate
         /// <summary>
         /// This command handles the power actions that can be done on the chip.For user chips, this command is only used after the chip has been contacted for the first time using the[CardReader.ReadRawData](#cardreader.readrawdata) command. For contactless user chips, this command may be used todeactivate the contactless card communication.For permanently connected chip cards, this command is the only way to control the chip power.
         /// </summary>
-        public async Task<ChipPowerResult> ChipPowerAsync(ChipPowerRequest action,
-                                                          CancellationToken cancellation)
+        public Task<ChipPowerResult> ChipPowerAsync(ChipPowerRequest action,
+                                                    CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +142,7 @@ namespace CardReader.CardReaderTemplate
         /// It may be calledonce on application start up or when any of the configuration parameters require to be changed. 
         /// The configurationset by this command is persistent.This command should be called with a complete list of acceptable payment system applications as any previous configurations will be replaced.
         /// </summary>
-        public async Task<EMVContactlessConfigureResult> EMVContactlessConfigureAsync(EMVContactlessConfigureRequest terminalConfig, CancellationToken cancellation)
+        public Task<EMVContactlessConfigureResult> EMVContactlessConfigureAsync(EMVContactlessConfigureRequest terminalConfig, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -160,9 +159,9 @@ namespace CardReader.CardReaderTemplate
         /// For intelligent contactless card readers, any in-built audio/visual feedback such as Beep/LEDs, need to becontrolled directly by the reader. 
         /// These indications should be implemented based on the EMVCo and payment system'sspecifications.
         /// </summary>
-        public async Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(EMVClessCommandEvents events,
-                                                                                                        EMVContactlessPerformTransactionRequest transactionData,
-                                                                                                        CancellationToken cancellation)
+        public Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(EMVClessCommandEvents events,
+                                                                                                  EMVContactlessPerformTransactionRequest transactionData,
+                                                                                                  CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -174,9 +173,9 @@ namespace CardReader.CardReaderTemplate
         /// The command enables the contactless card reader and waits for the customer to re-tap their card.
         /// The contactless chip card reader waits for the period of time specified in the command all for a card to be tapped.
         /// </summary>
-        public async Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(EMVClessCommandEvents events,
-                                                                                            EMVContactlessIssuerUpdateRequest transactionData,
-                                                                                            CancellationToken cancellation)
+        public Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(EMVClessCommandEvents events,
+                                                                                      EMVContactlessIssuerUpdateRequest transactionData,
+                                                                                      CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -185,7 +184,7 @@ namespace CardReader.CardReaderTemplate
         /// This command is used for setting the DES key that is necessary for operating a CIM86 module.
         /// The command must beexecuted before the first read command is issued to the card reader.
         /// </summary>
-        public async Task<SetCIM86KeyResult> SetCIM86KeyAsync(SetCIM86KeyRequest keyInfo,
+        public Task<SetCIM86KeyResult> SetCIM86KeyAsync(SetCIM86KeyRequest keyInfo,
                                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
@@ -238,7 +237,7 @@ namespace CardReader.CardReaderTemplate
         /// Latched dips card readers can logically move cards from the transport position to the exit position by
         /// unlatching the card reader.That is, the card will not physically move but will be accessible to the user.
         /// </summary>
-        public async Task<MoveCardResult> MoveCardAsync(MoveCardRequest moveCardInfo, CancellationToken cancellation)
+        public Task<MoveCardResult> MoveCardAsync(MoveCardRequest moveCardInfo, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -286,7 +285,7 @@ namespace CardReader.CardReaderTemplate
         /// Set new configuration and counters
         /// </summary>
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
-        public async Task<SetCardStorageResult> SetCardStorageAsync(SetCardStorageRequest request, CancellationToken cancellation)
+        public Task<SetCardStorageResult> SetCardStorageAsync(SetCardStorageRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -379,16 +378,16 @@ namespace CardReader.CardReaderTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 CardReaderInterface: new CommonCapabilitiesClass.CardReaderInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.ReadRawData,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.WriteRawData,
@@ -401,9 +400,9 @@ namespace CardReader.CardReaderTemplate
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.QueryIFMIdentifier,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.SetKey,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.CommandEnum.Move,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InsertCardEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaDetectedEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.MediaInsertedEvent,
@@ -411,43 +410,43 @@ namespace CardReader.CardReaderTemplate
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.InvalidMediaEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.EMVClessReadStatusEvent,
                         CommonCapabilitiesClass.CardReaderInterfaceClass.EventEnum.CardActionEvent,
-                    }
+                    ]
                 ),
                 StorageInterface: new CommonCapabilitiesClass.StorageInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.GetStorage,
                         CommonCapabilitiesClass.StorageInterfaceClass.CommandEnum.SetStorage,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageThresholdEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageChangedEvent,
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "CardReaderTemplate",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "CardReaderTemplate device",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
@@ -500,8 +499,6 @@ namespace CardReader.CardReaderTemplate
                                                                                         false),
                                                               new CardConfigurationClass(40));
         }
-
-        private CardUnitInfo cardUnitInfo = new ();
 
         private ILogger Logger { get; }
     }

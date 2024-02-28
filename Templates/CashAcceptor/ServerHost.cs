@@ -23,10 +23,10 @@ namespace CashAcceptor.CashAcceptorTemplate
                 /// CashAcceptor Service Provider
                 var cashAcceptorDevice = new CashAcceptorTemplate(Logger);
                 var cashAcceptorService = new CashAcceptorServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CashAcceptorTemplate",
-                                                                      cashAcceptorDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                                          ServiceName: "CashAcceptorTemplate",
+                                                                          cashAcceptorDevice,
+                                                                          Logger,
+                                                                          new FilePersistentData(Logger));
 
                 cashAcceptorDevice.SetServiceProvider = cashAcceptorService;
                 Publisher.Add(cashAcceptorService);

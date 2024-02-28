@@ -45,7 +45,7 @@ namespace BarcodeReader.BarcodeReaderTemplate
         /// The completion event for this command contains thescanned barcode data.
         /// The device waits for the period of time specified by the property in the ReadRequest.
         /// </summary>
-        public async Task<ReadResult> Read(ReadRequest request, CancellationToken cancellation)
+        public Task<ReadResult> Read(ReadRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -53,7 +53,7 @@ namespace BarcodeReader.BarcodeReaderTemplate
         /// <summary>
         /// Perform device reset command.
         /// </summary>
-        public async Task<DeviceResult> ResetDevice(CancellationToken cancellation)
+        public Task<DeviceResult> ResetDevice(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -63,8 +63,10 @@ namespace BarcodeReader.BarcodeReaderTemplate
         /// RunAync
         /// Handle unsolic events
         /// </summary>
-        public async Task RunAsync(CancellationToken Token)
-        { }
+        public Task RunAsync(CancellationToken Token)
+        {
+            return Task.CompletedTask;
+        }
 
         /// <summary>
         /// Stores barcode reader capabilites
@@ -96,41 +98,41 @@ namespace BarcodeReader.BarcodeReaderTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 BarcodeReaderInterface: new CommonCapabilitiesClass.BarcodeReaderInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.BarcodeReaderInterfaceClass.CommandEnum.Read,
                         CommonCapabilitiesClass.BarcodeReaderInterfaceClass.CommandEnum.Reset,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
+                DeviceInformation:
+                [
+                    new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

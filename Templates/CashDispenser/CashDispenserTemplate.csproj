@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>CashDispenserTemplate</AssemblyName>
     <RootNamespace>CashDispenser.CashDispenserTemplate</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="1.6.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>

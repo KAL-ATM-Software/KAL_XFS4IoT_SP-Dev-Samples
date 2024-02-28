@@ -44,10 +44,6 @@ namespace Biometric.BiometricTemplate
 
         private readonly ILogger _logger;
 
-        // Biometric Sample to use within the Sample project.
-        private readonly List<byte> SampleData = Enumerable.Range(0, 255).Select(c => (byte)c).ToList();
-        private List<byte> LastScannedData = null;
-
         public Dictionary<string, BiometricDataType> StorageInfo { get => internalTemplates.ToDictionary(c => c.Key, c => c.Value.DataType); }
         private Dictionary<string, BiometricData> internalTemplates { get; set; } = new();
         private int internalTemplateId = 0;
@@ -56,23 +52,21 @@ namespace Biometric.BiometricTemplate
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
-        private IBiometricService BiometricService => SetServiceProvider.IsA<IBiometricService>();
-
         public CommonStatusClass CommonStatus { get; set; }
 
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 BiometricInterface: new CommonCapabilitiesClass.BiometricInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Clear,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.GetStorageInfo,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Import,
@@ -80,38 +74,38 @@ namespace Biometric.BiometricTemplate
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Read,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.BiometricInterfaceClass.CommandEnum.SetDataPersistence
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.PresentSubjectEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.SubjectDetectedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.RemoveSubjectEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.SubjectRemovedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.DataClearedEvent,
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.OrientationEvent
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
+                DeviceInformation:
+                [
+                    new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
-                                new CommonCapabilitiesClass.SoftwareClass(
+                            ],
+                            Software:
+                            [
+                                new(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
@@ -142,12 +136,12 @@ namespace Biometric.BiometricTemplate
                                                false,
                                                KeyManagementCapabilitiesClass.DESKeyLengthEmum.NotSupported,
                                                KeyManagementCapabilitiesClass.CertificateTypeEnum.NotSupported,
-                                               new(),
+                                               [],
                                                KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
                                                KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.NotSupported,
-                                               new(),
-                                               new(),
-                                               new());
+                                               [],
+                                               [],
+                                               []);
 
         public Task<DeviceResult> ClearAsync(ClearDataRequest ClearMode, CancellationToken cancellation)
         {
@@ -164,7 +158,7 @@ namespace Biometric.BiometricTemplate
             throw new NotImplementedException();
         }
 
-        public async Task<ReadResult> ReadAsync(ReadRequest request, CancellationToken cancellation)
+        public Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -255,6 +249,12 @@ namespace Biometric.BiometricTemplate
             => throw new NotSupportedException();
 
         public Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportEMVPublicKeyResult> ImportEMVPublicKey(ImportEMVPublicKeyRequest request, CancellationToken cancellation)
             => throw new NotSupportedException();
 
         #endregion

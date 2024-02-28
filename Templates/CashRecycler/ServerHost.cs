@@ -23,10 +23,10 @@ namespace CashRecycler.CashRecyclerTemplate
                 /// CashRecycler Service Provider
                 var cashRecyclerDevice = new CashRecyclerTemplate(Logger);
                 var cashRecyclerService = new CashRecyclerServiceProvider(EndpointDetails,
-                                                                      ServiceName: "CashRecyclerTemplate",
-                                                                      cashRecyclerDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                                          ServiceName: "CashRecyclerTemplate",
+                                                                          cashRecyclerDevice,
+                                                                          Logger,
+                                                                          new FilePersistentData(Logger));
 
                 cashRecyclerDevice.SetServiceProvider = cashRecyclerService;
                 Publisher.Add(cashRecyclerService);

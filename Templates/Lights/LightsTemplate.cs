@@ -53,7 +53,7 @@ namespace Lights.LightsTemplate
         /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
         /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
         /// </summary>
-        public async Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation)
+        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -107,40 +107,40 @@ namespace Lights.LightsTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 LightsInterface: new CommonCapabilitiesClass.LightsInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
-                                new CommonCapabilitiesClass.FirmwareClass(
+                            Firmware:
+                            [
+                                new(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
-                                new CommonCapabilitiesClass.SoftwareClass(
+                            ],
+                            Software:
+                            [
+                                new(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

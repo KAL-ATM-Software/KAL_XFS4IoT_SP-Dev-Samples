@@ -28,6 +28,7 @@ using XFS4IoT.Crypto.Completions;
 using XFS4IoT.Keyboard.Events;
 using XFS4IoT.Completions;
 using XFS4IoTServer;
+using System.Runtime.Loader;
 
 namespace PinPad.PinPadTemplate
 {
@@ -52,8 +53,8 @@ namespace PinPad.PinPadTemplate
                                                  CommonStatusClass.ExchangeEnum.NotSupported,
                                                  CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
-                                                               KeyManagementStatusClass.CertificateStateEnum.Unknown);
+            KeyManagementStatus = new KeyManagementStatusClass(encryptionState,
+                                                               certState);
 
             KeyboardStatus = new KeyboardStatusClass(KeyboardStatusClass.AutoBeepModeEnum.InActive);
         }
@@ -93,7 +94,7 @@ namespace PinPad.PinPadTemplate
         /// If the application makes a call to [PinPad.GetPinblock](#pinpad.getpinblock) or a local verification command without the minimum PIN digits having been entered, 
         /// either the command will fail or the PIN verification will fail. It is the responsibility of the application to identify the mapping between the FDK code and the physical location of the FDK.
         /// </summary>
-        public async Task<PinEntryResult> PinEntry(KeyboardCommandEvents events, PinEntryRequest request, CancellationToken cancellation)
+        public Task<PinEntryResult> PinEntry(KeyboardCommandEvents events, PinEntryRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +103,7 @@ namespace PinPad.PinPadTemplate
         /// This function enables keyboard insercure mode and report entered key in clear text with solicited events. 
         /// For Keyboard device, this command will clear the pin unless the application has requested that the pin be maintained through the MaintainPin command.
         /// </summary>
-        public async Task<DataEntryResult> DataEntry(KeyboardCommandEvents events, DataEntryRequest request, CancellationToken cancellation)
+        public Task<DataEntryResult> DataEntry(KeyboardCommandEvents events, DataEntryRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -134,7 +135,7 @@ namespace PinPad.PinPadTemplate
         /// Encryption key parts entered with this command are stored through either the ImportKey. 
         /// Each key part can only be stored once after which the secure key buffer will be cleared automatically.
         /// </summary>
-        public async Task<SecureKeyEntryResult> SecureKeyEntry(KeyboardCommandEvents events, SecureKeyEntryRequest request, CancellationToken cancellation)
+        public Task<SecureKeyEntryResult> SecureKeyEntry(KeyboardCommandEvents events, SecureKeyEntryRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +144,7 @@ namespace PinPad.PinPadTemplate
         /// This command is used to enable or disable the device from emitting a beep tone on subsequent key presses of active or in-active keys.
         /// This command is valid only on devices which have the capability to support application control of automatic beeping. 
         /// </summary>
-        public async Task<DeviceResult> SetKeypressBeep(KeyboardBeepEnum Beep, CancellationToken cancellation)
+        public Task<DeviceResult> SetKeypressBeep(KeyboardBeepEnum Beep, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -156,7 +157,7 @@ namespace PinPad.PinPadTemplate
         /// (4) Secure mode which corresponds to the SecureKeyEntry command. 
         /// One or more layouts can be preloaded into the device, if the device supports this, or a single layout can be loaded into the device immediately prior to the keyboard command being requested. If a [Keyboard.DataEntry](#keyboard.dataentry), [Keyboard.PinEntry](#keyboard.pinentry), or [Keyboard.SecureKeyEntry](#keyboard.securekeyentry) command is already in progress (or queued), then this command is rejected with a command result of SequenceError. Layouts defined with this command are persistent.
         /// </summary>
-        public async Task<DefineLayoutResult> DefineLayout(Dictionary<EntryModeEnum, List<FrameClass>> request, CancellationToken cancellation)
+        public Task<DefineLayoutResult> DefineLayout(Dictionary<EntryModeEnum, List<FrameClass>> request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -194,7 +195,7 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// The PIN, which was entered with the GetPin command, is combined with the requisite data specified by the DES validation algorithm and locally verified for correctness. The result of the verification is returned to the application. This command will clear the PIN unless the application has requested that the PIN be maintained through the [PinPad.MaintinPin](#pinpad.maintainpin) command.
         /// </summary>
-        public async Task<VerifyPINLocalResult> VerifyPINLocalDES(VerifyPINLocalDESRequest request, CancellationToken cancellation)
+        public Task<VerifyPINLocalResult> VerifyPINLocalDES(VerifyPINLocalDESRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -202,7 +203,7 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// The PIN, which was entered with the GetPin command, is combined with the requisite data specified by the VISA validation algorithm and locally verified for correctness. The result of the verification is returned to the application. This command will clear the PIN unless the application has requested that the PIN be maintained through the [PinPad.MaintinPin](#pinpad.maintainpin) command.
         /// </summary>
-        public async Task<VerifyPINLocalResult> VerifyPINLocalVISA(VerifyPINLocalVISARequest request, CancellationToken cancellation)
+        public Task<VerifyPINLocalResult> VerifyPINLocalVISA(VerifyPINLocalVISARequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -211,7 +212,7 @@ namespace PinPad.PinPadTemplate
         /// This command is used to control if the PIN is maintained after a PIN processing command for subsequent use by other PIN processing commands. 
         /// This command is also used to clear the PIN buffer when the PIN is no longer required.
         /// </summary>
-        public async Task<DeviceResult> MaintainPin(bool MaintainPIN, CancellationToken cancellation)
+        public Task<DeviceResult> MaintainPin(bool MaintainPIN, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -221,7 +222,7 @@ namespace PinPad.PinPadTemplate
         /// keyboard interface GetPin and GetPinBlock should be called after this command.
         /// For all other devices Unsupported will be returned here. If this command is required and it is not called, the Keyboard.GetPin command will fail with the generic error SequenceError. If the input parameters passed to this commad and [PinPad.GetPinBlock](#pinpad.getpinblock) are not identical, the [PinPad.GetPinBlock](#pinpad.getpinblock) command will fail with the generic error InvalidData. The data associated with this command will be cleared on a [PinPad.GetPinBlock](#pinpad.getpinblock) command.
         /// </summary>
-        public async Task<DeviceResult> SetPinBlockData(PINBlockRequest request, CancellationToken cancellation)
+        public Task<DeviceResult> SetPinBlockData(PINBlockRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -231,7 +232,7 @@ namespace PinPad.PinPadTemplate
         /// The PIN block can be calculated using one of the algorithms specified in the device capabilities.
         /// This command will clear the PIN unless the application has requested that the PIN be maintained through the MaintinPin command enabled.
         /// </summary>
-        public async Task<PINBlockResult> GetPinBlock(PinPadCommandEvents events, PINBlockRequest request, CancellationToken cancellation)
+        public Task<PINBlockResult> GetPinBlock(PinPadCommandEvents events, PINBlockRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -241,7 +242,7 @@ namespace PinPad.PinPadTemplate
         /// The result of the presentation is returned to the application. 
         /// This command will clear the PIN unless the application has requested that the PIN be maintained through the MaintainPin command.
         /// </summary>
-        public async Task<PresentIDCResult> PresentIDC(PresentIDCRequest request,
+        public Task<PresentIDCResult> PresentIDC(PresentIDCRequest request,
                                           CancellationToken cancellation)
         {
             throw new NotImplementedException();
@@ -271,8 +272,8 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// Importing key components temporarily while in secure key loading process 
         /// </summary>
-        public async Task<ImportKeyResult> ImportKeyPart(ImportKeyPartRequest request,
-                                                         CancellationToken cancellation)
+        public Task<ImportKeyResult> ImportKeyPart(ImportKeyPartRequest request,
+                                                   CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -281,8 +282,8 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// Last part of loading key components stored temporarily in secure key buffer into the EPP
         /// </summary>
-        public async Task<ImportKeyResult> AssemblyKeyParts(AssemblyKeyPartsRequest request,
-                                                            CancellationToken cancellation)
+        public Task<ImportKeyResult> AssemblyKeyParts(AssemblyKeyPartsRequest request,
+                                                      CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -291,8 +292,8 @@ namespace PinPad.PinPadTemplate
         /// The encryption key passed by the application is loaded in the encryption module. 
         /// For secret keys, the key must be passed encrypted with an accompanying "key encrypting key" or "key block protection key". For public keys, they key is not required to be encrypted but is required to have verification data in order to be loaded.
         /// </summary>
-        public async Task<ImportKeyResult> ImportKey(ImportKeyRequest request,
-                                                     CancellationToken cancellation)
+        public Task<ImportKeyResult> ImportKey(ImportKeyRequest request,
+                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -301,8 +302,8 @@ namespace PinPad.PinPadTemplate
         /// This command can be used to delete a key without authentication.
         /// Where an authenticated delete is required, the StartAuthenticate command should be used.
         /// </summary>
-        public async Task<DeviceResult> DeleteKey(DeleteKeyRequest request,
-                                                  CancellationToken cancellation)
+        public Task<DeviceResult> DeleteKey(DeleteKeyRequest request,
+                                            CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -310,8 +311,8 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// This command returns the Key Check Value (KCV) for the specified key. 
         /// </summary>
-        public async Task<GenerateKCVResult> GenerateKCV(GenerateKCVRequest request,
-                                                         CancellationToken cancellation)
+        public Task<GenerateKCVResult> GenerateKCV(GenerateKCVRequest request,
+                                                   CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -341,8 +342,8 @@ namespace PinPad.PinPadTemplate
         /// but the LoadCertificate or ReplaceCertificate commands must be called again.When multiple ZKA HSMs are present, 
         /// this command deletes all keys loaded within all ZKA logical HSMs.
         /// </summary>
-        public async Task<InitializationResult> Initialization(InitializationRequest request,
-                                                               CancellationToken cancellation)
+        public Task<InitializationResult> Initialization(InitializationRequest request,
+                                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -357,8 +358,8 @@ namespace PinPad.PinPadTemplate
         /// Key parts loaded with the secureConstruct flag can only be stored once as the encryption key in the secure key buffer is no longer available after this command has been executed. 
         /// The construct and secureConstruct construction flags cannot be used in combination. 
         /// </summary>
-        public async Task<DeriveKeyResult> DeriveKey(DeriveKeyRequest request,
-                                                     CancellationToken cancellation)
+        public Task<DeriveKeyResult> DeriveKey(DeriveKeyRequest request,
+                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -366,7 +367,7 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// Sends a service reset to the Service Provider. 
         /// </summary>
-        public async Task<DeviceResult> ResetDevice(CancellationToken cancellation)
+        public Task<DeviceResult> ResetDevice(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -383,14 +384,14 @@ namespace PinPad.PinPadTemplate
         ///   These public/private key pairs are installed during manufacture.
         ///   Typically, an exported public key is used by the host to encipher the symmetric key.
         /// </summary>
-        public async Task<RSASignedItemResult> ExportEPPId(ExportEPPIdRequest request,
-                                                           CancellationToken cancellation)
+        public Task<RSASignedItemResult> ExportEPPId(ExportEPPIdRequest request,
+                                                     CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<RSASignedItemResult> ExportRSAPublicKey(ExportRSAPublicKeyRequest request,
-                                                                  CancellationToken cancellation)
+        public Task<RSASignedItemResult> ExportRSAPublicKey(ExportRSAPublicKeyRequest request,
+                                                            CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -401,8 +402,8 @@ namespace PinPad.PinPadTemplate
         /// ExportRSAEPPSignedItem.The newly generated key pair can only be used for the use defined in the use flag.
         /// This flag defines the use of the private key; its public key can only be used for the inverse function.
         /// </summary>
-        public async Task<GenerateRSAKeyPairResult> GenerateRSAKeyPair(GenerateRSAKeyPairRequest request,
-                                                                       CancellationToken cancellation)
+        public Task<GenerateRSAKeyPairResult> GenerateRSAKeyPair(GenerateRSAKeyPairRequest request,
+                                                                 CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -412,8 +413,8 @@ namespace PinPad.PinPadTemplate
         /// This command only needs to be called once if no new Certificate Authority has taken over.
         /// The output of this command will specify in the PKCS #7 message the resulting Primary or Secondary certificate.
         /// </summary>
-        public async Task<ExportCertificateResult> ExportCertificate(ExportCertificateRequest request,
-                                                                     CancellationToken cancellation)
+        public Task<ExportCertificateResult> ExportCertificate(ExportCertificateRequest request,
+                                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -424,8 +425,8 @@ namespace PinPad.PinPadTemplate
         /// These operations will replace either the primary or secondary Certificate Authority public verification key inside of the KeyManagement.
         /// After this command is complete, the application should send the LoadCertificate and GetCertificate commands to ensure that the new HOST and the encryptor have all the information required to perform the remote key loading process.
         /// </summary>
-        public async Task<ReplaceCertificateResult> ReplaceCertificate(ReplaceCertificateRequest request,
-                                                                       CancellationToken cancellation)
+        public Task<ReplaceCertificateResult> ReplaceCertificate(ReplaceCertificateRequest request,
+                                                                 CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -436,7 +437,7 @@ namespace PinPad.PinPadTemplate
         /// This output value is returned to the host and is used in the ImportKey and LoadCertificate to verify that the encryptor is talking to the proper host.
         /// The ImportKey command end the key exchange process.
         /// </summary>
-        public async Task<StartKeyExchangeResult> StartKeyExchange(CancellationToken cancellation)
+        public Task<StartKeyExchangeResult> StartKeyExchange(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -447,8 +448,8 @@ namespace PinPad.PinPadTemplate
         /// This command can be used to load a host certificate when there is not already one present in the encryptor as well as replace the existing host certificate with a new host certificate.
         /// The type of certificate (Primary or Secondary) to be loaded will be embedded within the actual certificate structure.
         /// </summary>
-        public async Task<ImportCertificateResult> ImportCertificate(ImportCertificateRequest request,
-                                                                     CancellationToken cancellation)
+        public Task<ImportCertificateResult> ImportCertificate(ImportCertificateRequest request,
+                                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -459,11 +460,17 @@ namespace PinPad.PinPadTemplate
         /// Any attempt to call the referenced command without using the Authenticate command, if authentication is required, 
         /// shall result in AuthRequired. 
         /// </summary>
-        public async Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, 
-                                                                     CancellationToken cancellation)
+        public Task<StartAuthenticateResult> StartAuthenticate(StartAuthenticateRequest request, 
+                                                               CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
+
+        public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
+
+        public Task<ImportEMVPublicKeyResult> ImportEMVPublicKey(ImportEMVPublicKeyRequest request, CancellationToken cancellation)
+            => throw new NotSupportedException();
 
         /// <summary>
         /// KeyManagement Status
@@ -528,7 +535,7 @@ namespace PinPad.PinPadTemplate
         /// <summary>
         /// This command is used to generate a random number. 
         /// </summary>
-        public async Task<GenerateRandomNumberResult> GenerateRandomNumber(CancellationToken cancellation)
+        public Task<GenerateRandomNumberResult> GenerateRandomNumber(CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -541,7 +548,7 @@ namespace PinPad.PinPadTemplate
         /// The start value (or Initialization Vector) can be provided as input data to this command, or it can beimported via TR-31 prior to requesting this command and referenced by name.
         /// The start value and start value keyare both optional parameters.
         /// </summary>
-        public async Task<CryptoDataResult> Crypto(CryptoCommandEvents events,
+        public Task<CryptoDataResult> Crypto(CryptoCommandEvents events,
                                                    CryptoDataRequest request,
                                                    CancellationToken cancellation)
         {
@@ -553,18 +560,18 @@ namespace PinPad.PinPadTemplate
         /// This input data is padded to necessary length mandated by the signature algorithm using padding parameter.
         /// Applications can use an alternative padding method by pre-formatting the data passed and combining this withthe standard padding method. 
         /// </summary>
-        public async Task<GenerateAuthenticationDataResult> GenerateSignature(CryptoCommandEvents events,
-                                                                              GenerateSignatureRequest request,
-                                                                              CancellationToken cancellation)
+        public Task<GenerateAuthenticationDataResult> GenerateSignature(CryptoCommandEvents events,
+                                                                        GenerateSignatureRequest request,
+                                                                        CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
 
         /// This command can be used for Message Authentication Code generation (i.e. macing).
         /// The input data ispadded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<GenerateAuthenticationDataResult> GenerateMAC(CryptoCommandEvents events,
-                                                                        GenerateMACRequest request,
-                                                                        CancellationToken cancellation)
+        public Task<GenerateAuthenticationDataResult> GenerateMAC(CryptoCommandEvents events,
+                                                                  GenerateMACRequest request,
+                                                                  CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -576,18 +583,18 @@ namespace PinPad.PinPadTemplate
         /// The start value (orInitialization Vector) can be provided as input data to this command, or it can be imported via TR-31 prior to requesting this command and referenced by name. 
         /// The start value and start value key are both optional parameters.
         /// </summary>
-        public async Task<VerifyAuthenticationDataResult> VerifySignature(CryptoCommandEvents events,
-                                                                          VerifySignatureRequest request,
-                                                                          CancellationToken cancellation)
+        public Task<VerifyAuthenticationDataResult> VerifySignature(CryptoCommandEvents events,
+                                                                    VerifySignatureRequest request,
+                                                                    CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
 
         /// This command can be used for MAC verification.
         /// The input data is padded to the necessary length mandated by the encryption algorithm using the padding parameter.
-        public async Task<VerifyAuthenticationDataResult> VerifyMAC(CryptoCommandEvents events,
-                                                                    VerifyMACRequest request,
-                                                                    CancellationToken cancellation)
+        public Task<VerifyAuthenticationDataResult> VerifyMAC(CryptoCommandEvents events,
+                                                              VerifyMACRequest request,
+                                                              CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -596,8 +603,8 @@ namespace PinPad.PinPadTemplate
         /// This command is used to compute a hash code on a stream of data using the specified hash algorithm. 
         /// This command can be used to verify EMV static and dynamic data.
         /// </summary>
-        public async Task<GenerateDigestResult> GenerateDigest(GenerateDigestRequest request,
-                                                               CancellationToken cancellation)
+        public Task<GenerateDigestResult> GenerateDigest(GenerateDigestRequest request,
+                                                         CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -631,9 +638,9 @@ namespace PinPad.PinPadTemplate
         /// Here is an example of handling MediaRemovedEvent after card is ejected successfully.
         /// </summary>
         /// <returns></returns>
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         #region COMMON Interface
@@ -649,16 +656,21 @@ namespace PinPad.PinPadTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ],
+                    Events:
+                    [
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.StatusChangedEvent,
+                        CommonCapabilitiesClass.CommonInterfaceClass.EventEnum.ErrorEvent
+                    ]
                 ),
                 KeyManagementInterface: new CommonCapabilitiesClass.KeyManagementInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
@@ -671,36 +683,30 @@ namespace PinPad.PinPadTemplate
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.StartAuthenticate,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetKeyDetail,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.CertificateChangeEvent,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.InitializedEvent,
-                    },
-                    AuthenticationRequired: new()
-                    {
-                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.Initialization,
-                    }
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.DUKPTKSNEvent,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.EventEnum.IllegalKeyAccessEvent,
+                    ]
                 ),
                 CryptoInterface: new CommonCapabilitiesClass.CryptoInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.CryptoData,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.Digest,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateAuthentication,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.GenerateRandom,
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.CryptoInterfaceClass.EventEnum.IllegalKeyAccessEvent,
-                    }
+                    ]
                 ),
                 PinPadInterface: new CommonCapabilitiesClass.PinPadInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetPinBlock,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.GetQueryPCIPTSDeviceId,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.LocalDES,
@@ -709,17 +715,12 @@ namespace PinPad.PinPadTemplate
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.PresentIDC,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.PinPadInterfaceClass.CommandEnum.SetPinBlockData,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.DUKPTKSNEvent,
-                        CommonCapabilitiesClass.PinPadInterfaceClass.EventEnum.IllegalKeyAccessEvent,
-                    }
+                    ]
                 ),
                 KeyboardInterface: new CommonCapabilitiesClass.KeyboardInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DataEntry,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.DefineLayout,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.GetLayout,
@@ -727,35 +728,35 @@ namespace PinPad.PinPadTemplate
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.PinEntry,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.Reset,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.CommandEnum.SecureKeyEntry,
-                    },
-                    Events: new()
-                    {
+                    ],
+                    Events:
+                    [
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.EnterDataEvent,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.KeyEvent,
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.LayoutEvent,
-                    }
+                    ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
+                DeviceInformation:
+                [
+                    new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
                             RevisionNumber: "RevisionNumber",
                             ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
@@ -810,23 +811,14 @@ namespace PinPad.PinPadTemplate
             throw new NotImplementedException();
         }
 
-        public XFS4IoTServer.IServiceProvider SetServiceProvider 
-        { 
-            get { return pinPadServiceProvider;  } 
-            set {} 
-        }
+        public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
         private ILogger Logger { get; }
 
-        private readonly SemaphoreSlim initializedSignal = new(0, 1);
-        private PinPadServiceProvider pinPadServiceProvider = null;
-        private bool serviceInitialized = false;
+        private KeyManagementStatusClass.EncryptionStateEnum encryptionState = KeyManagementStatusClass.EncryptionStateEnum.NotInitialized;
+        private KeyManagementStatusClass.CertificateStateEnum certState = KeyManagementStatusClass.CertificateStateEnum.Primary;
 
-        private XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum encryptionState = XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum.NotInitialized;
-        private XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum certState = XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Primary;
-
-        private readonly Dictionary<EntryModeEnum, List<FrameClass>> keyLayouts = new()
-        {};
+        private readonly Dictionary<EntryModeEnum, List<FrameClass>> keyLayouts = [];
 
         private static class Constants
         {

@@ -22,7 +22,6 @@ namespace Auxiliaries.AuxiliariesTemplate
 {
     public class AuxiliariesTemplate : IAuxiliariesDevice, ICommonDevice, ILightsDevice
     {
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -35,15 +34,21 @@ namespace Auxiliaries.AuxiliariesTemplate
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
-        public AuxiliariesCapabilities AuxiliariesCapabilities { get; set; } = new AuxiliariesCapabilities(HandsetSensor: AuxiliariesCapabilities.HandsetSensorCapabilities.Manual | AuxiliariesCapabilities.HandsetSensorCapabilities.Microphone | AuxiliariesCapabilities.HandsetSensorCapabilities.Auto | AuxiliariesCapabilities.HandsetSensorCapabilities.SemiAuto,
-                                                                                                           AutoStartupMode: AuxiliariesCapabilities.AutoStartupModes.Daily | AuxiliariesCapabilities.AutoStartupModes.Weekly | AuxiliariesCapabilities.AutoStartupModes.Specific,
-                                                                                                           AuxiliariesSupported: AuxiliariesCapabilities.AuxiliariesSupportedEnum.Heating);
-        public AuxiliariesStatus AuxiliariesStatus { get; set; } = new AuxiliariesStatus(HandsetSensor: AuxiliariesStatus.HandsetSensorStatusEnum.OffTheHook, Heating: AuxiliariesStatus.SensorEnum.Off);
+        public AuxiliariesCapabilitiesClass AuxiliariesCapabilities { get; set; } = 
+            new AuxiliariesCapabilitiesClass(
+                HandsetSensor: AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Manual | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Microphone | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Auto | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.SemiAuto,
+                AutoStartupMode: AuxiliariesCapabilitiesClass.AutoStartupModes.Daily | AuxiliariesCapabilitiesClass.AutoStartupModes.Weekly | AuxiliariesCapabilitiesClass.AutoStartupModes.Specific,
+                AuxiliariesSupported: AuxiliariesCapabilitiesClass.AuxiliariesSupportedEnum.Heating);
+
+        public AuxiliariesStatusClass AuxiliariesStatus { get; set; } = 
+            new AuxiliariesStatusClass(
+                HandsetSensor: AuxiliariesStatusClass.HandsetSensorStatusEnum.OffTheHook, 
+                Heating: AuxiliariesStatusClass.SensorEnum.Off);
+
         private ILogger Logger { get; }
 
         AutoStartupTimeModeEnum AutoStartupTimeModeEnum { get; set; } = AutoStartupTimeModeEnum.Clear;
         StartupTime AutoStartupTime { get; set; } = null;
-
 
         public Task<DeviceResult> ClearAutoStartupTime(CancellationToken cancellation)
         {
@@ -56,9 +61,9 @@ namespace Auxiliaries.AuxiliariesTemplate
         }
 
 
-        public async Task RunAsync(CancellationToken Token)
+        public Task RunAsync(CancellationToken Token)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task<DeviceResult> SetAutostartupTime(SetAutostartupTimeRequest autoStartupInfo, CancellationToken cancellation)
@@ -83,33 +88,29 @@ namespace Auxiliaries.AuxiliariesTemplate
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
-                    }
+                    ]
                 ),
                 AuxiliariesInterface: new CommonCapabilitiesClass.AuxiliariesInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAuxiliaries,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.Register,
-                    },
-                    Events: new()
-                    {
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.EventEnum.AuxiliaryStatusEvent,
-                    }
+                    ]
                 ),
                 LightsInterface: new CommonCapabilitiesClass.LightsInterfaceClass
                 (
-                    Commands: new()
-                    {
+                    Commands:
+                    [
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
-                    }
+                    ]
                 ),
                 DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
                 {
@@ -125,12 +126,12 @@ namespace Auxiliaries.AuxiliariesTemplate
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
                             },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
+                            ])
                 },
                 PowerSaveControl: false,
                 AntiFraudModule: false);
@@ -150,7 +151,7 @@ namespace Auxiliaries.AuxiliariesTemplate
         /// For guidelights, the slow and medium flash rates must not be greater than 2.0 Hz. 
         /// It should be noted that in order to comply with American Disabilities Act guidelines only a slow or medium flash rate must be used.
         /// </summary>
-        public async Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation)
+        public Task<SetLightResult> SetLightAsync(SetLightRequest request, CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }

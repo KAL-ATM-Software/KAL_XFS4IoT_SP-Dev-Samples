@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace BarcodeReader.BarcodeReaderTemplate
+namespace Camera.CameraTemplate
 {
     class Server
     {
@@ -20,15 +20,16 @@ namespace BarcodeReader.BarcodeReaderTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// BarcodeReader Service Provider
-                var barcodeReaderDevice = new BarcodeReaderTemplate(Logger);
-                var barcodeReaderService = new BarcodeReaderServiceProvider(EndpointDetails,
-                                                                            ServiceName: "BarcodeReaderTemplate",
-                                                                            barcodeReaderDevice,
-                                                                            Logger);
+                /// Camera Service Provider
+                var camDevice = new CameraTemplate(Logger);
+                var camService = new CameraServiceProvider(EndpointDetails,
+                                                           ServiceName: "CameraTemplate",
+                                                           camDevice,
+                                                           Logger,
+                                                           new FilePersistentData(Logger));
 
-                barcodeReaderDevice.SetServiceProvider = barcodeReaderService;
-                Publisher.Add(barcodeReaderService);
+                camDevice.SetServiceProvider = camService;
+                Publisher.Add(camService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }

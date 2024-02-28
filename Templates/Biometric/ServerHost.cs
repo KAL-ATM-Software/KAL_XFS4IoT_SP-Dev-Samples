@@ -23,10 +23,10 @@ namespace Biometric.BiometricTemplate
                 /// Biometric Service Provider
                 var biometricDevice = new BiometricTemplate(Logger);
                 var biometricService = new BiometricServiceProvider(EndpointDetails,
-                                                                      ServiceName: "BiometricTemplate",
-                                                                      biometricDevice,
-                                                                      Logger,
-                                                                      new FilePersistentData(Logger));
+                                                                    ServiceName: "BiometricTemplate",
+                                                                    biometricDevice,
+                                                                    Logger,
+                                                                    new FilePersistentData(Logger));
 
                 biometricDevice.SetServiceProvider = biometricService;
                 Publisher.Add(biometricService);
