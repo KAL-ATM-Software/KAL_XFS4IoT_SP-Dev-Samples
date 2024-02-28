@@ -356,6 +356,22 @@ namespace TestClientForms
             CashAcceptorAccURI = new System.Windows.Forms.TextBox();
             label74 = new System.Windows.Forms.Label();
             label75 = new System.Windows.Forms.Label();
+            tabPage1 = new System.Windows.Forms.TabPage();
+            TakePic = new System.Windows.Forms.Button();
+            cameraTreeView = new System.Windows.Forms.TreeView();
+            cameraRawBox = new System.Windows.Forms.TextBox();
+            CameraReset = new System.Windows.Forms.Button();
+            label79 = new System.Windows.Forms.Label();
+            StCamera = new System.Windows.Forms.TextBox();
+            CameraCapabilities = new System.Windows.Forms.Button();
+            CameraStatus = new System.Windows.Forms.Button();
+            CameraServiceURI = new System.Windows.Forms.TextBox();
+            CameraServiceDiscovery = new System.Windows.Forms.Button();
+            CameraPortNum = new System.Windows.Forms.TextBox();
+            label80 = new System.Windows.Forms.Label();
+            CameraURI = new System.Windows.Forms.TextBox();
+            label81 = new System.Windows.Forms.Label();
+            label82 = new System.Windows.Forms.Label();
             testClientTabControl.SuspendLayout();
             CardReaderTab.SuspendLayout();
             DispenserTab.SuspendLayout();
@@ -370,6 +386,7 @@ namespace TestClientForms
             BarcodeReaderTabPage.SuspendLayout();
             BiometricPage.SuspendLayout();
             CashAccTabPage.SuspendLayout();
+            tabPage1.SuspendLayout();
             SuspendLayout();
             // 
             // AcceptCard
@@ -596,6 +613,7 @@ namespace TestClientForms
             testClientTabControl.Controls.Add(BarcodeReaderTabPage);
             testClientTabControl.Controls.Add(BiometricPage);
             testClientTabControl.Controls.Add(CashAccTabPage);
+            testClientTabControl.Controls.Add(tabPage1);
             testClientTabControl.Location = new System.Drawing.Point(8, 3);
             testClientTabControl.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             testClientTabControl.Name = "testClientTabControl";
@@ -3900,6 +3918,179 @@ namespace TestClientForms
             label75.TabIndex = 53;
             label75.Text = "Service URI";
             // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(TakePic);
+            tabPage1.Controls.Add(cameraTreeView);
+            tabPage1.Controls.Add(cameraRawBox);
+            tabPage1.Controls.Add(CameraReset);
+            tabPage1.Controls.Add(label79);
+            tabPage1.Controls.Add(StCamera);
+            tabPage1.Controls.Add(CameraCapabilities);
+            tabPage1.Controls.Add(CameraStatus);
+            tabPage1.Controls.Add(CameraServiceURI);
+            tabPage1.Controls.Add(CameraServiceDiscovery);
+            tabPage1.Controls.Add(CameraPortNum);
+            tabPage1.Controls.Add(label80);
+            tabPage1.Controls.Add(CameraURI);
+            tabPage1.Controls.Add(label81);
+            tabPage1.Controls.Add(label82);
+            tabPage1.Location = new System.Drawing.Point(4, 29);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            tabPage1.Size = new System.Drawing.Size(1346, 691);
+            tabPage1.TabIndex = 13;
+            tabPage1.Text = "Camera";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // TakePic
+            // 
+            TakePic.Location = new System.Drawing.Point(1211, 13);
+            TakePic.Margin = new System.Windows.Forms.Padding(0);
+            TakePic.Name = "TakePic";
+            TakePic.Size = new System.Drawing.Size(127, 29);
+            TakePic.TabIndex = 91;
+            TakePic.Text = "TakePicture";
+            TakePic.UseVisualStyleBackColor = true;
+            TakePic.Click += TakePic_Click;
+            // 
+            // cameraTreeView
+            // 
+            cameraTreeView.Location = new System.Drawing.Point(23, 273);
+            cameraTreeView.Name = "cameraTreeView";
+            cameraTreeView.Size = new System.Drawing.Size(892, 405);
+            cameraTreeView.TabIndex = 90;
+            // 
+            // cameraRawBox
+            // 
+            cameraRawBox.Location = new System.Drawing.Point(931, 273);
+            cameraRawBox.Multiline = true;
+            cameraRawBox.Name = "cameraRawBox";
+            cameraRawBox.ReadOnly = true;
+            cameraRawBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            cameraRawBox.Size = new System.Drawing.Size(407, 405);
+            cameraRawBox.TabIndex = 89;
+            cameraRawBox.WordWrap = false;
+            // 
+            // CameraReset
+            // 
+            CameraReset.Location = new System.Drawing.Point(1211, 53);
+            CameraReset.Margin = new System.Windows.Forms.Padding(0);
+            CameraReset.Name = "CameraReset";
+            CameraReset.Size = new System.Drawing.Size(127, 29);
+            CameraReset.TabIndex = 88;
+            CameraReset.Text = "Reset";
+            CameraReset.UseVisualStyleBackColor = true;
+            CameraReset.Click += CameraReset_Click;
+            // 
+            // label79
+            // 
+            label79.AutoSize = true;
+            label79.Location = new System.Drawing.Point(682, 19);
+            label79.Margin = new System.Windows.Forms.Padding(0);
+            label79.Name = "label79";
+            label79.Size = new System.Drawing.Size(96, 20);
+            label79.TabIndex = 84;
+            label79.Text = "Device status";
+            // 
+            // StCamera
+            // 
+            StCamera.Location = new System.Drawing.Point(778, 15);
+            StCamera.Margin = new System.Windows.Forms.Padding(0);
+            StCamera.Name = "StCamera";
+            StCamera.ReadOnly = true;
+            StCamera.Size = new System.Drawing.Size(121, 27);
+            StCamera.TabIndex = 87;
+            // 
+            // CameraCapabilities
+            // 
+            CameraCapabilities.Location = new System.Drawing.Point(906, 53);
+            CameraCapabilities.Margin = new System.Windows.Forms.Padding(0);
+            CameraCapabilities.Name = "CameraCapabilities";
+            CameraCapabilities.Size = new System.Drawing.Size(103, 29);
+            CameraCapabilities.TabIndex = 86;
+            CameraCapabilities.Text = "Capabilities";
+            CameraCapabilities.UseVisualStyleBackColor = true;
+            CameraCapabilities.Click += CameraCapabilities_Click;
+            // 
+            // CameraStatus
+            // 
+            CameraStatus.Location = new System.Drawing.Point(906, 13);
+            CameraStatus.Margin = new System.Windows.Forms.Padding(0);
+            CameraStatus.Name = "CameraStatus";
+            CameraStatus.Size = new System.Drawing.Size(103, 29);
+            CameraStatus.TabIndex = 85;
+            CameraStatus.Text = "Status";
+            CameraStatus.UseVisualStyleBackColor = true;
+            CameraStatus.Click += CameraStatus_Click;
+            // 
+            // CameraServiceURI
+            // 
+            CameraServiceURI.Location = new System.Drawing.Point(119, 23);
+            CameraServiceURI.Margin = new System.Windows.Forms.Padding(0);
+            CameraServiceURI.Name = "CameraServiceURI";
+            CameraServiceURI.Size = new System.Drawing.Size(530, 27);
+            CameraServiceURI.TabIndex = 82;
+            // 
+            // CameraServiceDiscovery
+            // 
+            CameraServiceDiscovery.Location = new System.Drawing.Point(506, 133);
+            CameraServiceDiscovery.Margin = new System.Windows.Forms.Padding(0);
+            CameraServiceDiscovery.Name = "CameraServiceDiscovery";
+            CameraServiceDiscovery.Size = new System.Drawing.Size(133, 31);
+            CameraServiceDiscovery.TabIndex = 77;
+            CameraServiceDiscovery.Text = "Service Discovery";
+            CameraServiceDiscovery.UseVisualStyleBackColor = true;
+            CameraServiceDiscovery.Click += CameraServiceDiscovery_Click;
+            // 
+            // CameraPortNum
+            // 
+            CameraPortNum.Location = new System.Drawing.Point(119, 55);
+            CameraPortNum.Margin = new System.Windows.Forms.Padding(0);
+            CameraPortNum.Name = "CameraPortNum";
+            CameraPortNum.ReadOnly = true;
+            CameraPortNum.Size = new System.Drawing.Size(121, 27);
+            CameraPortNum.TabIndex = 78;
+            // 
+            // label80
+            // 
+            label80.AutoSize = true;
+            label80.Location = new System.Drawing.Point(9, 89);
+            label80.Margin = new System.Windows.Forms.Padding(0);
+            label80.Name = "label80";
+            label80.Size = new System.Drawing.Size(101, 20);
+            label80.TabIndex = 79;
+            label80.Text = "Dispenser URI";
+            // 
+            // CameraURI
+            // 
+            CameraURI.Location = new System.Drawing.Point(119, 85);
+            CameraURI.Margin = new System.Windows.Forms.Padding(0);
+            CameraURI.Name = "CameraURI";
+            CameraURI.ReadOnly = true;
+            CameraURI.Size = new System.Drawing.Size(530, 27);
+            CameraURI.TabIndex = 80;
+            // 
+            // label81
+            // 
+            label81.AutoSize = true;
+            label81.Location = new System.Drawing.Point(11, 55);
+            label81.Margin = new System.Windows.Forms.Padding(0);
+            label81.Name = "label81";
+            label81.Size = new System.Drawing.Size(93, 20);
+            label81.TabIndex = 81;
+            label81.Text = "Port Number";
+            // 
+            // label82
+            // 
+            label82.AutoSize = true;
+            label82.Location = new System.Drawing.Point(11, 23);
+            label82.Margin = new System.Windows.Forms.Padding(0);
+            label82.Name = "label82";
+            label82.Size = new System.Drawing.Size(83, 20);
+            label82.TabIndex = 83;
+            label82.Text = "Service URI";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -3941,6 +4132,8 @@ namespace TestClientForms
             BiometricPage.PerformLayout();
             CashAccTabPage.ResumeLayout(false);
             CashAccTabPage.PerformLayout();
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -4269,6 +4462,22 @@ namespace TestClientForms
         private global::System.Windows.Forms.TreeView cashAcceptorTreeView;
         private System.Windows.Forms.Label label78;
         private System.Windows.Forms.TextBox NonceTextBox;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TreeView cameraTreeView;
+        private System.Windows.Forms.Button CameraReset;
+        private System.Windows.Forms.Label label79;
+        private System.Windows.Forms.TextBox StCamera;
+        private System.Windows.Forms.Button CameraCapabilities;
+        private System.Windows.Forms.Button CameraStatus;
+        private System.Windows.Forms.TextBox CameraServiceURI;
+        private System.Windows.Forms.Button CameraServiceDiscovery;
+        private System.Windows.Forms.TextBox CameraPortNum;
+        private System.Windows.Forms.Label label80;
+        private System.Windows.Forms.TextBox CameraURI;
+        private System.Windows.Forms.Label label81;
+        private System.Windows.Forms.Label label82;
+        private System.Windows.Forms.Button TakePic;
+        private System.Windows.Forms.TextBox cameraRawBox;
     }
 }
 

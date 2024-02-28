@@ -57,7 +57,7 @@ namespace XFS4IoTClient
             { }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception(ex.ToString());
             }
             finally
             {
@@ -104,15 +104,24 @@ namespace XFS4IoTClient
         {
             try
             {
-                var buffer = new ArraySegment<byte>(new byte[MessageBufferSize]);
+                var buffer = new Memory<byte>(new byte[MessageBufferSize]);
 
                 // Get the next message
-                var rc = await Socket.ReceiveAsync(buffer, CancelTaken == default ? CancellationToken.None : CancelTaken);
+                ValueWebSocketReceiveResult rc;
+                int ReceivedBufferReceived = 0;
+                do
+                {
+                    var BufferSlice = buffer.Slice(ReceivedBufferReceived, buffer.Length - ReceivedBufferReceived);
+                    // Wait for data from the client
+                    rc = await Socket.ReceiveAsync(BufferSlice, CancelTaken);
+                    ReceivedBufferReceived += rc.Count;
+                } while (!rc.EndOfMessage && ReceivedBufferReceived < buffer.Length);
+
 
                 if (rc.MessageType == WebSocketMessageType.Text)
                 {
                     // trim the incomming message and extract a string
-                    var messageString = Encoding.UTF8.GetString(buffer.Take(rc.Count).ToArray());
+                    var messageString = Encoding.UTF8.GetString(buffer[0..ReceivedBufferReceived].Span);
 
                     // see if the decoder can decode the message
                     if (!ResponseDecoder.TryUnserialise(messageString, out object message))
@@ -151,7 +160,7 @@ namespace XFS4IoTClient
         /// <summary>
         /// maximum buffer size for recieving incomming messages. 
         /// </summary>
-        private const int MessageBufferSize = 20 * 1024;
+        private const int MessageBufferSize = 2 * 1024 * 1024; // 2MB
 
         /// <summary>
         /// Endpoint of this device to connect

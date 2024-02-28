@@ -32,8 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JsonSchema.Net" Version="5.5.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.0.1" />
+    <PackageReference Include="JsonSchema.Net" Version="6.0.3" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.1.0" />
     <PackageReference Include="NJsonSchema" Version="11.0.0" />
   </ItemGroup>
 
@@ -41,6 +41,7 @@
     <ProjectReference Include="..\AuxiliariesSample\AuxiliariesSample.csproj" />
     <ProjectReference Include="..\BarcodeReaderSample\BarcodeReaderSample.csproj" />
     <ProjectReference Include="..\BiometricSample\BiometricSample.csproj" />
+    <ProjectReference Include="..\CameraSample\CameraSample.csproj" />
     <ProjectReference Include="..\CardReaderSample\CardReaderSample.csproj" />
     <ProjectReference Include="..\CashAcceptorSample\CashAcceptorSample.csproj" />
     <ProjectReference Include="..\CashDispenserSample\CashDispenserSample.csproj" />

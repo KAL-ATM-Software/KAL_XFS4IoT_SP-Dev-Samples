@@ -164,6 +164,17 @@ namespace Server
                 simCashAcceptorDevice.SetServiceProvider = cashAcceptorService;
                 Publisher.Add(cashAcceptorService);
 
+                /// Camera Service Provider
+                var simCameraDevice = new KAL.XFS4IoTSP.Camera.Sample.CameraSample(Logger);
+                var cameraervice = new CameraServiceProvider(EndpointDetails,
+                                                             ServiceName: "SimCamera",
+                                                             simCameraDevice,
+                                                             Logger,
+                                                             new FilePersistentData(Logger));
+
+                simCameraDevice.SetServiceProvider = cameraervice;
+                Publisher.Add(cameraervice);
+
                 /// CasRecycler Service Provider
                 /*
                 var simCashRecyclerDevice = new KAL.XFS4IoTSP.CashRecycler.Sample.CashRecyclerSample(Logger);

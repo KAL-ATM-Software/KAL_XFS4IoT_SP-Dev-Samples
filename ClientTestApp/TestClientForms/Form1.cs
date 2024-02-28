@@ -21,6 +21,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text;
 using System.Text.Json.Nodes;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TestClientForms
 {
@@ -43,6 +44,7 @@ namespace TestClientForms
             BarcodeReaderServiceURI.Text = "ws://localhost";
             BiometricServiceURI.Text = "ws://localhost";
             CashAcceptorServiceURI.Text = "ws://localhost";
+            CameraServiceURI.Text = "ws://localhost";
 
             CashDispenserDev = new("CashDispenser", DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
@@ -57,6 +59,7 @@ namespace TestClientForms
             BarcodeReaderDev = new("BarcodeReader", BarcodeReaderServiceURI, BarcodeReaderPortNum, BarcodeReaderURI);
             BiometricDev = new("Biometric", BiometricServiceURI, BiometricPortNum, BiometricURI);
             CashAcceptorDev = new("CashAcceptor", CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
+            CameraDev = new("Camera", CameraServiceURI, CameraPortNum, CameraURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
@@ -80,9 +83,7 @@ namespace TestClientForms
         private BarcodeReaderDevice BarcodeReaderDev { get; init; }
         private BiometricDevice BiometricDev { get; init; }
         private CashAcceptorDevice CashAcceptorDev { get; init; }
-
-
-
+        private CameraDevice CameraDev { get; init; }
 
 
         #region init Form Windows
@@ -117,6 +118,7 @@ namespace TestClientForms
                     barcodeReaderTreeView.AfterSelect += TreeView_AfterSelect;
                     biometricTreeView.AfterSelect += TreeView_AfterSelect;
                     cashAcceptorTreeView.AfterSelect += TreeView_AfterSelect;
+                    cameraTreeView.AfterSelect += TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages += Device_XFS4IoTMessages;
@@ -131,6 +133,7 @@ namespace TestClientForms
                     BarcodeReaderDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     BiometricDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     CashAcceptorDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    CameraDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                 }
                 else
                 {
@@ -147,6 +150,7 @@ namespace TestClientForms
                     barcodeReaderTreeView.AfterSelect -= TreeView_AfterSelect;
                     biometricTreeView.AfterSelect -= TreeView_AfterSelect;
                     cashAcceptorTreeView.AfterSelect -= TreeView_AfterSelect;
+                    cameraTreeView.AfterSelect -= TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
@@ -161,6 +165,7 @@ namespace TestClientForms
                     BarcodeReaderDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     BiometricDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     CashAcceptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    CameraDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                 }
             }
             catch (Exception ex)
@@ -1070,6 +1075,34 @@ namespace TestClientForms
         }
         #endregion
 
+        #region Camera
+        private async void CameraServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await CameraDev.DoServiceDiscovery();
+        }
+
+        private async void CameraStatus_Click(object sender, EventArgs e)
+        {
+            var status = await CameraDev.GetStatus();
+            StCamera.Text = status?.Payload?.Common?.Device?.ToString() ?? "";
+        }
+
+        private async void CameraCapabilities_Click(object sender, EventArgs e)
+        {
+            await CameraDev.GetCapabilities();
+        }
+
+        private async void CameraReset_Click(object sender, EventArgs e)
+        {
+            await CameraDev.Reset();
+        }
+
+        private async void TakePic_Click(object sender, EventArgs e)
+        {
+            await CameraDev.TakePitcure();
+        }
+
+        #endregion
 
         #region TreeViews manage 
         private void LoadXFS4IoTMsgToTreeView(System.Windows.Forms.TreeView jsonTreeView, string jsonString)
@@ -1252,6 +1285,8 @@ namespace TestClientForms
                         treeViewToUpdate = biometricTreeView;
                     else if (sender is CashAcceptorDevice)
                         treeViewToUpdate = cashAcceptorTreeView;
+                    else if (sender is CameraDevice)
+                        treeViewToUpdate = cameraTreeView;
                     else
                         treeViewToUpdate = null;
 
@@ -1321,6 +1356,9 @@ namespace TestClientForms
                         case "cashAcceptorTreeView":
                             cashAcceptorRawBox.Text = stringifySelectedNode;
                             break;
+                        case "cameraTreeView":
+                            cameraRawBox.Text = stringifySelectedNode;
+                            break;
                         default:
                             break;
                     }
@@ -1333,6 +1371,5 @@ namespace TestClientForms
             }
         }
         #endregion
-
     }
 }

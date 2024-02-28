@@ -13,9 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="2.0.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="2.0.1" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="2.0.1" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashAcceptor" Version="2.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashManagement" Version="2.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="2.1.0" />
   </ItemGroup>
 
 </Project>
