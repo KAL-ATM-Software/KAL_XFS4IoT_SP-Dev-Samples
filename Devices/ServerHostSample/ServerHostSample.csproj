@@ -11,6 +11,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <AssemblyName>XFS4IoT.SP.ServerHostSample</AssemblyName>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JsonSchema.Net" Version="6.0.3" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.1.0" />
+    <PackageReference Include="JsonSchema.Net" Version="6.0.7" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="2.2.0" />
     <PackageReference Include="NJsonSchema" Version="11.0.0" />
   </ItemGroup>
 
@@ -44,7 +45,9 @@
     <ProjectReference Include="..\CameraSample\CameraSample.csproj" />
     <ProjectReference Include="..\CardReaderSample\CardReaderSample.csproj" />
     <ProjectReference Include="..\CashAcceptorSample\CashAcceptorSample.csproj" />
+    <ProjectReference Include="..\CashDispenserSample\CashDispenserFirmware\CashDispenserFirmware.vcxproj" />
     <ProjectReference Include="..\CashDispenserSample\CashDispenserSample.csproj" />
+    <ProjectReference Include="..\CheckScannerSample\CheckScannerSample.csproj" />
     <ProjectReference Include="..\EncryptorSample\EncryptorSample.csproj" />
     <ProjectReference Include="..\LightsSample\LightsSample.csproj" />
     <ProjectReference Include="..\PinPadSample\PinPadSample.csproj" />

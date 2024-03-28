@@ -23,10 +23,14 @@ namespace TestClientForms.Devices
 {
     public delegate void XFS4IoTMessagesDelegate(object sender, string msg);
 
-    public class CommonDevice
+    /// <summary>
+    /// Get a reference to the required text boxes for the device.
+    /// Use separate text box per device to enable using more than one device at a time.
+    /// </summary>
+    public class CommonDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox, bool useSingleConnection = false)
     {
-        static readonly int[] PortRanges = new int[]
-            {
+        static readonly int[] PortRanges =
+            [
                 80,  // Only for HTTP
                 443, // Only for HTTPS
                 5846,
@@ -40,22 +44,9 @@ namespace TestClientForms.Devices
                 5854,
                 5855,
                 5856
-            };
+            ];
 
-        /// <summary>
-        /// Get a reference to the required text boxes for the device.
-        /// Use separate text box per device to enable using more than one device at a time.
-        /// </summary>
-        public CommonDevice(string serviceName, TextBox uriBox, TextBox portBox, TextBox serviceUriBox, bool useSingleConnection = false)
-        {
-            ServiceName = serviceName;         
-            UriBox = uriBox;
-            PortBox = portBox;
-            ServiceUriBox = serviceUriBox;
-            UseSingleConnection = useSingleConnection;
-        }
-
-        protected string ServiceName { get; init; }
+        protected string ServiceName { get; init; } = serviceName;
 
         /// <summary>
         /// the event is raised when XFS4IoT message is sent or received
@@ -67,11 +58,11 @@ namespace TestClientForms.Devices
             XFS4IoTMessages?.Invoke(this, msg);
         }
 
-        
-        protected TextBox UriBox { get; init; }
-        protected TextBox PortBox { get; init; }
-        protected TextBox ServiceUriBox { get; init; }
-        protected bool UseSingleConnection { get; init; }
+
+        protected TextBox UriBox { get; init; } = uriBox;
+        protected TextBox PortBox { get; init; } = portBox;
+        protected TextBox ServiceUriBox { get; init; } = serviceUriBox;
+        protected bool UseSingleConnection { get; init; } = useSingleConnection;
         protected XFS4IoTClient.ClientConnection SingleConnection {get; private set;}
 
         private int? ServicePort { get; set; }

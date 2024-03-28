@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>CheckScannerTemplate</AssemblyName>
+    <RootNamespace>CheckScanner.CheckScannerTemplate</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Check" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>

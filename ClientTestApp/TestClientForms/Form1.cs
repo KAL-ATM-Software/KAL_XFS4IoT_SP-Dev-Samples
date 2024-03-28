@@ -45,6 +45,7 @@ namespace TestClientForms
             BiometricServiceURI.Text = "ws://localhost";
             CashAcceptorServiceURI.Text = "ws://localhost";
             CameraServiceURI.Text = "ws://localhost";
+            CheckScannerServiceURI.Text = "ws://localhost";
 
             CashDispenserDev = new("CashDispenser", DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
@@ -60,6 +61,7 @@ namespace TestClientForms
             BiometricDev = new("Biometric", BiometricServiceURI, BiometricPortNum, BiometricURI);
             CashAcceptorDev = new("CashAcceptor", CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
             CameraDev = new("Camera", CameraServiceURI, CameraPortNum, CameraURI);
+            CheckScannerDev = new("ChecKScanner", CheckScannerServiceURI, CheckScannerPortNum, CheckScannerURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
@@ -84,7 +86,7 @@ namespace TestClientForms
         private BiometricDevice BiometricDev { get; init; }
         private CashAcceptorDevice CashAcceptorDev { get; init; }
         private CameraDevice CameraDev { get; init; }
-
+        private CheckScannerDevice CheckScannerDev { get; init; }
 
         #region init Form Windows
 
@@ -119,6 +121,7 @@ namespace TestClientForms
                     biometricTreeView.AfterSelect += TreeView_AfterSelect;
                     cashAcceptorTreeView.AfterSelect += TreeView_AfterSelect;
                     cameraTreeView.AfterSelect += TreeView_AfterSelect;
+                    checkScannerTreeView.AfterSelect += TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages += Device_XFS4IoTMessages;
@@ -134,6 +137,7 @@ namespace TestClientForms
                     BiometricDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     CashAcceptorDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     CameraDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    CheckScannerDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                 }
                 else
                 {
@@ -151,6 +155,7 @@ namespace TestClientForms
                     biometricTreeView.AfterSelect -= TreeView_AfterSelect;
                     cashAcceptorTreeView.AfterSelect -= TreeView_AfterSelect;
                     cameraTreeView.AfterSelect -= TreeView_AfterSelect;
+                    checkScannerTreeView.AfterSelect -= TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
@@ -166,6 +171,7 @@ namespace TestClientForms
                     BiometricDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     CashAcceptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     CameraDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    CheckScannerDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                 }
             }
             catch (Exception ex)
@@ -1104,6 +1110,82 @@ namespace TestClientForms
 
         #endregion
 
+        #region CheckScanner
+
+        private async void ChecKScannerServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.DoServiceDiscovery();
+        }
+
+        private async void CheckScannerStatus_Click(object sender, EventArgs e)
+        {
+            var status = await CheckScannerDev.GetStatus();
+            StCheck.Text = status?.Payload?.Common?.Device?.ToString() ?? "";
+        }
+
+        private async void CheckScannerCapabilities_Click(object sender, EventArgs e)
+        {
+            var caps = await CheckScannerDev.GetCapabilities();
+            CheckDeviceType.Text = caps?.Payload?.Check?.Type?.ToString();
+        }
+
+        private async void CheckScannerSetCheckUnitInfo_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.SetCheckUnitInfo();
+        }
+
+        private async void CheckScannerGetCheckUnitInfo_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.GetCheckUnitInfo();
+        }
+
+        private async void CheckScannerGetTransactionStatus_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.GetTransactionStatus();
+        }
+
+        private async void CheckScannerReset_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.Reset();
+        }
+
+        private async void CheckScannerRetract_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.Retract();
+        }
+
+        private async void CheckScannerStartExchange_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.StartExchange();
+        }
+
+        private async void CheckScannerEndExchange_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.EndExchange();
+        }
+
+        private async void CheckScannerMediaIn_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.MediaIn();
+        }
+
+        private async void CheckScannerMediaInEnd_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.MediaInEnd();
+        }
+
+        private async void CheckScannerMediaInRollback_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.MediaInRollback();
+        }
+
+        private async void viewTxnStatus_Click(object sender, EventArgs e)
+        {
+            await CheckScannerDev.ShowTransactionStatus();
+        }
+
+        #endregion
+
         #region TreeViews manage 
         private void LoadXFS4IoTMsgToTreeView(System.Windows.Forms.TreeView jsonTreeView, string jsonString)
         {
@@ -1287,6 +1369,8 @@ namespace TestClientForms
                         treeViewToUpdate = cashAcceptorTreeView;
                     else if (sender is CameraDevice)
                         treeViewToUpdate = cameraTreeView;
+                    else if (sender is CheckScannerDevice)
+                        treeViewToUpdate = checkScannerTreeView;
                     else
                         treeViewToUpdate = null;
 
@@ -1359,6 +1443,9 @@ namespace TestClientForms
                         case "cameraTreeView":
                             cameraRawBox.Text = stringifySelectedNode;
                             break;
+                        case "checkScannerTreeView":
+                            checkScannerRawBox.Text = stringifySelectedNode;
+                            break;
                         default:
                             break;
                     }
@@ -1371,5 +1458,6 @@ namespace TestClientForms
             }
         }
         #endregion
+
     }
 }

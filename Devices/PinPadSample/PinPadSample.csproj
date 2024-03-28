@@ -17,10 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Crypto" Version="2.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Keyboard" Version="2.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.KeyManagement" Version="2.1.0" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="2.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

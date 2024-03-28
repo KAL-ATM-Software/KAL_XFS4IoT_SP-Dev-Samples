@@ -53,7 +53,7 @@ namespace XFS4IoTClient
                     await Socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closed by the application.", CancellationToken.None);
                 }
             }
-            catch (WebSocketException ex)
+            catch (WebSocketException)
             { }
             catch (Exception ex)
             {
@@ -170,11 +170,11 @@ namespace XFS4IoTClient
         /// <summary>
         /// Message decoder for responses
         /// </summary>
-        private static readonly MessageDecoder ResponseDecoder = new MessageDecoder(MessageDecoder.AutoPopulateType.Response);
+        private static readonly MessageDecoder ResponseDecoder = new(MessageDecoder.AutoPopulateType.Response);
 
         /// <summary>
         /// WebSocket client object
         /// </summary>
-        private ClientWebSocket Socket = new ClientWebSocket();
+        private ClientWebSocket Socket = new();
     }
 }

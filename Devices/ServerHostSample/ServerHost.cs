@@ -1,5 +1,5 @@
 ﻿/***********************************************************************************************\
- * (C) KAL ATM Software GmbH, 2022
+ * (C) KAL ATM Software GmbH, 2024
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
@@ -39,7 +39,7 @@ namespace Server
 
                 simCardReaderDevice.SetServiceProvider = cardReaderService;
                 Publisher.Add(cardReaderService);
-                
+
                 /// CashDispenser Service Provider
                 var simCashDispenserrDevice = new KAL.XFS4IoTSP.CashDispenser.Sample.CashDispenserSample(Logger);
                 var cashDispenserService = new CashDispenserServiceProvider(EndpointDetails,
@@ -49,7 +49,7 @@ namespace Server
                                                                             new FilePersistentData(Logger));
                 simCashDispenserrDevice.SetServiceProvider = cashDispenserService;
                 Publisher.Add(cashDispenserService);
-                
+
                 /// Text Terminal Unit Service Provider
                 var simTextTerminalDevice = new TextTerminalSample.TextTerminalSample(Logger);
                 var textTerminalService = new TextTerminalServiceProvider(EndpointDetails,
@@ -187,6 +187,18 @@ namespace Server
                 simCashRecyclerDevice.SetServiceProvider = cashRecyclerService;
                 Publisher.Add(cashRecyclerService);
                 */
+                
+                /// CheckScanner Service Provider
+                var simCheckDevice = new KAL.XFS4IoTSP.CheckScanner.Sample.CheckScannerSample(Logger);
+                var checkService = new CheckScannerServiceProvider(EndpointDetails,
+                                                                   ServiceName: "SimCheckScanner",
+                                                                   simCheckDevice,
+                                                                   Logger,
+                                                                   new FilePersistentData(Logger));
+
+                simCheckDevice.SetServiceProvider = checkService;
+                Publisher.Add(checkService);
+
                 // TODO: adding other services
 
                 // CancellationSource object allows to restart service when it's signalled.

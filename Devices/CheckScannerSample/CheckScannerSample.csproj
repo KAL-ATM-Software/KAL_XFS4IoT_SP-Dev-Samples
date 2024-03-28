@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.CheckScanner</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.CheckScanner.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <EmbeddedResource Include="check.bmp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Check" Version="2.2.0" />
+  </ItemGroup>
+
+</Project>

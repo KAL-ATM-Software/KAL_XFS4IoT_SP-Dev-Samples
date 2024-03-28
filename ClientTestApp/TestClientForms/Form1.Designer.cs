@@ -356,7 +356,7 @@ namespace TestClientForms
             CashAcceptorAccURI = new System.Windows.Forms.TextBox();
             label74 = new System.Windows.Forms.Label();
             label75 = new System.Windows.Forms.Label();
-            tabPage1 = new System.Windows.Forms.TabPage();
+            CamTabPage = new System.Windows.Forms.TabPage();
             TakePic = new System.Windows.Forms.Button();
             cameraTreeView = new System.Windows.Forms.TreeView();
             cameraRawBox = new System.Windows.Forms.TextBox();
@@ -372,6 +372,33 @@ namespace TestClientForms
             CameraURI = new System.Windows.Forms.TextBox();
             label81 = new System.Windows.Forms.Label();
             label82 = new System.Windows.Forms.Label();
+            CheckTabPage = new System.Windows.Forms.TabPage();
+            viewTxnStatus = new System.Windows.Forms.Button();
+            checkScannerTreeView = new System.Windows.Forms.TreeView();
+            checkScannerRawBox = new System.Windows.Forms.TextBox();
+            CheckScannerSetCheckUnitInfo = new System.Windows.Forms.Button();
+            CheckScannerRetract = new System.Windows.Forms.Button();
+            CheckScannerMediaIn = new System.Windows.Forms.Button();
+            CheckScannerMediaInEnd = new System.Windows.Forms.Button();
+            CheckScannerMediaInRollback = new System.Windows.Forms.Button();
+            CheckScannerEndExchange = new System.Windows.Forms.Button();
+            CheckScannerStartExchange = new System.Windows.Forms.Button();
+            CheckScannerReset = new System.Windows.Forms.Button();
+            CheckScannerGetTransactionStatus = new System.Windows.Forms.Button();
+            CheckDeviceType = new System.Windows.Forms.TextBox();
+            label83 = new System.Windows.Forms.Label();
+            label84 = new System.Windows.Forms.Label();
+            StCheck = new System.Windows.Forms.TextBox();
+            CheckScannerCapabilities = new System.Windows.Forms.Button();
+            CheckScannerStatus = new System.Windows.Forms.Button();
+            CheckScannerGetCheckUnitInfo = new System.Windows.Forms.Button();
+            CheckScannerServiceURI = new System.Windows.Forms.TextBox();
+            CheckScannerServiceDiscovery = new System.Windows.Forms.Button();
+            CheckScannerPortNum = new System.Windows.Forms.TextBox();
+            label85 = new System.Windows.Forms.Label();
+            CheckScannerURI = new System.Windows.Forms.TextBox();
+            label86 = new System.Windows.Forms.Label();
+            label87 = new System.Windows.Forms.Label();
             testClientTabControl.SuspendLayout();
             CardReaderTab.SuspendLayout();
             DispenserTab.SuspendLayout();
@@ -386,7 +413,8 @@ namespace TestClientForms
             BarcodeReaderTabPage.SuspendLayout();
             BiometricPage.SuspendLayout();
             CashAccTabPage.SuspendLayout();
-            tabPage1.SuspendLayout();
+            CamTabPage.SuspendLayout();
+            CheckTabPage.SuspendLayout();
             SuspendLayout();
             // 
             // AcceptCard
@@ -613,7 +641,8 @@ namespace TestClientForms
             testClientTabControl.Controls.Add(BarcodeReaderTabPage);
             testClientTabControl.Controls.Add(BiometricPage);
             testClientTabControl.Controls.Add(CashAccTabPage);
-            testClientTabControl.Controls.Add(tabPage1);
+            testClientTabControl.Controls.Add(CamTabPage);
+            testClientTabControl.Controls.Add(CheckTabPage);
             testClientTabControl.Location = new System.Drawing.Point(8, 3);
             testClientTabControl.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             testClientTabControl.Name = "testClientTabControl";
@@ -661,6 +690,7 @@ namespace TestClientForms
             cardReaderRawBox.Multiline = true;
             cardReaderRawBox.Name = "cardReaderRawBox";
             cardReaderRawBox.ReadOnly = true;
+            cardReaderRawBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             cardReaderRawBox.Size = new System.Drawing.Size(383, 407);
             cardReaderRawBox.TabIndex = 130;
             // 
@@ -1947,9 +1977,9 @@ namespace TestClientForms
             label29.Location = new System.Drawing.Point(9, 83);
             label29.Margin = new System.Windows.Forms.Padding(0);
             label29.Name = "label29";
-            label29.Size = new System.Drawing.Size(99, 20);
+            label29.Size = new System.Drawing.Size(80, 20);
             label29.TabIndex = 62;
-            label29.Text = "Encryptor URI";
+            label29.Text = "PinPad URI";
             // 
             // PinPadURI
             // 
@@ -2013,7 +2043,7 @@ namespace TestClientForms
             PrinterTabPage.Controls.Add(label38);
             PrinterTabPage.Location = new System.Drawing.Point(4, 29);
             PrinterTabPage.Name = "PrinterTabPage";
-            PrinterTabPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            PrinterTabPage.Padding = new System.Windows.Forms.Padding(3);
             PrinterTabPage.Size = new System.Drawing.Size(1346, 691);
             PrinterTabPage.TabIndex = 5;
             PrinterTabPage.Text = "Printer";
@@ -2763,7 +2793,7 @@ namespace TestClientForms
             VendorModeTabPage.Controls.Add(label53);
             VendorModeTabPage.Location = new System.Drawing.Point(4, 29);
             VendorModeTabPage.Name = "VendorModeTabPage";
-            VendorModeTabPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            VendorModeTabPage.Padding = new System.Windows.Forms.Padding(3);
             VendorModeTabPage.Size = new System.Drawing.Size(1346, 691);
             VendorModeTabPage.TabIndex = 8;
             VendorModeTabPage.Text = "VendorMode";
@@ -2945,7 +2975,7 @@ namespace TestClientForms
             VendorAppTabPage.Controls.Add(label57);
             VendorAppTabPage.Location = new System.Drawing.Point(4, 29);
             VendorAppTabPage.Name = "VendorAppTabPage";
-            VendorAppTabPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            VendorAppTabPage.Padding = new System.Windows.Forms.Padding(3);
             VendorAppTabPage.Size = new System.Drawing.Size(1346, 691);
             VendorAppTabPage.TabIndex = 9;
             VendorAppTabPage.Text = "VendorApplication";
@@ -3154,7 +3184,7 @@ namespace TestClientForms
             BarcodeReaderTabPage.Controls.Add(label65);
             BarcodeReaderTabPage.Location = new System.Drawing.Point(4, 29);
             BarcodeReaderTabPage.Name = "BarcodeReaderTabPage";
-            BarcodeReaderTabPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            BarcodeReaderTabPage.Padding = new System.Windows.Forms.Padding(3);
             BarcodeReaderTabPage.Size = new System.Drawing.Size(1346, 691);
             BarcodeReaderTabPage.TabIndex = 10;
             BarcodeReaderTabPage.Text = "BarcodeReader";
@@ -3636,7 +3666,7 @@ namespace TestClientForms
             CashAccTabPage.Controls.Add(label75);
             CashAccTabPage.Location = new System.Drawing.Point(4, 29);
             CashAccTabPage.Name = "CashAccTabPage";
-            CashAccTabPage.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            CashAccTabPage.Padding = new System.Windows.Forms.Padding(3);
             CashAccTabPage.Size = new System.Drawing.Size(1346, 691);
             CashAccTabPage.TabIndex = 12;
             CashAccTabPage.Text = "CashAcceptor";
@@ -3885,9 +3915,9 @@ namespace TestClientForms
             label73.Location = new System.Drawing.Point(7, 91);
             label73.Margin = new System.Windows.Forms.Padding(0);
             label73.Name = "label73";
-            label73.Size = new System.Drawing.Size(101, 20);
+            label73.Size = new System.Drawing.Size(96, 20);
             label73.TabIndex = 49;
-            label73.Text = "Dispenser URI";
+            label73.Text = "Acceptor URI";
             // 
             // CashAcceptorAccURI
             // 
@@ -3918,30 +3948,30 @@ namespace TestClientForms
             label75.TabIndex = 53;
             label75.Text = "Service URI";
             // 
-            // tabPage1
+            // CamTabPage
             // 
-            tabPage1.Controls.Add(TakePic);
-            tabPage1.Controls.Add(cameraTreeView);
-            tabPage1.Controls.Add(cameraRawBox);
-            tabPage1.Controls.Add(CameraReset);
-            tabPage1.Controls.Add(label79);
-            tabPage1.Controls.Add(StCamera);
-            tabPage1.Controls.Add(CameraCapabilities);
-            tabPage1.Controls.Add(CameraStatus);
-            tabPage1.Controls.Add(CameraServiceURI);
-            tabPage1.Controls.Add(CameraServiceDiscovery);
-            tabPage1.Controls.Add(CameraPortNum);
-            tabPage1.Controls.Add(label80);
-            tabPage1.Controls.Add(CameraURI);
-            tabPage1.Controls.Add(label81);
-            tabPage1.Controls.Add(label82);
-            tabPage1.Location = new System.Drawing.Point(4, 29);
-            tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
-            tabPage1.Size = new System.Drawing.Size(1346, 691);
-            tabPage1.TabIndex = 13;
-            tabPage1.Text = "Camera";
-            tabPage1.UseVisualStyleBackColor = true;
+            CamTabPage.Controls.Add(TakePic);
+            CamTabPage.Controls.Add(cameraTreeView);
+            CamTabPage.Controls.Add(cameraRawBox);
+            CamTabPage.Controls.Add(CameraReset);
+            CamTabPage.Controls.Add(label79);
+            CamTabPage.Controls.Add(StCamera);
+            CamTabPage.Controls.Add(CameraCapabilities);
+            CamTabPage.Controls.Add(CameraStatus);
+            CamTabPage.Controls.Add(CameraServiceURI);
+            CamTabPage.Controls.Add(CameraServiceDiscovery);
+            CamTabPage.Controls.Add(CameraPortNum);
+            CamTabPage.Controls.Add(label80);
+            CamTabPage.Controls.Add(CameraURI);
+            CamTabPage.Controls.Add(label81);
+            CamTabPage.Controls.Add(label82);
+            CamTabPage.Location = new System.Drawing.Point(4, 29);
+            CamTabPage.Name = "CamTabPage";
+            CamTabPage.Padding = new System.Windows.Forms.Padding(3);
+            CamTabPage.Size = new System.Drawing.Size(1346, 691);
+            CamTabPage.TabIndex = 13;
+            CamTabPage.Text = "Camera";
+            CamTabPage.UseVisualStyleBackColor = true;
             // 
             // TakePic
             // 
@@ -4058,9 +4088,9 @@ namespace TestClientForms
             label80.Location = new System.Drawing.Point(9, 89);
             label80.Margin = new System.Windows.Forms.Padding(0);
             label80.Name = "label80";
-            label80.Size = new System.Drawing.Size(101, 20);
+            label80.Size = new System.Drawing.Size(87, 20);
             label80.TabIndex = 79;
-            label80.Text = "Dispenser URI";
+            label80.Text = "Camera URI";
             // 
             // CameraURI
             // 
@@ -4090,6 +4120,307 @@ namespace TestClientForms
             label82.Size = new System.Drawing.Size(83, 20);
             label82.TabIndex = 83;
             label82.Text = "Service URI";
+            // 
+            // CheckTabPage
+            // 
+            CheckTabPage.Controls.Add(viewTxnStatus);
+            CheckTabPage.Controls.Add(checkScannerTreeView);
+            CheckTabPage.Controls.Add(checkScannerRawBox);
+            CheckTabPage.Controls.Add(CheckScannerSetCheckUnitInfo);
+            CheckTabPage.Controls.Add(CheckScannerRetract);
+            CheckTabPage.Controls.Add(CheckScannerMediaIn);
+            CheckTabPage.Controls.Add(CheckScannerMediaInEnd);
+            CheckTabPage.Controls.Add(CheckScannerMediaInRollback);
+            CheckTabPage.Controls.Add(CheckScannerEndExchange);
+            CheckTabPage.Controls.Add(CheckScannerStartExchange);
+            CheckTabPage.Controls.Add(CheckScannerReset);
+            CheckTabPage.Controls.Add(CheckScannerGetTransactionStatus);
+            CheckTabPage.Controls.Add(CheckDeviceType);
+            CheckTabPage.Controls.Add(label83);
+            CheckTabPage.Controls.Add(label84);
+            CheckTabPage.Controls.Add(StCheck);
+            CheckTabPage.Controls.Add(CheckScannerCapabilities);
+            CheckTabPage.Controls.Add(CheckScannerStatus);
+            CheckTabPage.Controls.Add(CheckScannerGetCheckUnitInfo);
+            CheckTabPage.Controls.Add(CheckScannerServiceURI);
+            CheckTabPage.Controls.Add(CheckScannerServiceDiscovery);
+            CheckTabPage.Controls.Add(CheckScannerPortNum);
+            CheckTabPage.Controls.Add(label85);
+            CheckTabPage.Controls.Add(CheckScannerURI);
+            CheckTabPage.Controls.Add(label86);
+            CheckTabPage.Controls.Add(label87);
+            CheckTabPage.Location = new System.Drawing.Point(4, 29);
+            CheckTabPage.Name = "CheckTabPage";
+            CheckTabPage.Padding = new System.Windows.Forms.Padding(3);
+            CheckTabPage.Size = new System.Drawing.Size(1346, 691);
+            CheckTabPage.TabIndex = 14;
+            CheckTabPage.Text = "CheckScanner";
+            CheckTabPage.UseVisualStyleBackColor = true;
+            // 
+            // viewTxnStatus
+            // 
+            viewTxnStatus.Location = new System.Drawing.Point(848, 231);
+            viewTxnStatus.Margin = new System.Windows.Forms.Padding(0);
+            viewTxnStatus.Name = "viewTxnStatus";
+            viewTxnStatus.Size = new System.Drawing.Size(185, 29);
+            viewTxnStatus.TabIndex = 103;
+            viewTxnStatus.Text = "View TransactionStatus";
+            viewTxnStatus.UseVisualStyleBackColor = true;
+            viewTxnStatus.Click += viewTxnStatus_Click;
+            // 
+            // checkScannerTreeView
+            // 
+            checkScannerTreeView.Location = new System.Drawing.Point(23, 275);
+            checkScannerTreeView.Name = "checkScannerTreeView";
+            checkScannerTreeView.Size = new System.Drawing.Size(892, 405);
+            checkScannerTreeView.TabIndex = 102;
+            // 
+            // checkScannerRawBox
+            // 
+            checkScannerRawBox.Location = new System.Drawing.Point(931, 275);
+            checkScannerRawBox.Multiline = true;
+            checkScannerRawBox.Name = "checkScannerRawBox";
+            checkScannerRawBox.ReadOnly = true;
+            checkScannerRawBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            checkScannerRawBox.Size = new System.Drawing.Size(407, 405);
+            checkScannerRawBox.TabIndex = 101;
+            // 
+            // CheckScannerSetCheckUnitInfo
+            // 
+            CheckScannerSetCheckUnitInfo.Location = new System.Drawing.Point(899, 100);
+            CheckScannerSetCheckUnitInfo.Margin = new System.Windows.Forms.Padding(1);
+            CheckScannerSetCheckUnitInfo.Name = "CheckScannerSetCheckUnitInfo";
+            CheckScannerSetCheckUnitInfo.Size = new System.Drawing.Size(134, 29);
+            CheckScannerSetCheckUnitInfo.TabIndex = 100;
+            CheckScannerSetCheckUnitInfo.Text = "SetCheckUnitInfo";
+            CheckScannerSetCheckUnitInfo.UseVisualStyleBackColor = true;
+            CheckScannerSetCheckUnitInfo.Click += CheckScannerSetCheckUnitInfo_Click;
+            // 
+            // CheckScannerRetract
+            // 
+            CheckScannerRetract.Location = new System.Drawing.Point(1057, 232);
+            CheckScannerRetract.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerRetract.Name = "CheckScannerRetract";
+            CheckScannerRetract.Size = new System.Drawing.Size(127, 28);
+            CheckScannerRetract.TabIndex = 99;
+            CheckScannerRetract.Text = "Retract";
+            CheckScannerRetract.UseVisualStyleBackColor = true;
+            CheckScannerRetract.Click += CheckScannerRetract_Click;
+            // 
+            // CheckScannerMediaIn
+            // 
+            CheckScannerMediaIn.Location = new System.Drawing.Point(1201, 155);
+            CheckScannerMediaIn.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerMediaIn.Name = "CheckScannerMediaIn";
+            CheckScannerMediaIn.Size = new System.Drawing.Size(133, 28);
+            CheckScannerMediaIn.TabIndex = 98;
+            CheckScannerMediaIn.Text = "MediaIn";
+            CheckScannerMediaIn.UseVisualStyleBackColor = true;
+            CheckScannerMediaIn.Click += CheckScannerMediaIn_Click;
+            // 
+            // CheckScannerMediaInEnd
+            // 
+            CheckScannerMediaInEnd.Location = new System.Drawing.Point(1201, 192);
+            CheckScannerMediaInEnd.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerMediaInEnd.Name = "CheckScannerMediaInEnd";
+            CheckScannerMediaInEnd.Size = new System.Drawing.Size(133, 29);
+            CheckScannerMediaInEnd.TabIndex = 97;
+            CheckScannerMediaInEnd.Text = "MediaInInEnd";
+            CheckScannerMediaInEnd.UseVisualStyleBackColor = true;
+            CheckScannerMediaInEnd.Click += CheckScannerMediaInEnd_Click;
+            // 
+            // CheckScannerMediaInRollback
+            // 
+            CheckScannerMediaInRollback.Location = new System.Drawing.Point(1201, 231);
+            CheckScannerMediaInRollback.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerMediaInRollback.Name = "CheckScannerMediaInRollback";
+            CheckScannerMediaInRollback.Size = new System.Drawing.Size(133, 29);
+            CheckScannerMediaInRollback.TabIndex = 95;
+            CheckScannerMediaInRollback.Text = "MediaInRollback";
+            CheckScannerMediaInRollback.UseVisualStyleBackColor = true;
+            CheckScannerMediaInRollback.Click += CheckScannerMediaInRollback_Click;
+            // 
+            // CheckScannerEndExchange
+            // 
+            CheckScannerEndExchange.Location = new System.Drawing.Point(1201, 60);
+            CheckScannerEndExchange.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerEndExchange.Name = "CheckScannerEndExchange";
+            CheckScannerEndExchange.Size = new System.Drawing.Size(133, 29);
+            CheckScannerEndExchange.TabIndex = 94;
+            CheckScannerEndExchange.Text = "EndExchange";
+            CheckScannerEndExchange.UseVisualStyleBackColor = true;
+            CheckScannerEndExchange.Click += CheckScannerEndExchange_Click;
+            // 
+            // CheckScannerStartExchange
+            // 
+            CheckScannerStartExchange.Location = new System.Drawing.Point(1201, 17);
+            CheckScannerStartExchange.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerStartExchange.Name = "CheckScannerStartExchange";
+            CheckScannerStartExchange.Size = new System.Drawing.Size(133, 29);
+            CheckScannerStartExchange.TabIndex = 93;
+            CheckScannerStartExchange.Text = "StartExchange";
+            CheckScannerStartExchange.UseVisualStyleBackColor = true;
+            CheckScannerStartExchange.Click += CheckScannerStartExchange_Click;
+            // 
+            // CheckScannerReset
+            // 
+            CheckScannerReset.Location = new System.Drawing.Point(1057, 15);
+            CheckScannerReset.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerReset.Name = "CheckScannerReset";
+            CheckScannerReset.Size = new System.Drawing.Size(127, 29);
+            CheckScannerReset.TabIndex = 92;
+            CheckScannerReset.Text = "Reset";
+            CheckScannerReset.UseVisualStyleBackColor = true;
+            CheckScannerReset.Click += CheckScannerReset_Click;
+            // 
+            // CheckScannerGetTransactionStatus
+            // 
+            CheckScannerGetTransactionStatus.Location = new System.Drawing.Point(848, 192);
+            CheckScannerGetTransactionStatus.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerGetTransactionStatus.Name = "CheckScannerGetTransactionStatus";
+            CheckScannerGetTransactionStatus.Size = new System.Drawing.Size(185, 29);
+            CheckScannerGetTransactionStatus.TabIndex = 91;
+            CheckScannerGetTransactionStatus.Text = "GetTransactionStatus";
+            CheckScannerGetTransactionStatus.UseVisualStyleBackColor = true;
+            CheckScannerGetTransactionStatus.Click += CheckScannerGetTransactionStatus_Click;
+            // 
+            // CheckDeviceType
+            // 
+            CheckDeviceType.Location = new System.Drawing.Point(794, 57);
+            CheckDeviceType.Margin = new System.Windows.Forms.Padding(0);
+            CheckDeviceType.Name = "CheckDeviceType";
+            CheckDeviceType.ReadOnly = true;
+            CheckDeviceType.Size = new System.Drawing.Size(121, 27);
+            CheckDeviceType.TabIndex = 90;
+            // 
+            // label83
+            // 
+            label83.AutoSize = true;
+            label83.Location = new System.Drawing.Point(700, 60);
+            label83.Margin = new System.Windows.Forms.Padding(0);
+            label83.Name = "label83";
+            label83.Size = new System.Drawing.Size(87, 20);
+            label83.TabIndex = 89;
+            label83.Text = "Device type";
+            // 
+            // label84
+            // 
+            label84.AutoSize = true;
+            label84.Location = new System.Drawing.Point(691, 20);
+            label84.Margin = new System.Windows.Forms.Padding(0);
+            label84.Name = "label84";
+            label84.Size = new System.Drawing.Size(96, 20);
+            label84.TabIndex = 85;
+            label84.Text = "Device status";
+            // 
+            // StCheck
+            // 
+            StCheck.Location = new System.Drawing.Point(794, 17);
+            StCheck.Margin = new System.Windows.Forms.Padding(0);
+            StCheck.Name = "StCheck";
+            StCheck.ReadOnly = true;
+            StCheck.Size = new System.Drawing.Size(121, 27);
+            StCheck.TabIndex = 88;
+            // 
+            // CheckScannerCapabilities
+            // 
+            CheckScannerCapabilities.Location = new System.Drawing.Point(930, 57);
+            CheckScannerCapabilities.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerCapabilities.Name = "CheckScannerCapabilities";
+            CheckScannerCapabilities.Size = new System.Drawing.Size(103, 29);
+            CheckScannerCapabilities.TabIndex = 87;
+            CheckScannerCapabilities.Text = "Capabilities";
+            CheckScannerCapabilities.UseVisualStyleBackColor = true;
+            CheckScannerCapabilities.Click += CheckScannerCapabilities_Click;
+            // 
+            // CheckScannerStatus
+            // 
+            CheckScannerStatus.Location = new System.Drawing.Point(930, 16);
+            CheckScannerStatus.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerStatus.Name = "CheckScannerStatus";
+            CheckScannerStatus.Size = new System.Drawing.Size(103, 29);
+            CheckScannerStatus.TabIndex = 86;
+            CheckScannerStatus.Text = "Status";
+            CheckScannerStatus.UseVisualStyleBackColor = true;
+            CheckScannerStatus.Click += CheckScannerStatus_Click;
+            // 
+            // CheckScannerGetCheckUnitInfo
+            // 
+            CheckScannerGetCheckUnitInfo.Location = new System.Drawing.Point(899, 139);
+            CheckScannerGetCheckUnitInfo.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerGetCheckUnitInfo.Name = "CheckScannerGetCheckUnitInfo";
+            CheckScannerGetCheckUnitInfo.Size = new System.Drawing.Size(134, 29);
+            CheckScannerGetCheckUnitInfo.TabIndex = 84;
+            CheckScannerGetCheckUnitInfo.Text = "GetCheckUnitInfo";
+            CheckScannerGetCheckUnitInfo.UseVisualStyleBackColor = true;
+            CheckScannerGetCheckUnitInfo.Click += CheckScannerGetCheckUnitInfo_Click;
+            // 
+            // CheckScannerServiceURI
+            // 
+            CheckScannerServiceURI.Location = new System.Drawing.Point(119, 25);
+            CheckScannerServiceURI.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerServiceURI.Name = "CheckScannerServiceURI";
+            CheckScannerServiceURI.Size = new System.Drawing.Size(530, 27);
+            CheckScannerServiceURI.TabIndex = 82;
+            // 
+            // CheckScannerServiceDiscovery
+            // 
+            CheckScannerServiceDiscovery.Location = new System.Drawing.Point(506, 136);
+            CheckScannerServiceDiscovery.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerServiceDiscovery.Name = "CheckScannerServiceDiscovery";
+            CheckScannerServiceDiscovery.Size = new System.Drawing.Size(133, 31);
+            CheckScannerServiceDiscovery.TabIndex = 77;
+            CheckScannerServiceDiscovery.Text = "Service Discovery";
+            CheckScannerServiceDiscovery.UseVisualStyleBackColor = true;
+            CheckScannerServiceDiscovery.Click += ChecKScannerServiceDiscovery_Click;
+            // 
+            // CheckScannerPortNum
+            // 
+            CheckScannerPortNum.Location = new System.Drawing.Point(119, 57);
+            CheckScannerPortNum.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerPortNum.Name = "CheckScannerPortNum";
+            CheckScannerPortNum.ReadOnly = true;
+            CheckScannerPortNum.Size = new System.Drawing.Size(121, 27);
+            CheckScannerPortNum.TabIndex = 78;
+            // 
+            // label85
+            // 
+            label85.AutoSize = true;
+            label85.Location = new System.Drawing.Point(9, 91);
+            label85.Margin = new System.Windows.Forms.Padding(0);
+            label85.Name = "label85";
+            label85.Size = new System.Drawing.Size(75, 20);
+            label85.TabIndex = 79;
+            label85.Text = "Check URI";
+            // 
+            // CheckScannerURI
+            // 
+            CheckScannerURI.Location = new System.Drawing.Point(119, 88);
+            CheckScannerURI.Margin = new System.Windows.Forms.Padding(0);
+            CheckScannerURI.Name = "CheckScannerURI";
+            CheckScannerURI.ReadOnly = true;
+            CheckScannerURI.Size = new System.Drawing.Size(530, 27);
+            CheckScannerURI.TabIndex = 80;
+            // 
+            // label86
+            // 
+            label86.AutoSize = true;
+            label86.Location = new System.Drawing.Point(11, 57);
+            label86.Margin = new System.Windows.Forms.Padding(0);
+            label86.Name = "label86";
+            label86.Size = new System.Drawing.Size(93, 20);
+            label86.TabIndex = 81;
+            label86.Text = "Port Number";
+            // 
+            // label87
+            // 
+            label87.AutoSize = true;
+            label87.Location = new System.Drawing.Point(11, 25);
+            label87.Margin = new System.Windows.Forms.Padding(0);
+            label87.Name = "label87";
+            label87.Size = new System.Drawing.Size(83, 20);
+            label87.TabIndex = 83;
+            label87.Text = "Service URI";
             // 
             // Form1
             // 
@@ -4132,8 +4463,10 @@ namespace TestClientForms
             BiometricPage.PerformLayout();
             CashAccTabPage.ResumeLayout(false);
             CashAccTabPage.PerformLayout();
-            tabPage1.ResumeLayout(false);
-            tabPage1.PerformLayout();
+            CamTabPage.ResumeLayout(false);
+            CamTabPage.PerformLayout();
+            CheckTabPage.ResumeLayout(false);
+            CheckTabPage.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -4462,7 +4795,7 @@ namespace TestClientForms
         private global::System.Windows.Forms.TreeView cashAcceptorTreeView;
         private System.Windows.Forms.Label label78;
         private System.Windows.Forms.TextBox NonceTextBox;
-        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage CamTabPage;
         private System.Windows.Forms.TreeView cameraTreeView;
         private System.Windows.Forms.Button CameraReset;
         private System.Windows.Forms.Label label79;
@@ -4478,6 +4811,33 @@ namespace TestClientForms
         private System.Windows.Forms.Label label82;
         private System.Windows.Forms.Button TakePic;
         private System.Windows.Forms.TextBox cameraRawBox;
+        private System.Windows.Forms.TabPage CheckTabPage;
+        private System.Windows.Forms.TreeView checkScannerTreeView;
+        private System.Windows.Forms.TextBox checkScannerRawBox;
+        private System.Windows.Forms.Button CheckScannerSetCheckUnitInfo;
+        private System.Windows.Forms.Button CheckScannerMediaIn;
+        private System.Windows.Forms.Button CheckScannerMediaInEnd;
+        private System.Windows.Forms.Button CheckScannerMediaInRollback;
+        private System.Windows.Forms.Button CheckScannerRetract;
+        private System.Windows.Forms.Button CheckScannerStartExchange;
+        private System.Windows.Forms.Button CheckScannerEndExchange;
+        private System.Windows.Forms.Button CheckScannerReset;
+        private System.Windows.Forms.Button CheckScannerGetTransactionStatus;
+        private System.Windows.Forms.TextBox CheckDeviceType;
+        private System.Windows.Forms.Label label83;
+        private System.Windows.Forms.Label label84;
+        private System.Windows.Forms.TextBox StCheck;
+        private System.Windows.Forms.Button CheckScannerCapabilities;
+        private System.Windows.Forms.Button CheckScannerStatus;
+        private System.Windows.Forms.Button CheckScannerGetCheckUnitInfo;
+        private System.Windows.Forms.TextBox CheckScannerServiceURI;
+        private System.Windows.Forms.Button CheckScannerServiceDiscovery;
+        private System.Windows.Forms.TextBox CheckScannerPortNum;
+        private System.Windows.Forms.Label label85;
+        private System.Windows.Forms.TextBox CheckScannerURI;
+        private System.Windows.Forms.Label label86;
+        private System.Windows.Forms.Label label87;
+        private System.Windows.Forms.Button viewTxnStatus;
     }
 }
 

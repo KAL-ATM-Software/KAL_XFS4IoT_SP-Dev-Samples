@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CashRecyclerTemplate", "Cas
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraTemplate", "Camera\CameraTemplate.csproj", "{18F66B95-B591-40D7-A9E9-EE4B4FB88CE4}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckScannerTemplate", "CheckScanner\CheckScannerTemplate.csproj", "{C7098138-BC2A-4A41-8EC9-A3505229AA89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -223,6 +225,18 @@ Global
 		{18F66B95-B591-40D7-A9E9-EE4B4FB88CE4}.Release|x64.Build.0 = Release|Any CPU
 		{18F66B95-B591-40D7-A9E9-EE4B4FB88CE4}.Release|x86.ActiveCfg = Release|Any CPU
 		{18F66B95-B591-40D7-A9E9-EE4B4FB88CE4}.Release|x86.Build.0 = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|x64.Build.0 = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Debug|x86.Build.0 = Debug|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|x64.ActiveCfg = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|x64.Build.0 = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|x86.ActiveCfg = Release|Any CPU
+		{C7098138-BC2A-4A41-8EC9-A3505229AA89}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

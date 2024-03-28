@@ -34,18 +34,20 @@
             // 
             // picBox
             // 
-            picBox.Location = new System.Drawing.Point(-3, -2);
+            picBox.Location = new System.Drawing.Point(2, 0);
+            picBox.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             picBox.Name = "picBox";
-            picBox.Size = new System.Drawing.Size(569, 443);
+            picBox.Size = new System.Drawing.Size(639, 588);
             picBox.TabIndex = 0;
             picBox.TabStop = false;
             // 
             // CamPreview
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(562, 441);
+            ClientSize = new System.Drawing.Size(642, 588);
             Controls.Add(picBox);
+            Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "CamPreview";
             Text = "CamPreview";
             ((System.ComponentModel.ISupportInitialize)picBox).EndInit();

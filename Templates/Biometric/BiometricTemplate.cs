@@ -44,9 +44,7 @@ namespace Biometric.BiometricTemplate
 
         private readonly ILogger _logger;
 
-        public Dictionary<string, BiometricDataType> StorageInfo { get => internalTemplates.ToDictionary(c => c.Key, c => c.Value.DataType); }
-        private Dictionary<string, BiometricData> internalTemplates { get; set; } = new();
-        private int internalTemplateId = 0;
+        public Dictionary<string, BiometricDataType> StorageInfo { get => []; }
 
         public BiometricStatusClass BiometricStatus { get; set; }
 

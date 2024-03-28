@@ -779,6 +779,41 @@ namespace CashRecycler.CashRecyclerTemplate
         /// </summary>
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
         public Task<SetCardStorageResult> SetCardStorageAsync(SetCardStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashDispenser service provider doesn't support card related operations.");
+
+        /// <summary>
+        /// Return cheeck storage information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the cash unit configuration or capabilities are changed, otherwise false</returns>
+        public bool GetCheckStorageConfiguration(out Dictionary<string, CheckUnitStorageConfiguration> newCheckUnits) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+        /// <summary>
+        /// Return check unit counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetCheckUnitCounts(out Dictionary<string, StorageCheckCountClass> unitCounts) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+        /// <summary>
+        /// Return check unit initial counts maintained by the device class and only this method is called on the start of day
+        /// </summary>
+        /// <returns>Return true if the device class maintained initial counts, otherwise false</returns>
+        public bool GetCheckUnitInitialCounts(out Dictionary<string, StorageCheckCountClass> initialCounts) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+
+        /// <summary>
+        /// Return check storage status.
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetCheckStorageStatus(out Dictionary<string, CheckUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+
+        /// <summary>
+        /// Return check unit status maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetCheckUnitStatus(out Dictionary<string, CheckStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for check units
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetCheckStorageResult> SetCheckStorageAsync(SetCheckStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
+
         #endregion
 
         #region Common Interface
