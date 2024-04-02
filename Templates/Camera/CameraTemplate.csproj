@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>CameraTemplate</AssemblyName>
-    <RootNamespace>BarcodeReader.CameraTemplate</RootNamespace>
+    <RootNamespace>Camera.CameraTemplate</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
