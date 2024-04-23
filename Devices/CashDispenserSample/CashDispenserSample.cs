@@ -94,6 +94,12 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         #region CashDispenser Interface
         public async Task<DispenseResult> DispenseAsync(DispenseCommandEvents events, DispenseRequest dispenseInfo, CancellationToken cancellation)
 		{
+            if (CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty)
+            {
+                // first dispense and clear dispensed notes information
+                LastDispenseResult.Clear();
+            }
+
             if (dispenseInfo.E2EToken is null)
                 return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, 
                                           "An end to end security token is required to dispense");
@@ -206,7 +212,12 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 if (LastDispenseResult.ContainsKey(item.Key))
                 {
                     LastDispenseResult[item.Key].StorageCashOutCount.Presented = LastDispenseResult[item.Key].StorageCashOutCount.Stacked;
-                    LastDispenseResult[item.Key].StorageCashOutCount.Stacked = new();
+                    // Presented and update stacked counts
+                    foreach (var stacked in LastDispenseResult[item.Key].StorageCashOutCount.Stacked.ItemCounts)
+                    {
+                        stacked.Value.Fit *= -1;
+                        // Ohter counters should not be used for the good dispensing
+                    }
                     LastDispenseResult[item.Key].Count = 0;
                 }
             }
@@ -235,12 +246,37 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
-            cashInCount.Rejected = new StorageCashCountClass(3, new()
+            cashInCount.Rejected = new StorageCashCountClass(0, new()
             {
                 { "typeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
                 { "typeEUR20", new CashItemCountClass(2, 0, 0, 0, 0) }
             });
+
             cashMovement.Add("unit1", new CashUnitCountClass(null, cashInCount, cashInCount.Rejected.Total));
+
+            foreach (var item in LastDispenseResult)
+            {
+                if (LastDispenseResult.ContainsKey(item.Key))
+                {
+                    // Clean up other counters
+                    foreach (var stacked in LastDispenseResult[item.Key].StorageCashOutCount.Stacked.ItemCounts)
+                    {
+                        if (stacked.Value.Fit > 0)
+                        {
+                            stacked.Value.Fit *= -1;
+                        }
+                    }
+                    foreach (var presented in LastDispenseResult[item.Key].StorageCashOutCount.Presented.ItemCounts)
+                    {
+                        if (presented.Value.Fit > 0)
+                        {
+                            presented.Value.Fit *= -1;
+                        }
+                    }
+                    // Ohter counters should not be used for the good dispensing
+                    cashMovement.Add(item.Key, new CashUnitCountClass(new(LastDispenseResult[item.Key].StorageCashOutCount), null, 0));
+                }
+            }
 
             LastDispenseResult.Clear();
 
@@ -404,7 +440,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
-            cashInCount.Retracted = new StorageCashCountClass(3, new() 
+            cashInCount.Retracted = new StorageCashCountClass(0, new() 
                                                                  { 
                                                                     { "typeEUR5",  new CashItemCountClass(1, 0, 0, 0, 0) },
                                                                     { "typeEUR20", new CashItemCountClass(3, 0, 0, 0, 0) } 
@@ -414,6 +450,33 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             CashDispenserStatus.IntermediateStacker = CashDispenserStatusClass.IntermediateStackerEnum.Empty;
             positionStatus.PositionStatus = CashManagementStatusClass.PositionStatusEnum.Empty;
             positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
+
+            foreach (var item in LastDispenseResult)
+            {
+                if (LastDispenseResult.ContainsKey(item.Key))
+                {
+                    // Clean up other counters
+                    foreach (var stacked in LastDispenseResult[item.Key].StorageCashOutCount.Stacked.ItemCounts)
+                    {
+                        if (stacked.Value.Fit > 0)
+                        {
+                            stacked.Value.Fit *= -1;
+                        }
+                    }
+                    foreach (var presented in LastDispenseResult[item.Key].StorageCashOutCount.Presented.ItemCounts)
+                    {
+                        if (presented.Value.Fit > 0)
+                        {
+                            presented.Value.Fit *= -1;
+                        }
+                    }
+                    // Ohter counters should not be used for the good dispensing
+                    cashMovement.Add(item.Key, new CashUnitCountClass(new(LastDispenseResult[item.Key].StorageCashOutCount), null, 0));
+                }
+
+            }
+
+            LastDispenseResult.Clear();
 
             return new RetractResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
         }
@@ -445,6 +508,8 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             positionStatus.Transport = CashManagementStatusClass.TransportEnum.Ok;
             positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
+
+            LastDispenseResult.Clear();
 
             return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success, MovementResult:null);
         }

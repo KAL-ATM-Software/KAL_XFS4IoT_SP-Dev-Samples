@@ -663,7 +663,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
 
             Dictionary<string, CashUnitCountClass> cashMovement = new();
             StorageCashInCountClass cashInCount = new();
-            cashInCount.Retracted = new StorageCashCountClass(3, new() 
+            cashInCount.Retracted = new StorageCashCountClass(0, new() 
                                                                  { 
                                                                     { "typeEUR5",  new CashItemCountClass(1, 0, 0, 0, 0) },
                                                                     { "typeEUR20", new CashItemCountClass(3, 0, 0, 0, 0) } 
