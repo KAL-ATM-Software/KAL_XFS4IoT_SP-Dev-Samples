@@ -59,10 +59,10 @@ namespace KAL.XFS4IoTSP.Lights.Sample
 
             if (!request.StdLights.ContainsKey(LightsCapabilitiesClass.DeviceEnum.CardReader))
             {
-                return new SetLightResult(MessagePayload.CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLights.Keys}");
+                return new SetLightResult(MessageHeader.CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLights.Keys}");
             }
             LightsStatus.Status[LightsCapabilitiesClass.DeviceEnum.CardReader] = new(LightsStatusClass.LightOperation.PositionEnum.Center, request.StdLights[LightsCapabilitiesClass.DeviceEnum.CardReader].FlashRate, LightsStatusClass.LightOperation.ColourEnum.Default, LightsStatusClass.LightOperation.DirectionEnum.None);
-            return new SetLightResult(MessagePayload.CompletionCodeEnum.Success);
+            return new SetLightResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

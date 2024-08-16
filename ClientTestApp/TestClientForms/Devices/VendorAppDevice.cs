@@ -52,7 +52,7 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
 
-                    if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                    if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
                         return;
                 }
                 else if (cmdResponse is Acknowledge)

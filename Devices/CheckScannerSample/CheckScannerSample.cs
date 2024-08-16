@@ -204,7 +204,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             positionStatus.Shutter = CheckScannerStatusClass.ShutterEnum.Closed;
 
             return new MediaInResult(
-                CompletionCode: MessagePayload.CompletionCodeEnum.Success,
+                CompletionCode: MessageHeader.CompletionCodeEnum.Success,
                 MediaOnStacker: AcceptedMedias.Count,
                 LastMedia: SampleMediaData.Count,
                 LastMediaOnStacker: SampleMediaData.Count);
@@ -253,12 +253,12 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             if (service?.LastTransactionStatus.MediaInTransactionState != TransactionStatus.MediaInTransactionStateEnum.Active &&
                 AcceptedMedias.Count == 0)
             {
-                return new MediaInEndResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new MediaInEndResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                             ErrorCode: MediaInEndCompletion.PayloadData.ErrorCodeEnum.NoMedia);
             }
 
             MediaInEndResult result = new(
-                CompletionCode: MessagePayload.CompletionCodeEnum.Success,
+                CompletionCode: MessageHeader.CompletionCodeEnum.Success,
                 MediaInEndCount: new(
                     MovementResult: new()
                     {
@@ -311,12 +311,12 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             if (service?.LastTransactionStatus.MediaInTransactionState != TransactionStatus.MediaInTransactionStateEnum.Active &&
                 AcceptedMedias.Count == 0)
             {
-                return new MediaInRollbackResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new MediaInRollbackResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                  ErrorCode: MediaInRollbackCompletion.PayloadData.ErrorCodeEnum.NoMedia);
             }
 
             MediaInRollbackResult result = new(
-                CompletionCode: MessagePayload.CompletionCodeEnum.Success,
+                CompletionCode: MessageHeader.CompletionCodeEnum.Success,
                 MediaInEndCount: new(
                     ItemsReturned: AcceptedMedias.Count)
                 );
@@ -353,12 +353,12 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             if (!AcceptedMedias.ContainsKey(request.MediaId))
             {
                 return new ReadImageResult(
-                    CompletionCode: MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                    CompletionCode: MessageHeader.CompletionCodeEnum.CommandErrorCode,
                     ErrorCode: ReadImageCompletion.PayloadData.ErrorCodeEnum.InvalidMediaID);
             }
 
             return new ReadImageResult(
-                CompletionCode: MessagePayload.CompletionCodeEnum.Success,
+                CompletionCode: MessageHeader.CompletionCodeEnum.Success,
                 ImageData: AcceptedMedias[request.MediaId].ImageData);
         }
 
@@ -408,12 +408,12 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             if (service?.LastTransactionStatus.MediaInTransactionState != TransactionStatus.MediaInTransactionStateEnum.Active &&
                 AcceptedMedias.Count == 0)
             {
-                return new RetractMediaResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new RetractMediaResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                               ErrorCode: RetractMediaCompletion.PayloadData.ErrorCodeEnum.NoMediaPresent);
             }
 
             RetractMediaResult result = new(
-                CompletionCode: MessagePayload.CompletionCodeEnum.Success,
+                CompletionCode: MessageHeader.CompletionCodeEnum.Success,
                 MovementResult: new()
                 {
                     { "unitRetract", new(Count: AcceptedMedias.Count,
@@ -451,7 +451,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             positionStatus.PositionStatus = CheckScannerStatusClass.PositionStatusEnum.Empty;
             CheckScannerStatus.Stacker = CheckScannerStatusClass.StackerEnum.Empty;
 
-            return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ResetDeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -499,7 +499,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            return new ExpelMediaResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ExpelMediaResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -527,7 +527,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -556,7 +556,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            return new SetMediaParametersResult(MessagePayload.CompletionCodeEnum.Success);
+            return new SetMediaParametersResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -779,7 +779,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
                 }
             }
 
-            return new(MessagePayload.CompletionCodeEnum.Success);
+            return new(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -792,7 +792,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             // Prepare for the cash unit exchange operation
             CommonStatus.Exchange = CommonStatusClass.ExchangeEnum.Active;
 
-            return new StartExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new StartExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -805,7 +805,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             // Complete for the cash unit exchange operation
             CommonStatus.Exchange = CommonStatusClass.ExchangeEnum.Inactive;
 
-            return new EndExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new EndExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

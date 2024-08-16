@@ -71,7 +71,7 @@ namespace KAL.XFS4IoTSP.Camera.Sample
             await Task.Delay(100);
             RoomCamStatus.NumberOfPictures++;
 
-            return new(MessagePayload.CompletionCodeEnum.Success, image);
+            return new(MessageHeader.CompletionCodeEnum.Success, image);
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace KAL.XFS4IoTSP.Camera.Sample
             await Task.Delay(100);
             RoomCamStatus.NumberOfPictures = 0;
 
-            return new(MessagePayload.CompletionCodeEnum.Success);
+            return new(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

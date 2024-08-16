@@ -282,7 +282,7 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, response.Serialise());
 
-                    if (response.Payload.CompletionCode == XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                    if (response.Header.CompletionCode == MessageHeader.CompletionCodeEnum.Success)
                         break;
                 }
                 else if (cmdResponse is Acknowledge)
@@ -324,8 +324,8 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, response.Serialise());
 
-                    if (response.Payload.CompletionCode == XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                        return MakeToken(response.Payload.CommandNonce, true);
+                    if (response.Header.CompletionCode == MessageHeader.CompletionCodeEnum.Success)
+                        return MakeToken(response.Payload?.CommandNonce, true);
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -468,7 +468,7 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, response.Serialise());
 
-                    if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success ||
+                    if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success ||
                         response.Payload.ErrorCode == PresentCompletion.PayloadData.ErrorCodeEnum.NoItems)
                         break;
                 }

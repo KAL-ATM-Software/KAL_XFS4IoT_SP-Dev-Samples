@@ -133,7 +133,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                     await events.KeyEvent();
                 }
             }
-            return new PinEntryResult(MessagePayload.CompletionCodeEnum.Success,
+            return new PinEntryResult(MessageHeader.CompletionCodeEnum.Success,
                                       keysPressed,
                                       EntryCompletion is null ? EntryCompletionEnum.Auto : EntryCompletion);
         }
@@ -193,7 +193,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 await events.KeyEvent(Digit: key);
             }
 
-            return new DataEntryResult(MessagePayload.CompletionCodeEnum.Success,
+            return new DataEntryResult(MessageHeader.CompletionCodeEnum.Success,
                                        keysPressed,
                                        keys,
                                        EntryCompletion is null ? EntryCompletionEnum.Auto : EntryCompletion);
@@ -242,7 +242,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 await events.KeyEvent(EntryCompletionEnum.Enter, "enter");
             }
 
-            return new SecureKeyEntryResult(MessagePayload.CompletionCodeEnum.Success,
+            return new SecureKeyEntryResult(MessageHeader.CompletionCodeEnum.Success,
                                             request.KeyLen,
                                             request.AutoEnd ? EntryCompletionEnum.Auto : EntryCompletionEnum.Enter,
                                             new() { 0x76, 0xf6, 0x3e });
@@ -255,7 +255,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<DeviceResult> SetKeypressBeep(KeyboardBeepEnum Beep, CancellationToken cancellation)
         {
             await Task.Delay(200, cancellation);
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success, null);
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             foreach (var entryMode in request)
                 keyLayouts[entryMode.Key] = entryMode.Value;
 
-            return new DefineLayoutResult(MessagePayload.CompletionCodeEnum.Success, null);
+            return new DefineLayoutResult(MessageHeader.CompletionCodeEnum.Success, null);
         }
 
         /// <summary>
@@ -312,7 +312,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<VerifyPINLocalResult> VerifyPINLocalDES(VerifyPINLocalDESRequest request, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new VerifyPINLocalResult(MessagePayload.CompletionCodeEnum.Success, true);
+            return new VerifyPINLocalResult(MessageHeader.CompletionCodeEnum.Success, true);
         }
 
         /// <summary>
@@ -321,7 +321,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<VerifyPINLocalResult> VerifyPINLocalVISA(VerifyPINLocalVISARequest request, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new VerifyPINLocalResult(MessagePayload.CompletionCodeEnum.Success, true);
+            return new VerifyPINLocalResult(MessageHeader.CompletionCodeEnum.Success, true);
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<DeviceResult> MaintainPin(bool MaintainPIN, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success, null);
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<DeviceResult> SetPinBlockData(PINBlockRequest request, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success, null);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success, null);
         }
 
         /// <summary>
@@ -353,7 +353,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         public async Task<PINBlockResult> GetPinBlock(PinPadCommandEvents events, PINBlockRequest request, CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new PINBlockResult(MessagePayload.CompletionCodeEnum.Success,
+            return new PINBlockResult(MessageHeader.CompletionCodeEnum.Success,
                                       PINBlock: new() { 0x37, 0x0f, 0xa6, 0x85, 0x72, 0x3d, 0xcc, 0xb5 });
         }
 
@@ -366,7 +366,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                           CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new PresentIDCResult(MessagePayload.CompletionCodeEnum.Success,
+            return new PresentIDCResult(MessageHeader.CompletionCodeEnum.Success,
                                         request.ChipProtocol,
                                         new List<byte>() { 0x90, 0x00 });
         }
@@ -437,7 +437,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 }
             }
 
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success,
+            return new ImportKeyResult(MessageHeader.CompletionCodeEnum.Success,
                                        new KeyInformationBase(), 
                                        keyCheckValue,
                                        verifyAttrib,
@@ -461,14 +461,14 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (request.KeyUsage != "K0")
             {
-                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ImportKeyResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                            $"Key usage should be K0 for this sample. {request.KeyUsage}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.UseViolation);
             }
 
             if (request.Algorithm != "T")
             {
-                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ImportKeyResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                            $"Specified algorithm is not supproted. {request.Algorithm}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.AlgorithmNotSupported);
             }
@@ -513,7 +513,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 }
             }
 
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new ImportKeyResult(MessageHeader.CompletionCodeEnum.Success, 
                                        new KeyInformationBase(), 
                                        keyCheckValue,
                                        verifyAttrib,
@@ -532,7 +532,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             Dictionary<string, LoadedKeyInfo> loadedKeys = GetKeys();
             if (loadedKeys.ContainsKey(request.KeyName))
             {
-                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ImportKeyResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                            $"Specified key already exist. {request.KeyName}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.DuplicateKey);
             }
@@ -540,7 +540,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             if (request.Algorithm != "T" &&
                 request.Algorithm != "R")
             {
-                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ImportKeyResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                            $"Specified algorithm is not supproted. {request.Algorithm}",
                                            ImportKeyCompletion.PayloadData.ErrorCodeEnum.AlgorithmNotSupported);
             }
@@ -548,7 +548,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             if (request.KeyData.Count != 16 &&
                 request.KeyData.Count != 24)
             {
-                return new ImportKeyResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ImportKeyResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                         $"Specified key data length is not supproted. {request.KeyData.Count}",
                                         ImportKeyCompletion.PayloadData.ErrorCodeEnum.InvalidKeyLength);
             }
@@ -600,7 +600,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 }
             }
 
-            return new ImportKeyResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new ImportKeyResult(MessageHeader.CompletionCodeEnum.Success, 
                                        new KeyInformationBase(), 
                                        keyCheckValue,
                                        verifyAttrib,
@@ -624,7 +624,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                     KeyContainerName = request.KeyName
                 });
                 rsaServiceProvider.Clear();
-                return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+                return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
             }
             catch (Exception)
             { }
@@ -640,7 +640,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             }
             StoreKeys(keys);
 
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -669,7 +669,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                     rsaKeyRequested = false;
                 }
 
-                return new GenerateKCVResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new GenerateKCVResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                              rsaKeyRequested ? $"RSA KVC is not supported by the GenerateKCV. {request.KeyName}" : $"Key not found. {request.KeyName}",
                                              rsaKeyRequested ? GenerateKCVCompletion.PayloadData.ErrorCodeEnum.AccessDenied : GenerateKCVCompletion.PayloadData.ErrorCodeEnum.KeyNotFound);
             }
@@ -692,7 +692,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             cryptoStream.Write(checkKey, 0, checkKey.Length);
             cryptoStream.FlushFinalBlock();
 
-            return new GenerateKCVResult(MessagePayload.CompletionCodeEnum.Success,
+            return new GenerateKCVResult(MessageHeader.CompletionCodeEnum.Success,
                                          memStream.ToArray().ToList());
         }
 
@@ -736,7 +736,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             initializedSignal.Release();
 
 
-            return new InitializationResult(MessagePayload.CompletionCodeEnum.Success);
+            return new InitializationResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -753,7 +753,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                                      CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new DeriveKeyResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+            return new DeriveKeyResult(MessageHeader.CompletionCodeEnum.UnsupportedCommand);
         }
 
         /// <summary>
@@ -766,7 +766,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             initializedSignal.Release();
 
 
-            return new InitializationResult(MessagePayload.CompletionCodeEnum.Success);
+            return new InitializationResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
 
@@ -796,7 +796,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             List<byte> signed = rsaServiceProvider.SignHash(eppID.ToArray(), CryptoConfig.MapNameToOID("SHA256")).ToList();
 
-            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new RSASignedItemResult(MessageHeader.CompletionCodeEnum.Success, 
                                            Data: eppID, 
                                            SignatureAlgorithm: RSASignedItemResult.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
                                            Signature: signed);
@@ -815,7 +815,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             List<byte> publicKey = rsaServiceProvider.ExportRSAPublicKey().ToList();
             List<byte> signed = rsaServiceProvider.SignHash(publicKey.ToArray(), CryptoConfig.MapNameToOID("SHA256")).ToList();
 
-            return new RSASignedItemResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new RSASignedItemResult(MessageHeader.CompletionCodeEnum.Success, 
                                            Data: publicKey, 
                                            SignatureAlgorithm: RSASignedItemResult.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5, 
                                            Signature: signed);
@@ -846,7 +846,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (rsaServiceProvider is not null)
             {
-                return new GenerateRSAKeyPairResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new GenerateRSAKeyPairResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                     $"Requested key exist. {request.KeyName}",
                                                     GenerateRSAKeyPairCompletion.PayloadData.ErrorCodeEnum.DuplicateKey);
             }
@@ -856,7 +856,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 KeyContainerName = request.KeyName
             });
 
-            return new GenerateRSAKeyPairResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new GenerateRSAKeyPairResult(MessageHeader.CompletionCodeEnum.Success, 
                                                 new GenerateRSAKeyPairResult.LoadedKeyInformation("S0",
                                                                                                   "R",
                                                                                                   "S",
@@ -875,7 +875,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             if (certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.NotReady ||
                 certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Unknown)
             {
-                return new ExportCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ExportCertificateResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                    $"Invalid certification state. {certState}",
                                                    GetCertificateCompletion.PayloadData.ErrorCodeEnum.InvalidCertificateState);
             }
@@ -941,7 +941,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 0x5A, 0x31, 0x19, 0x30, 0xF8, 0xA4, 0xF1, 0xDD, 0xD7, 0x52, 0x74, 0x20, 0xD7, 0xB1, 0x31, 0x00
             };
 
-            return new ExportCertificateResult(MessagePayload.CompletionCodeEnum.Success,
+            return new ExportCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                certificate);
         }
 
@@ -957,7 +957,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             if (certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.NotReady ||
                 certState == XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Unknown)
             {
-                return new ReplaceCertificateResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new ReplaceCertificateResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                     $"Invalid certification state. {certState}",
                                                     ReplaceCertificateCompletion.PayloadData.ErrorCodeEnum.InvalidCertificateState);
             }
@@ -969,7 +969,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 0xA2, 0x7A, 0xCC, 0x48, 0xDF, 0x26, 0x6D, 0x1B, 0xCB, 0x0B, 0x56, 0x76, 0x05, 0x9B, 0xDB, 0x9B,
                 0x7B, 0x38, 0xCA, 0xA4, 0xBA, 0x39, 0x9B, 0xCB, 0x4F, 0x58, 0x4A, 0x99, 0x85, 0x99, 0x69, 0x7D
             };
-            return new ReplaceCertificateResult(MessagePayload.CompletionCodeEnum.Success,
+            return new ReplaceCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                 digest);
         }
 
@@ -983,7 +983,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(200, cancellation);
 
-            return new StartKeyExchangeResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber());
+            return new StartKeyExchangeResult(MessageHeader.CompletionCodeEnum.Success, GenerateRandomNumber());
         }
 
 
@@ -997,7 +997,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             if (request.Certificate is null || request.Certificate.Count == 0)
             {
-                return new ImportCertificateResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new ImportCertificateResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                    $"No certificate specified.");
             }
 
@@ -1022,7 +1022,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (!validvalidOption)
             {
-                return new ImportCertificateResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new ImportCertificateResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                    $"Specified signer or option is not supported. {request.Signer}, or {request.LoadOption}");
             }
 
@@ -1033,7 +1033,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 0xFD, 0x77, 0x17, 0xC0, 0x3D, 0xAB, 0x76, 0x5C, 0x54, 0x7E, 0xF3, 0x53, 0x41, 0x00, 0xCD, 0x04,
                 0x04, 0xE9, 0xB0, 0xBF, 0x71, 0x05, 0xE9, 0xAE, 0x50, 0xC0, 0x81, 0x75, 0xA1, 0x8B, 0x92, 0x62
             };
-            return new ImportCertificateResult(MessagePayload.CompletionCodeEnum.Success,
+            return new ImportCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                ImportCertificateResult.RSAKeyCheckModeEnum.SHA256,
                                                digest);
         }
@@ -1048,7 +1048,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                                                      CancellationToken cancellation)
         {
             await Task.Delay(100, cancellation);
-            return new StartAuthenticateResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
+            return new StartAuthenticateResult(MessageHeader.CompletionCodeEnum.Success, GenerateRandomNumber(), AuthenticationData.SigningMethodEnum.CertHost);
         }
 
         public Task<ImportKeyTokenResult> ImportKeyToken(ImportKeyTokenRequest request, CancellationToken cancellation)
@@ -1124,7 +1124,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(200, cancellation);
 
-            return new GenerateRandomNumberResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber());
+            return new GenerateRandomNumberResult(MessageHeader.CompletionCodeEnum.Success, GenerateRandomNumber());
         }
 
         /// <summary>
@@ -1143,7 +1143,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (request.Mode != CryptoDataRequest.CryptoModeEnum.Encrypt)
             {
-                return new CryptoDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new CryptoDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                             $"Smaple SP only supports encryption.",
                                             CryptoDataCompletion.PayloadData.ErrorCodeEnum.ModeOfUseNotSupported);
             }
@@ -1151,7 +1151,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             Dictionary<string, LoadedKeyInfo> keysLoaded = GetKeys();
             if (!keysLoaded.ContainsKey(request.KeyName))
             {
-                return new CryptoDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new CryptoDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                             $"Key not found {request.KeyName}",
                                             CryptoDataCompletion.PayloadData.ErrorCodeEnum.KeyNotFound);
             }
@@ -1169,12 +1169,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 cryptoStream.Write(request.Data.ToArray(), 0, request.Data.Count);
                 cryptoStream.FlushFinalBlock();
 
-                return new CryptoDataResult(MessagePayload.CompletionCodeEnum.Success,
+                return new CryptoDataResult(MessageHeader.CompletionCodeEnum.Success,
                                             memStream.ToArray().ToList());
             }
             catch (CryptographicException ex)
             {
-                return new CryptoDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new CryptoDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                             $"Excryption failed. {ex.Message}",
                                             CryptoDataCompletion.PayloadData.ErrorCodeEnum.AccessDenied);
             }
@@ -1206,12 +1206,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (rsaServiceProvider is null)
             {
-                return new GenerateAuthenticationDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new GenerateAuthenticationDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                             $"Requested key exist. {request.KeyName}",
                                                             GenerateAuthenticationCompletion.PayloadData.ErrorCodeEnum.KeyNotFound);
             }
 
-            return new GenerateAuthenticationDataResult(MessagePayload.CompletionCodeEnum.Success,
+            return new GenerateAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success,
                                                         rsaServiceProvider.SignHash(request.Data.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).ToList());
         }
 
@@ -1223,7 +1223,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(100, cancellation);
 
-            return new GenerateAuthenticationDataResult(MessagePayload.CompletionCodeEnum.Success, GenerateRandomNumber());
+            return new GenerateAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success, GenerateRandomNumber());
         }
 
         /// <summary>
@@ -1254,15 +1254,15 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (rsaServiceProvider is null)
             {
-                return new VerifyAuthenticationDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                           $"Requested key exist. {request.KeyName}",
                                                           VerifyAuthenticationCompletion.PayloadData.ErrorCodeEnum.KeyNotFound);
             }
 
             bool verified = rsaServiceProvider.VerifyData(request.Data.ToArray(), HashAlgorithmName.SHA256, request.VerificationData.ToArray());
 
-            return verified ? new VerifyAuthenticationDataResult(MessagePayload.CompletionCodeEnum.Success) :
-                              new VerifyAuthenticationDataResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+            return verified ? new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success) :
+                              new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                                  $"Supplied signature data failed to verify",
                                                                  VerifyAuthenticationCompletion.PayloadData.ErrorCodeEnum.SignatureInvalid);
         }
@@ -1275,7 +1275,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(100, cancellation);
 
-            return new VerifyAuthenticationDataResult(MessagePayload.CompletionCodeEnum.Success);
+            return new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -1289,10 +1289,10 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             if (request.Hash == HashAlgorithmEnum.SHA256)
             {
-                return new GenerateDigestResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new GenerateDigestResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                 ErrorDescription: $"SHA1 is not supported.");
             }
-            return new GenerateDigestResult(MessagePayload.CompletionCodeEnum.Success,
+            return new GenerateDigestResult(MessageHeader.CompletionCodeEnum.Success,
                                             new SHA256CryptoServiceProvider().ComputeHash(request.DataToHash.ToArray()).ToList());
         }
 
@@ -1370,7 +1370,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                     Commands:
                     [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
-                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSADeviceSignedItem,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateRSAKeyPair,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetCertificate,

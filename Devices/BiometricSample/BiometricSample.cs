@@ -165,7 +165,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 BiometricStatus.Capture = false;
             }
 
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<ImportResult> ImportAsync(ImportRequest request, CancellationToken cancellation)
@@ -177,16 +177,16 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 templatesImported.Add(id, item.DataType);
                 internalTemplates.Add(id, item);
             }
-            return Task.FromResult(new ImportResult(MessagePayload.CompletionCodeEnum.Success, templatesImported));
+            return Task.FromResult(new ImportResult(MessageHeader.CompletionCodeEnum.Success, templatesImported));
         }
 
         public Task<MatchResult> MatchAsync(MatchRequest request, CancellationToken cancellation)
         {
             if (LastScannedData is not { Count: > 0 })
-                return Task.FromResult(new MatchResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, "No Captured data available.", XFS4IoT.Biometric.Completions.MatchCompletion.PayloadData.ErrorCodeEnum.NoCaptureData));
+                return Task.FromResult(new MatchResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, "No Captured data available.", XFS4IoT.Biometric.Completions.MatchCompletion.PayloadData.ErrorCodeEnum.NoCaptureData));
 
             if (!internalTemplates.ContainsKey(request.Identifier))
-                return Task.FromResult(new MatchResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, "Invalid Identifier", XFS4IoT.Biometric.Completions.MatchCompletion.PayloadData.ErrorCodeEnum.NoImportedData));
+                return Task.FromResult(new MatchResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, "Invalid Identifier", XFS4IoT.Biometric.Completions.MatchCompletion.PayloadData.ErrorCodeEnum.NoImportedData));
 
             var template = internalTemplates[request.Identifier];
             bool matched = template.Data.Count == LastScannedData.Count;
@@ -194,7 +194,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 if (template.Data[i] != LastScannedData[i])
                     matched = false;
 
-            return Task.FromResult(new MatchResult(MessagePayload.CompletionCodeEnum.Success,
+            return Task.FromResult(new MatchResult(MessageHeader.CompletionCodeEnum.Success,
                 matched 
                 ? new Dictionary<string, MatchCandidate>() { { request.Identifier, new MatchCandidate(100, LastScannedData) } }
                 : null));
@@ -225,12 +225,12 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
             }
 
             if (request.DataTypes is { Count: > 0 })
-            return new ReadResult(MessagePayload.CompletionCodeEnum.Success, new List<BiometricData>() 
+            return new ReadResult(MessageHeader.CompletionCodeEnum.Success, new List<BiometricData>() 
             { 
                 new BiometricData(new BiometricDataType(BiometricCapabilitiesClass.FormatEnum.ReservedTemplate1), SampleData) 
             });
 
-            return new ReadResult(MessagePayload.CompletionCodeEnum.Success, null);
+            return new ReadResult(MessageHeader.CompletionCodeEnum.Success, null);
         }
 
         public Task<DeviceResult> ResetDeviceAsync(ClearDataRequest ClearMode, CancellationToken cancellation)
@@ -244,7 +244,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                 BiometricStatus.Capture = false;
             }
 
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task RunAsync(CancellationToken cancel)
@@ -255,7 +255,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
         public Task<DeviceResult> SetDataPersistenceAsync(BiometricCapabilitiesClass.PersistenceModesEnum Mode, CancellationToken cancellation)
         {
             BiometricStatus.DataPersistence = Mode;
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<SetMatchResult> SetMatchAsync(MatchRequest request, CancellationToken cancellation)
@@ -304,7 +304,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
 
         public Task<DeviceResult> ResetDevice(CancellationToken cancellation)
         {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<RSASignedItemResult> ExportEPPId(ExportEPPIdRequest request, CancellationToken cancellation)

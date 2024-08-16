@@ -515,8 +515,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<GetCommandNonceCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                throw new Exception($"GetCommandNonce failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                throw new Exception($"GetCommandNonce failed: {response.Header.CompletionCode}");
 
             return response.Payload.CommandNonce;
         }
@@ -530,8 +530,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<ClearCommandNonceCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                throw new Exception($"ClearCommandNonce failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                throw new Exception($"ClearCommandNonce failed: {response.Header.CompletionCode}");
         }
 
         private async Task DoDispenseCash(ClientConnection cashDispenser, int Amount, string CurrencyID, string Token)
@@ -554,8 +554,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<DispenseCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"Dispense failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Dispense failed: {response.Header.CompletionCode}");
 
         }
 
@@ -568,8 +568,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<PresentCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"Present failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                Logger.LogWarning($"Present failed: {response.Header.CompletionCode}");
 
         }
 
@@ -582,8 +582,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<GetPresentStatusCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"GetPresentStatus failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                Logger.LogWarning($"GetPresentStatus failed: {response.Header.CompletionCode}");
 
             return response.Payload; 
         }
@@ -631,8 +631,8 @@ namespace TestClient
 
             // Wait for a response from the device. 
             var response = await GetCompletionAsync<SetStorageCompletion>(cashDispenser);
-            if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
-                Logger.LogWarning($"SetStorage failed: {response.Payload.CompletionCode}");
+            if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
+                Logger.LogWarning($"SetStorage failed: {response.Header.CompletionCode}");
         }
 
         private async Task<CompletionType> GetCompletionAsync<CompletionType>(ClientConnection connection)

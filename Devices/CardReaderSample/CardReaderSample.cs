@@ -20,7 +20,6 @@ using XFS4IoT.Common;
 using XFS4IoT.CardReader.Events;
 using XFS4IoT.CardReader;
 using XFS4IoT.CardReader.Completions;
-using XFS4IoT.Completions;
 using XFS4IoTServer;
 
 namespace KAL.XFS4IoTSP.CardReader.Sample
@@ -81,7 +80,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
             CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Present;
 
-            return new AcceptCardResult(MessagePayload.CompletionCodeEnum.Success);
+            return new AcceptCardResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -101,7 +100,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            MessagePayload.CompletionCodeEnum completionCode = MessagePayload.CompletionCodeEnum.InvalidData;
+            MessageHeader.CompletionCodeEnum completionCode = MessageHeader.CompletionCodeEnum.InvalidData;
 
             Dictionary<ReadCardRequest.CardDataTypesEnum, ReadCardResult.CardData> readData = new();
             List<ReadCardResult.CardData> chipATR = new(); 
@@ -134,7 +133,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                     chipATR.Add(new ReadCardResult.CardData(ReadCardResult.CardData.DataStatusEnum.Ok,
                                 new List<byte>() { 0x3b, 0x2a, 0x00, 0x80, 0x65, 0xa2, 0x1, 0x2, 0x1, 0x31, 0x72, 0xd6, 0x43 }));
                 }
-                completionCode = MessagePayload.CompletionCodeEnum.Success;
+                completionCode = MessageHeader.CompletionCodeEnum.Success;
             }
             
             return new ReadCardResult(completionCode,
@@ -155,7 +154,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            return new WriteCardResult(MessagePayload.CompletionCodeEnum.Success);
+            return new WriteCardResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -185,7 +184,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             await Task.Delay(1000, cancellation);
 
             List<byte> chipData = new() { 0x90, 0x00 };
-            return new ChipIOResult(MessagePayload.CompletionCodeEnum.Success, chipData);
+            return new ChipIOResult(MessageHeader.CompletionCodeEnum.Success, chipData);
         }
 
         /// <summary>
@@ -204,7 +203,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
             CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.NotPresent;
 
-            return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ResetDeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -214,7 +213,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                           CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
-            return new ChipPowerResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ChipPowerResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -227,7 +226,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         public async Task<EMVContactlessConfigureResult> EMVContactlessConfigureAsync(EMVContactlessConfigureRequest terminalConfig, CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
-            return new EMVContactlessConfigureResult(MessagePayload.CompletionCodeEnum.Success) ;
+            return new EMVContactlessConfigureResult(MessageHeader.CompletionCodeEnum.Success) ;
         }
 
         /// <summary>
@@ -268,7 +267,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                                                               0,
                                                                                                                               new List<byte>() { }));
 
-            return new EMVContactlessPerformTransactionResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new EMVContactlessPerformTransactionResult(MessageHeader.CompletionCodeEnum.Success, 
                                                               new() 
                                                               { 
                                                                   { 
@@ -309,7 +308,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                                                                0, 
                                                                                                                                new List<byte>() { }));
 
-            return new EMVContactlessIssuerUpdateResult(MessagePayload.CompletionCodeEnum.Success, txnOutput);
+            return new EMVContactlessIssuerUpdateResult(MessageHeader.CompletionCodeEnum.Success, txnOutput);
         }
 
         /// <summary>
@@ -320,7 +319,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                         CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
-            return new SetCIM86KeyResult(MessagePayload.CompletionCodeEnum.Success);
+            return new SetCIM86KeyResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -351,7 +350,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// </summary>
         public QueryIFMIdentifierResult QueryIFMIdentifier()
         {
-            return new QueryIFMIdentifierResult(MessagePayload.CompletionCodeEnum.Success,
+            return new QueryIFMIdentifierResult(MessageHeader.CompletionCodeEnum.Success,
                                                 new List<IFMIdentifierInfo>()
                                                 {
                                                 new IFMIdentifierInfo(IFMIdentifierInfo.IFMAuthorityEnum.EMV, "1234" )
@@ -370,7 +369,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 new EMVApplication(Encoding.UTF8.GetBytes("A0000000031010").ToList(), null),
                 new EMVApplication(Encoding.UTF8.GetBytes("A0000000041010").ToList(), null)
             };
-            return new QueryEMVApplicationResult(MessagePayload.CompletionCodeEnum.Success, AIDList);
+            return new QueryEMVApplicationResult(MessageHeader.CompletionCodeEnum.Success, AIDList);
         }
 
         /// <summary>
@@ -393,14 +392,14 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             if (moveCardInfo.From.Position == MovePosition.MovePositionEnum.Storage)
             {
-                return new MoveCardResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new MoveCardResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                           $"This device doesn't support dispensing card capability. {moveCardInfo.From.Position}");
             }
             else
             {
                 if (CardReaderStatus.Media == CardReaderStatusClass.MediaEnum.NotPresent)
                 {
-                    return new MoveCardResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                    return new MoveCardResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                               $"No card present in the reader.",
                                               MoveCompletion.PayloadData.ErrorCodeEnum.NoMedia);
                 }
@@ -414,7 +413,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
 
                 if (moveCardInfo.To.StorageId != cardUnitInfo.CardBin.PositionName)
                 {
-                    return new MoveCardResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                    return new MoveCardResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                               $"Unsupported storage ID specified. {moveCardInfo.To.StorageId}");
                 }
 
@@ -448,7 +447,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 CardReaderStatus.Media = CardReaderStatusClass.MediaEnum.Present;
             }
 
-            return new MoveCardResult(MessagePayload.CompletionCodeEnum.Success, 
+            return new MoveCardResult(MessageHeader.CompletionCodeEnum.Success, 
                                       cardUnitInfo.CardBin.PositionName,
                                       cardMoved);
         }
@@ -549,7 +548,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                                                                                               cardUnitInfo.CardBin.Configuration.CardId),
                                                                                          cardUnitInfo.InitialCount));
 
-            return new SetCardStorageResult(MessagePayload.CompletionCodeEnum.Success, newCardStorage);
+            return new SetCardStorageResult(MessageHeader.CompletionCodeEnum.Success, newCardStorage);
         }
 
         /// <summary>

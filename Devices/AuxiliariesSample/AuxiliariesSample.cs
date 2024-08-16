@@ -49,12 +49,12 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         {
             AutoStartupTime = null;
             AutoStartupTimeModeEnum = AutoStartupTimeModeEnum.Clear;
-            return Task.FromResult(new DeviceResult(XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<GetAutostartupTimeResult> GetAutoStartupTime(CancellationToken cancellation)
         {
-            return Task.FromResult(new GetAutostartupTimeResult(XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success, AutoStartupTime, AutoStartupTimeModeEnum));
+            return Task.FromResult(new GetAutostartupTimeResult(MessageHeader.CompletionCodeEnum.Success, AutoStartupTime, AutoStartupTimeModeEnum));
         }
 
 
@@ -67,7 +67,7 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         {
             AutoStartupTimeModeEnum = autoStartupInfo.Mode;
             AutoStartupTime = autoStartupInfo.StartupTime;
-            return Task.FromResult(new DeviceResult(XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<DeviceResult> SetAuxiliaries(SetAuxiliariesRequest request, CancellationToken cancellation)

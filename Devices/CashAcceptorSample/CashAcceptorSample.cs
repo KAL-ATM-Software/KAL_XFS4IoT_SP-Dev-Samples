@@ -20,7 +20,6 @@ using XFS4IoT.Common;
 using XFS4IoT.CashAcceptor;
 using XFS4IoT.CashAcceptor.Completions;
 using XFS4IoT.CashManagement.Completions;
-using XFS4IoT.Completions;
 using XFS4IoTServer;
 
 namespace KAL.XFS4IoTSP.CashAcceptor.Sample
@@ -52,8 +51,6 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 await CashAcceptorService.ItemsTakenEvent(CashManagementCapabilitiesClass.PositionEnum.OutDefault);
 
                 await Task.Delay(500);
-
-                await CashAcceptorService.ShutterStatusChangedEvent(CashManagementCapabilitiesClass.PositionEnum.InDefault, CashManagementStatusClass.ShutterEnum.Closed);
             }
         }
 
@@ -105,24 +102,24 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
         {
             if (CashAcceptorStatus.IntermediateStacker != CashAcceptorStatusClass.IntermediateStackerEnum.Empty)
             {
-                return new CashInStartResult(MessagePayload.CompletionCodeEnum.HardwareError, $"The stacker is not an empty state. {CashAcceptorStatus.IntermediateStacker}");
+                return new CashInStartResult(MessageHeader.CompletionCodeEnum.HardwareError, $"The stacker is not an empty state. {CashAcceptorStatus.IntermediateStacker}");
             }
 
             if (positionStatus.PositionStatus != CashManagementStatusClass.PositionStatusEnum.Empty)
             {
-                return new CashInStartResult(MessagePayload.CompletionCodeEnum.HardwareError, $"The position status is not good state to start cash-in operation. {positionStatus.PositionStatus}");
+                return new CashInStartResult(MessageHeader.CompletionCodeEnum.HardwareError, $"The position status is not good state to start cash-in operation. {positionStatus.PositionStatus}");
             }
 
             if (positionStatus.Shutter != CashManagementStatusClass.ShutterEnum.Closed)
             {
-                return new CashInStartResult(MessagePayload.CompletionCodeEnum.HardwareError, $"The shutter status is not good state to start cash-in operation. {positionStatus.Shutter}");
+                return new CashInStartResult(MessageHeader.CompletionCodeEnum.HardwareError, $"The shutter status is not good state to start cash-in operation. {positionStatus.Shutter}");
             }
 
             await Task.Delay(100, cancellation);
 
             AcceptedItems.Clear();
 
-            return new CashInStartResult(MessagePayload.CompletionCodeEnum.Success);
+            return new CashInStartResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -191,7 +188,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             if (positionStatus.PositionStatus != CashManagementStatusClass.PositionStatusEnum.Empty &&
                 positionStatus.PositionStatus != CashManagementStatusClass.PositionStatusEnum.NotEmpty)
             {
-                return new CashInResult(MessagePayload.CompletionCodeEnum.HardwareError, $"The device has a bad position status. {positionStatus.PositionStatus}");
+                return new CashInResult(MessageHeader.CompletionCodeEnum.HardwareError, $"The device has a bad position status. {positionStatus.PositionStatus}");
             }
             
             if (positionStatus.PositionStatus == CashManagementStatusClass.PositionStatusEnum.Empty)
@@ -201,7 +198,6 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 await Task.Delay(2000, cancellation);
 
                 positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
-                await CashAcceptorService.ShutterStatusChangedEvent(CashManagementCapabilitiesClass.PositionEnum.InDefault, CashManagementStatusClass.ShutterEnum.Closed);
 
                 await Task.Delay(100, cancellation);
             }
@@ -241,7 +237,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.NotEmpty;
             CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoCustomerAccess;
 
-            return new CashInResult(MessagePayload.CompletionCodeEnum.Success,
+            return new CashInResult(MessageHeader.CompletionCodeEnum.Success,
                                     identified,
                                     null,
                                     0);
@@ -264,12 +260,12 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
         {
             if (positionStatus.PositionStatus != CashManagementStatusClass.PositionStatusEnum.Empty)
             {
-                return new CashInEndResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, $"Items in the position.", CashInEndCompletion.PayloadData.ErrorCodeEnum.PositionNotEmpty);
+                return new CashInEndResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, $"Items in the position.", CashInEndCompletion.PayloadData.ErrorCodeEnum.PositionNotEmpty);
             }
             if (CashAcceptorStatus.IntermediateStacker == CashAcceptorStatusClass.IntermediateStackerEnum.Empty)
             {
                 CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoItems;
-                return new CashInEndResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, $"No cash accepted.", CashInEndCompletion.PayloadData.ErrorCodeEnum.NoItems);
+                return new CashInEndResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, $"No cash accepted.", CashInEndCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
             await Task.Delay(1000, cancellation);
@@ -284,7 +280,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.Empty;
             CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.CustomerAccess;
             CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoItems;
-            return new CashInEndResult(MessagePayload.CompletionCodeEnum.Success,
+            return new CashInEndResult(MessageHeader.CompletionCodeEnum.Success,
                                        cashMovement);
         }
 
@@ -322,14 +318,13 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             if (CashAcceptorStatus.IntermediateStacker == CashAcceptorStatusClass.IntermediateStackerEnum.Empty)
             {
                 CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoItems;
-                return new CashInRollbackResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, $"No items in the stacker. {CashAcceptorStatus.IntermediateStacker}", CashInRollbackCompletion.PayloadData.ErrorCodeEnum.NoItems);
+                return new CashInRollbackResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, $"No items in the stacker. {CashAcceptorStatus.IntermediateStacker}", CashInRollbackCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
             await Task.Delay(1000, cancellation);
 
             positionStatus.PositionStatus = CashManagementStatusClass.PositionStatusEnum.NotEmpty;
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.Empty;
-            await CashAcceptorService.ShutterStatusChangedEvent(CashManagementCapabilitiesClass.PositionEnum.OutDefault, CashManagementStatusClass.ShutterEnum.Open);
 
             await Task.Delay(1000, cancellation);
 
@@ -337,7 +332,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
 
             new Thread(CashTakenThread).IsNotNull().Start();
 
-            return new CashInRollbackResult(MessagePayload.CompletionCodeEnum.Success);
+            return new CashInRollbackResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -362,7 +357,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 }
             }
 
-            return new ConfigureNoteTypesResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ConfigureNoteTypesResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -408,7 +403,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
         {
             await Task.Delay(500, cancellation);
 
-            return new ConfigureNoteReaderResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ConfigureNoteReaderResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -468,7 +463,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 unit.Value.Unit.Status.Accuracy = CashStatusClass.AccuracyEnum.Accurate;
             }
 
-            return new CashUnitCountResult(MessagePayload.CompletionCodeEnum.Success);
+            return new CashUnitCountResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -652,7 +647,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             if (CashAcceptorStatus.IntermediateStacker == CashAcceptorStatusClass.IntermediateStackerEnum.Empty &&
                 positionStatus.PositionStatus == CashManagementStatusClass.PositionStatusEnum.Empty)
             {
-                return new RetractResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new RetractResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                          "No cash to retract",
                                          RetractCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
@@ -674,14 +669,14 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             positionStatus.PositionStatus = CashManagementStatusClass.PositionStatusEnum.Empty;
             positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
-            return new RetractResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
+            return new RetractResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
         }
 
         /// <summary>
         /// OpenCloseShutterAsync
         /// Perform shutter operation to open or close.
         /// </summary>
-        public Task<OpenCloseShutterResult> OpenCloseShutterAsync(OpenCloseShutterRequest shutterInfo, CancellationToken cancellation) => Task.FromResult(new OpenCloseShutterResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand));
+        public Task<OpenCloseShutterResult> OpenCloseShutterAsync(OpenCloseShutterRequest shutterInfo, CancellationToken cancellation) => Task.FromResult(new OpenCloseShutterResult(MessageHeader.CompletionCodeEnum.UnsupportedCommand));
 
 
         /// <summary>
@@ -699,7 +694,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.Empty;
             CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoItems;
 
-            return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success, MovementResult:null);
+            return new ResetDeviceResult(MessageHeader.CompletionCodeEnum.Success, MovementResult:null);
         }
 
         /// <summary>
@@ -752,7 +747,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
         /// recommended that applications that are interested in the available information should query for it following the
         /// CashManagement.InfoAvailableEvent* but before any other command is executed.
         /// </summary>
-        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessageHeader.CompletionCodeEnum.UnsupportedCommand);
 
         /// <summary>
         /// CashManagement Status
@@ -955,7 +950,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 {
                     if (unit.Value.Configuration.BanknoteItems.Count == 0)
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"Empty banknote items are set. {unit.Key}");
                     }
                     CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.BanknoteItems = unit.Value.Configuration.BanknoteItems;
@@ -973,7 +968,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                     if (CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashIn) &&
                         unit.Value.Configuration?.Items != CashCapabilitiesClass.ItemsEnum.Fit)
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The cash out unit can only set fit type of cash. {unit.Value.Configuration.Items}");
                     }
                 }
@@ -982,7 +977,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                     if (CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashIn) &&
                         ((double)unit.Value.Configuration.Value != 5))
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The cash out unit can only set denomination 5, 10 or 20 Euros. {unit.Value.Configuration.Items}");
                     }
 
@@ -990,7 +985,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                          CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashInRetract)) &&
                         ((double)unit.Value.Configuration.Value != 0))
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The reject or retract unit can only set denomination 0. {unit.Value.Configuration.Items}");
                     }
 
@@ -1005,7 +1000,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
                 }
             }
 
-            return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.Success, request.CashStorageToSet);
+            return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.Success, request.CashStorageToSet);
         }
 
         /// <summary>
@@ -1017,7 +1012,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
 
             // Prepare for the cash unit exchange operation
 
-            return new StartExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new StartExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -1029,7 +1024,7 @@ namespace KAL.XFS4IoTSP.CashAcceptor.Sample
 
             // Complete for the cash unit exchange operation
 
-            return new EndExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new EndExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

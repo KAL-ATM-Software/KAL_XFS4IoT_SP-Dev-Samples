@@ -76,7 +76,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             {
                 if (PrinterStatus.Media != PrinterStatusClass.MediaEnum.Present)
                 {
-                    return new ControlMediaResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                    return new ControlMediaResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                                   $"No media to eject.",
                                                   ControlMediaResult.ErrorCodeEnum.NoMediaPresent);
                 }
@@ -86,7 +86,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                 new Thread(PaperTakenThread).IsNotNull().Start();
             }
 
-            return new ControlMediaResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ControlMediaResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             await Task.Delay(200, cancellation);
             PaperSupplyStatus.PaperSupply = PrinterStatusClass.PaperSupplyEnum.Full;
             CommonStatus.Device = CommonStatusClass.DeviceEnum.Online;
-            return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new ResetDeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                 BlackMarkModeStatus = PrinterStatusClass.BlackMarkModeEnum.Off;
             else
                 BlackMarkModeStatus = PrinterStatusClass.BlackMarkModeEnum.On;
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         {
             await Task.Delay(200, cancellation);
             PaperSupplyStatus.PaperSupply = PrinterStatusClass.PaperSupplyEnum.Full;
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             bool success = printerServiceProvider.PrintToBitmap(request.PrintJob, bitCount, true, out ImageInfo imageInfo);
             if (!success)
             {
-                return new PrintTaskResult(MessagePayload.CompletionCodeEnum.HardwareError, $"Failed on printing form to an image.", PrintFormCompletion.PayloadData.ErrorCodeEnum.FormInvalid);
+                return new PrintTaskResult(MessageHeader.CompletionCodeEnum.HardwareError, $"Failed on printing form to an image.", PrintFormCompletion.PayloadData.ErrorCodeEnum.FormInvalid);
             }
 
             PixelFormat pixelFormat = bitCount switch
@@ -203,7 +203,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             image.Save("C:\\temp\\test.bmp", ImageFormat.Bmp);
             */
 
-            return new PrintTaskResult(MessagePayload.CompletionCodeEnum.Success);
+            return new PrintTaskResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace KAL.XFS4IoTSP.Printer.Sample
             await Task.Delay(200, cancellation);
             PrinterStatus.Media = PrinterStatusClass.MediaEnum.Present;
 
-            return new RawPrintResult(MessagePayload.CompletionCodeEnum.Success);
+            return new RawPrintResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

@@ -493,7 +493,7 @@ namespace TestClientForms.Devices
                 if (cmdResponse is MediaInRollbackCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
-                    if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                    if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
                         break;
                 }
                 else if (cmdResponse is MediaPresentedEvent mediaPresentedEv)

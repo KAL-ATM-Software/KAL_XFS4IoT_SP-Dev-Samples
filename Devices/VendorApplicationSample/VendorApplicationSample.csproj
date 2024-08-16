@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.VendorApplication" Version="2.3.0" />
+    <ProjectReference Include="..\..\..\KAL_XFS4IoT_SP-Dev\Framework\ServiceClasses\VendorApplicationServiceProvider\VendorApplicationServiceProvider.csproj" />
   </ItemGroup>
 
 </Project>

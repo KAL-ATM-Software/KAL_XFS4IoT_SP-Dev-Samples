@@ -53,14 +53,14 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
             }
             catch (Exception ex)
             {
-                return new DeviceResult(MessagePayload.CompletionCodeEnum.InvalidData, $"Failed to start specified application. {request.ApplicationName} " + ex.Message);
+                return new DeviceResult(MessageHeader.CompletionCodeEnum.InvalidData, $"Failed to start specified application. {request.ApplicationName} " + ex.Message);
             }
 
             await Task.Delay(100, cancellation);
 
             appStartedSignal.Release();
 
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         /// </summary>
         public GetActiveInterfaceResult GetActiveInterface()
         {
-            return new GetActiveInterfaceResult(MessagePayload.CompletionCodeEnum.Success, CurrentActiveInterface);
+            return new GetActiveInterfaceResult(MessageHeader.CompletionCodeEnum.Success, CurrentActiveInterface);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         {
             await Task.Delay(100, cancellation);
             CurrentActiveInterface = request.ActiveInterface;
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>

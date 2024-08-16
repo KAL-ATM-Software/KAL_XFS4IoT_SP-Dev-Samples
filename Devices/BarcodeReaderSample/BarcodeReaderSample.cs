@@ -58,7 +58,7 @@ namespace KAL.XFS4IoTSP.BarcodeReader.Sample
 
             BarcodeReaderStatus.ScannerStatus = BarcodeReaderStatusClass.ScannerStatusEnum.Off;
 
-            return new ReadResult(MessagePayload.CompletionCodeEnum.Success,
+            return new ReadResult(MessageHeader.CompletionCodeEnum.Success,
                                   readData);
         }
 
@@ -71,7 +71,7 @@ namespace KAL.XFS4IoTSP.BarcodeReader.Sample
 
             BarcodeReaderStatus.ScannerStatus = BarcodeReaderStatusClass.ScannerStatusEnum.Off;
 
-            return new DeviceResult(MessagePayload.CompletionCodeEnum.Success);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
 

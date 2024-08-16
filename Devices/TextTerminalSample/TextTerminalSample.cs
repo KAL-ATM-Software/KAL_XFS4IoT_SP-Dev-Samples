@@ -104,7 +104,7 @@ namespace TextTerminalSample
         /// </summary>
         public Task<DeviceResult> BeepAsync(BeepRequest beepInfo, CancellationToken cancellation)
         {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace TextTerminalSample
         public Task<DeviceResult> ClearScreenAsync(ClearScreenRequest request, CancellationToken cancellation)
         {
             TextTerminalUI.ClearArea(request.PositionX, request.PositionY, request.Width, request.Height);
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace TextTerminalSample
         public Task<DeviceResult> SetResolutionAsync(SetResolutionRequest resolutionInfo, CancellationToken cancellation)
         {
             TextTerminalUI.SetResolution(resolutionInfo.SizeX, resolutionInfo.SizeY);
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace TextTerminalSample
         public Task<DeviceResult> WriteAsync(WriteRequest writeInfo, CancellationToken cancellation)
         {
             TextTerminalUI.WriteAt(writeInfo.PosX, writeInfo.PosY, writeInfo.Text);
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace TextTerminalSample
                 }
             }
             TextTerminalUI.SetReading(false); //Read complete - stop sending keys to the channel.
-            return new(MessagePayload.CompletionCodeEnum.Success, null, buffer.ToString());
+            return new(MessageHeader.CompletionCodeEnum.Success, null, buffer.ToString());
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace TextTerminalSample
         public Task<DeviceResult> ScrollAsync(CancellationToken cancellation)
         {
             TextTerminalUI.ScrollTextBox();
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace TextTerminalSample
         /// </summary>
         public Task<DeviceResult> ResetDeviceAsync(CancellationToken cancellation)
         {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         /// <summary>

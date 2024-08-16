@@ -101,13 +101,13 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             }
 
             if (dispenseInfo.E2EToken is null)
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, 
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.InvalidToken, 
                                           "An end to end security token is required to dispense");
 
             if (dispenseInfo.Values is null ||
                 dispenseInfo.Values.Count == 0)
             {
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.Success,
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.Success,
                                           $"Empty denominate value received from the framework.",
                                           DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
             }
@@ -118,7 +118,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                              select info.Value.CashUnitStorageConfig.Configuration.Currency;
             if( currencies.Distinct().Count() > 1 )
             {
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                           $"Sample dispenser currencly only supports one currency at a time.",
                                           DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
             }
@@ -133,13 +133,13 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                              .Sum();
             
             if( totalDouble > Int32.MaxValue )
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                           $"Requested dispense value is too large to handle",
                                           DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
             
             int total = (Int32)Math.Floor(totalDouble);
             if( totalDouble % 1 != 0 )
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                           $"Cannot dispense fractional amounts",
                                           DispenseCompletion.PayloadData.ErrorCodeEnum.NotDispensable);
 
@@ -155,7 +155,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             });
             if (!dispenseResult)
             {
-                return new DispenseResult(MessagePayload.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
+                return new DispenseResult(MessageHeader.CompletionCodeEnum.InvalidToken, dispenseInfo.Values, LastDispenseResult);
             }
 
             // Record the new status. 
@@ -188,7 +188,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 }
             }
 
-            return new DispenseResult(MessagePayload.CompletionCodeEnum.Success, dispenseInfo.Values, LastDispenseResult);
+            return new DispenseResult(MessageHeader.CompletionCodeEnum.Success, dispenseInfo.Values, LastDispenseResult);
         }
 
         public async Task<PresentCashResult> PresentCashAsync(PresentCashCommandEvents events, PresentCashRequest presentInfo, CancellationToken cancellation)
@@ -197,7 +197,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             
             if (CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty || LastDispenseResult.Count == 0)
 			{
-                return new PresentCashResult(MessagePayload.CompletionCodeEnum.CommandErrorCode, 
+                return new PresentCashResult(MessageHeader.CompletionCodeEnum.CommandErrorCode, 
                                              "No cash to present", 
                                              PresentCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
@@ -224,7 +224,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             
             new Thread(CashTakenThread).IsNotNull().Start();
 
-            return new PresentCashResult(MessagePayload.CompletionCodeEnum.Success, 0, LastDispenseResult);
+            return new PresentCashResult(MessageHeader.CompletionCodeEnum.Success, 0, LastDispenseResult);
         }
 
         public async Task<RejectResult> RejectAsync(RejectCommandEvents events, CancellationToken cancellation)
@@ -235,7 +235,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                  positionStatus.PositionStatus == CashManagementStatusClass.PositionStatusEnum.Empty) || 
                 LastDispenseResult.Count == 0)
             {
-                return new RejectResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new RejectResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                         "No cash to reject",
                                         RejectCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
@@ -280,7 +280,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             LastDispenseResult.Clear();
 
-            return new RejectResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
+            return new RejectResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
         }
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             });
             cashMovement.Add("PH2", new CashUnitCountClass(cashOutCount, cashInCount, cashOutCount.Rejected.Total));
 
-            return new TestCashUnitsResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
+            return new TestCashUnitsResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                     if (CashUnitInfo[id].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashOutRetract) ||
                         CashUnitInfo[id].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.Reject))
                     {
-                        return new CountResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new CountResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                $"Specified cash unit can't be emptied. {id}");
                     }
 
@@ -345,7 +345,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             }
             
 
-            return new CountResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
+            return new CountResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
         }
 
         /// <summary>
@@ -357,7 +357,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 		{
             await Task.Delay(1000, cancellation);
 
-            return new PrepareDispenseResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+            return new PrepareDispenseResult(MessageHeader.CompletionCodeEnum.UnsupportedCommand);
 		}
 
 
@@ -429,7 +429,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             if (CashDispenserStatus.IntermediateStacker == CashDispenserStatusClass.IntermediateStackerEnum.Empty &&
                 positionStatus.PositionStatus == CashManagementStatusClass.PositionStatusEnum.Empty)
             {
-                return new RetractResult(MessagePayload.CompletionCodeEnum.CommandErrorCode,
+                return new RetractResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
                                          "No cash to retract",
                                          RetractCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
@@ -478,7 +478,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             LastDispenseResult.Clear();
 
-            return new RetractResult(MessagePayload.CompletionCodeEnum.Success, cashMovement);
+            return new RetractResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
         }
 
         /// <summary>
@@ -494,7 +494,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
             if (shutterInfo.Action == OpenCloseShutterRequest.ActionEnum.Close)
                 positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
-            return new OpenCloseShutterResult(MessagePayload.CompletionCodeEnum.Success);
+            return new OpenCloseShutterResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
 
@@ -511,7 +511,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             LastDispenseResult.Clear();
 
-            return new ResetDeviceResult(MessagePayload.CompletionCodeEnum.Success, MovementResult:null);
+            return new ResetDeviceResult(MessageHeader.CompletionCodeEnum.Success, MovementResult:null);
         }
 
         /// <summary>
@@ -561,7 +561,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         /// recommended that applications that are interested in the available information should query for it following the
         /// CashManagement.InfoAvailableEvent* but before any other command is executed.
         /// </summary>
-        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessageHeader.CompletionCodeEnum.UnsupportedCommand);
 
         /// <summary>
         /// CashManagement Status
@@ -819,7 +819,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 {
                     if (unit.Value.Configuration.BanknoteItems.Count == 0)
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"Empty banknote items are set. {unit.Key}");
                     }
                     CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.BanknoteItems = unit.Value.Configuration.BanknoteItems;
@@ -837,7 +837,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                     if (CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashOut) &&
                         unit.Value.Configuration?.Items != CashCapabilitiesClass.ItemsEnum.Fit)
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The cash out unit can only set fit type of cash. {unit.Value.Configuration.Items}");
                     }
                 }
@@ -848,7 +848,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                          (double)unit.Value.Configuration.Value != 10 &&
                          (double)unit.Value.Configuration.Value != 20))
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The cash out unit can only set denomination 5, 10 or 20 Euros. {unit.Value.Configuration.Items}");
                     }
 
@@ -856,7 +856,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                          CashUnitInfo[unit.Key].CashUnitStorageConfig.Configuration.Types.HasFlag(CashCapabilitiesClass.TypesEnum.CashOutRetract)) &&
                         ((double)unit.Value.Configuration.Value != 0))
                     {
-                        return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.InvalidData,
+                        return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.InvalidData,
                                                         $"The reject or retract unit can only set denomination 0. {unit.Value.Configuration.Items}");
                     }
 
@@ -871,7 +871,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
                 }
             }
 
-            return new SetCashStorageResult(MessagePayload.CompletionCodeEnum.Success, request.CashStorageToSet);
+            return new SetCashStorageResult(MessageHeader.CompletionCodeEnum.Success, request.CashStorageToSet);
         }
 
         /// <summary>
@@ -883,7 +883,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             // Prepare for the cash unit exchange operation
 
-            return new StartExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new StartExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -895,7 +895,7 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
 
             // Complete for the cash unit exchange operation
 
-            return new EndExchangeResult(MessagePayload.CompletionCodeEnum.Success);
+            return new EndExchangeResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
@@ -1085,14 +1085,14 @@ namespace KAL.XFS4IoTSP.CashDispenser.Sample
         {
             string nonce = Firmware.GetCommandNonce();
 
-            return Task.FromResult(new GetCommandNonceResult(MessagePayload.CompletionCodeEnum.Success,
-                                                             nonce));
+            return Task.FromResult(new GetCommandNonceResult(MessageHeader.CompletionCodeEnum.Success,
+                                                             Nonce: nonce));
         }
         public Task<DeviceResult> ClearCommandNonce()
         {
             Firmware.ClearCommandNonce();
 
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
         #endregion
 

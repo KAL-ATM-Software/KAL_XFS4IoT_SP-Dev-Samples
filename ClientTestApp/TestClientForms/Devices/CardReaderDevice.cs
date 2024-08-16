@@ -126,7 +126,7 @@ namespace TestClientForms.Devices
                 {
                     case MoveCompletion response:
                         base.OnXFS4IoTMessages(this, response.Serialise());
-                        if (response.Payload.CompletionCode != XFS4IoT.Completions.MessagePayload.CompletionCodeEnum.Success)
+                        if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
                             return;
                         break;
 
@@ -268,7 +268,7 @@ namespace TestClientForms.Devices
                 {
                     case GetStorageCompletion response:
                         base.OnXFS4IoTMessages(this, response.Serialise());
-                        if (response.Payload.CompletionCode != MessagePayload.CompletionCodeEnum.Success)
+                        if (response.Header.CompletionCode != MessageHeader.CompletionCodeEnum.Success)
                             return;
                         break;
 
