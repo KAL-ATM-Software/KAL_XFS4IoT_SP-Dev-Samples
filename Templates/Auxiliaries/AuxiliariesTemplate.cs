@@ -102,7 +102,6 @@ namespace Auxiliaries.AuxiliariesTemplate
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartUpTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAuxiliaries,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.Register,
                     ]
                 ),
                 LightsInterface: new CommonCapabilitiesClass.LightsInterfaceClass
@@ -112,27 +111,26 @@ namespace Auxiliaries.AuxiliariesTemplate
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
-                            ModelName: "ModelName",
-                            SerialNumber: "SerialNumber",
-                            RevisionNumber: "RevisionNumber",
-                            ModelDescription: "ModelDescription",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
-                                new CommonCapabilitiesClass.FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0")
-                            },
-                            Software:
-                            [
-                                new CommonCapabilitiesClass.SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            ])
-                },
+                DeviceInformation:
+                [
+                    new(ModelName: "ModelName",
+                        SerialNumber: "SerialNumber",
+                        RevisionNumber: "RevisionNumber",
+                        ModelDescription: "ModelDescription",
+                        Firmware:
+                        [
+                            new CommonCapabilitiesClass.FirmwareClass(
+                                    FirmwareName: "XFS4 SP",
+                                    FirmwareVersion: "1.0",
+                                    HardwareRevision: "1.0")
+                        ],
+                        Software:
+                        [
+                            new CommonCapabilitiesClass.SoftwareClass(
+                                    SoftwareName: "XFS4 SP",
+                                    SoftwareVersion: "1.0")
+                        ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

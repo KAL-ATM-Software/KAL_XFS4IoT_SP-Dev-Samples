@@ -672,7 +672,7 @@ namespace PinPad.PinPadTemplate
                     Commands:
                     [
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.DeleteKey,
-                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSAEPPSignedItem,
+                        CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.ExportRSADeviceSignedItem,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateKCV,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GenerateRSAKeyPair,
                         CommonCapabilitiesClass.KeyManagementInterfaceClass.CommandEnum.GetCertificate,
