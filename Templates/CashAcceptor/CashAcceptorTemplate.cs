@@ -50,27 +50,30 @@ namespace CashAcceptor.CashAcceptorTemplate
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CashAcceptorTemplate)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.Inactive,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.Inactive,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            CashAcceptorStatus = new CashAcceptorStatusClass(CashAcceptorStatusClass.IntermediateStackerEnum.Empty,
-                                                             CashAcceptorStatusClass.StackerItemsEnum.NoItems,
-                                                             CashAcceptorStatusClass.BanknoteReaderEnum.Ok,
-                                                             false,
-                                                             new()
-                                                               {
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.InCenter,  positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.InDefault, positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.OutCenter, positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.OutDefault,positionStatus },
-                                                             });
+            CashAcceptorStatus = new CashAcceptorStatusClass(
+                CashAcceptorStatusClass.IntermediateStackerEnum.Empty,
+                CashAcceptorStatusClass.StackerItemsEnum.NoItems,
+                CashAcceptorStatusClass.BanknoteReaderEnum.Ok,
+                false,
+                new()
+                {
+                    { CashManagementCapabilitiesClass.PositionEnum.InCenter,  positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.InDefault, positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.OutCenter, positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.OutDefault,positionStatus },
+                });
 
-            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.DispenserEnum.Ok,
-                                                                 CashManagementStatusClass.AcceptorEnum.NotSupported);
+            CashManagementStatus = new CashManagementStatusClass(
+                CashManagementStatusClass.DispenserEnum.Ok,
+                CashManagementStatusClass.AcceptorEnum.NotSupported);
         }
 
         #region CashAcceptor Interface
@@ -402,12 +405,12 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// Key - The storage id can be used for target of the depletion operation.
         /// Value - List of storage id can be used for source of the depletion operation
         /// </summary>
-        public Dictionary<string, List<string>> GetDepleteCashUnitSources() => new();
+        public Dictionary<string, List<string>> GetDepleteCashUnitSources() => [];
 
         /// <summary>
         /// Which storage units can be specified as targets for a given source storage unit with the CashAcceptor.Replenish command
         /// </summary>
-        public List<string> ReplenishTargets() => new();
+        public List<string> ReplenishTargets() => [];
 
         /// <summary>
         /// CashAcceptor Status
@@ -497,7 +500,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// OpenCloseShutterAsync
         /// Perform shutter operation to open or close.
         /// </summary>
-        public Task<OpenCloseShutterResult> OpenCloseShutterAsync(OpenCloseShutterRequest shutterInfo, CancellationToken cancellation) => Task.FromResult(new OpenCloseShutterResult(MessagePayload.CompletionCodeEnum.UnsupportedCommand));
+        public Task<OpenCloseShutterResult> OpenCloseShutterAsync(OpenCloseShutterRequest shutterInfo, CancellationToken cancellation) => Task.FromResult(new OpenCloseShutterResult(MessageHeader.CompletionCodeEnum.UnsupportedCommand));
 
 
         /// <summary>
@@ -559,7 +562,7 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// recommended that applications that are interested in the available information should query for it following the
         /// CashManagement.InfoAvailableEvent* but before any other command is executed.
         /// </summary>
-        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessagePayload.CompletionCodeEnum.UnsupportedCommand);
+        public GetItemInfoResult GetItemInfoInfo(GetItemInfoRequest request) => new(MessageHeader.CompletionCodeEnum.UnsupportedCommand);
 
         /// <summary>
         /// CashManagement Status
@@ -680,6 +683,44 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// </summary>
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
         public Task<SetCheckStorageResult> SetCheckStorageAsync(SetCheckStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support check related operations.");
+
+        /// <summary>
+        /// Return printer storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetPrinterStorageConfiguration(out Dictionary<string, PrinterUnitStorageConfiguration> newPrinterUnits) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetPrinterUnitCounts(out Dictionary<string, PrinterUnitCount> unitCounts) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage status (retract bin, passbook storage).
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterStorageStatus(out Dictionary<string, PrinterUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer unit status (retract bin, passbook storage) maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterUnitStatus(out Dictionary<string, XFS4IoTFramework.Storage.PrinterStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for printer storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetPrinterStorageAsync(SetPrinterStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return IBNS storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// Status object is a reference to report status changes.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support IBNS related operations.");
+
 
         /// <summary>
         /// Start cash unit exchange operation

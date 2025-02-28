@@ -3,32 +3,17 @@
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
-#pragma warning disable CA1416 // Validate platform compatibility, only works for windows
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Text.Json;
-using System.Text;
-using System.Linq;
-using System.IO;
 using XFS4IoT;
 using XFS4IoTFramework.PinPad;
 using XFS4IoTFramework.Keyboard;
 using XFS4IoTFramework.Crypto;
 using XFS4IoTFramework.KeyManagement;
 using XFS4IoTFramework.Common;
-using XFS4IoT.Common.Commands;
-using XFS4IoT.Common.Completions;
-using XFS4IoT.Common;
-using XFS4IoT.KeyManagement.Completions;
-using XFS4IoT.Crypto.Completions;
-using XFS4IoT.Keyboard.Events;
-using XFS4IoT.Completions;
 using XFS4IoTServer;
-using System.Runtime.Loader;
 
 namespace PinPad.PinPadTemplate
 {
@@ -46,12 +31,13 @@ namespace PinPad.PinPadTemplate
             Logger.IsNotNull($"Invalid parameter received in the {nameof(PinPadTemplate)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             KeyManagementStatus = new KeyManagementStatusClass(encryptionState,
                                                                certState);
@@ -171,7 +157,10 @@ namespace PinPad.PinPadTemplate
         /// Keyboard Capabilities
         /// </summary>
         public KeyboardCapabilitiesClass KeyboardCapabilities { get; set; } = new KeyboardCapabilitiesClass(
-            AutoBeep: KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveAvailable | KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveSelectable| KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveAvailable | KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveSelectable,
+            AutoBeep: KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveAvailable | 
+                      KeyboardCapabilitiesClass.KeyboardBeepEnum.ActiveSelectable| 
+                      KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveAvailable | 
+                      KeyboardCapabilitiesClass.KeyboardBeepEnum.InActiveSelectable,
             ETSCaps: null);
 
 
@@ -487,17 +476,24 @@ namespace PinPad.PinPadTemplate
             RSAAuthenticationScheme: KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.SecondPartySignature | KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.ThirdPartyCertificate,
             RSASignatureAlgorithm: KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.RSASSA_PKCS1_V1_5,
             RSACryptAlgorithm: KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.RSAES_PKCS1_V1_5,
-            RSAKeyCheckMode: KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA1 | KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA256,
-            SignatureScheme: KeyManagementCapabilitiesClass.SignatureSchemeEnum.ExportEPPID | KeyManagementCapabilitiesClass.SignatureSchemeEnum.RandomNumber | KeyManagementCapabilitiesClass.SignatureSchemeEnum.EnhancedRKL,
+            RSAKeyCheckMode: KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA1 | 
+                             KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.SHA256,
+            SignatureScheme: KeyManagementCapabilitiesClass.SignatureSchemeEnum.ExportEPPID | 
+                             KeyManagementCapabilitiesClass.SignatureSchemeEnum.RandomNumber | 
+                             KeyManagementCapabilitiesClass.SignatureSchemeEnum.EnhancedRKL,
             EMVImportSchemes: KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
-            KeyBlockImportFormats: KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKA | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKB | KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKC,
+            KeyBlockImportFormats: KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKA | 
+                                   KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKB | 
+                                   KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.KEYBLOCKC,
             KeyImportThroughParts: true,
             DESKeyLength: KeyManagementCapabilitiesClass.DESKeyLengthEmum.Double,
-            CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
-            LoadCertificationOptions: new()
-            {
-                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
-            },
+            CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | 
+                              KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | 
+                              KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
+            LoadCertificationOptions:
+            [
+                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA_TR34, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
+            ],
             CRKLLoadOption: KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
             SymmetricKeyManagementMethods: KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.MasterKey,
             KeyAttributes: new()
@@ -549,8 +545,8 @@ namespace PinPad.PinPadTemplate
         /// The start value and start value keyare both optional parameters.
         /// </summary>
         public Task<CryptoDataResult> Crypto(CryptoCommandEvents events,
-                                                   CryptoDataRequest request,
-                                                   CancellationToken cancellation)
+                                             CryptoDataRequest request,
+                                             CancellationToken cancellation)
         {
             throw new NotImplementedException();
         }
@@ -815,8 +811,8 @@ namespace PinPad.PinPadTemplate
 
         private ILogger Logger { get; }
 
-        private KeyManagementStatusClass.EncryptionStateEnum encryptionState = KeyManagementStatusClass.EncryptionStateEnum.NotInitialized;
-        private KeyManagementStatusClass.CertificateStateEnum certState = KeyManagementStatusClass.CertificateStateEnum.Primary;
+        private readonly KeyManagementStatusClass.EncryptionStateEnum encryptionState = KeyManagementStatusClass.EncryptionStateEnum.NotInitialized;
+        private readonly KeyManagementStatusClass.CertificateStateEnum certState = KeyManagementStatusClass.CertificateStateEnum.Primary;
 
         private readonly Dictionary<EntryModeEnum, List<FrameClass>> keyLayouts = [];
 

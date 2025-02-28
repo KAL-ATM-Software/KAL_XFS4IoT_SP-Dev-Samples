@@ -20,37 +20,27 @@ using XFS4IoTServer;
 
 namespace Biometric.BiometricTemplate
 {
-    public class BiometricTemplate : IBiometricDevice, ICommonDevice, IKeyManagementDevice
+    public class BiometricTemplate(ILogger logger) : IBiometricDevice, ICommonDevice, IKeyManagementDevice
     {
-        public BiometricTemplate(ILogger logger)
-        {
-            _logger = logger;
-
-            BiometricStatus = new(BiometricStatusClass.SubjectStatusEnum.NotPresent,
-                                  false,
-                                  BiometricCapabilitiesClass.PersistenceModesEnum.Persist,
-                                  1024 * 1024);
-
-            CommonStatus = new(CommonStatusClass.DeviceEnum.Online,
-                               CommonStatusClass.PositionStatusEnum.InPosition,
-                               0,
-                               CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                               CommonStatusClass.ExchangeEnum.NotSupported,
-                               CommonStatusClass.EndToEndSecurityEnum.NotSupported);
-
-            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.NotInitialized,
-                                                               KeyManagementStatusClass.CertificateStateEnum.NotSupported);
-        }
-
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = logger;
 
         public Dictionary<string, BiometricDataType> StorageInfo { get => []; }
 
-        public BiometricStatusClass BiometricStatus { get; set; }
+        public BiometricStatusClass BiometricStatus { get; set; } = new(
+                BiometricStatusClass.SubjectStatusEnum.NotPresent,
+                false,
+                BiometricCapabilitiesClass.PersistenceModesEnum.Persist,
+                1024 * 1024);
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
-        public CommonStatusClass CommonStatus { get; set; }
+        public CommonStatusClass CommonStatus { get; set; } = new(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
@@ -119,27 +109,30 @@ namespace Biometric.BiometricTemplate
                 BiometricCapabilitiesClass.ScanModesEnum.Match | BiometricCapabilitiesClass.ScanModesEnum.Scan,
                 BiometricCapabilitiesClass.CompareModesEnum.Verify,
                 BiometricCapabilitiesClass.ClearModesEnum.ImportedData | BiometricCapabilitiesClass.ClearModesEnum.ScannedData);
-        public KeyManagementStatusClass KeyManagementStatus { get; set; }
+        public KeyManagementStatusClass KeyManagementStatus { get; set; } = new(
+                KeyManagementStatusClass.EncryptionStateEnum.NotInitialized,
+                KeyManagementStatusClass.CertificateStateEnum.NotSupported);
         public KeyManagementCapabilitiesClass KeyManagementCapabilities { get; set; } = 
-            new KeyManagementCapabilitiesClass(5,
-                                               KeyManagementCapabilitiesClass.KeyCheckModeEnum.NotSupported,
-                                               "",
-                                               KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.SignatureSchemeEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.NotSupported,
-                                               false,
-                                               KeyManagementCapabilitiesClass.DESKeyLengthEmum.NotSupported,
-                                               KeyManagementCapabilitiesClass.CertificateTypeEnum.NotSupported,
-                                               [],
-                                               KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
-                                               KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.NotSupported,
-                                               [],
-                                               [],
-                                               []);
+            new KeyManagementCapabilitiesClass(
+                5,
+                KeyManagementCapabilitiesClass.KeyCheckModeEnum.NotSupported,
+                "",
+                KeyManagementCapabilitiesClass.RSAAuthenticationSchemeEnum.NotSupported,
+                KeyManagementCapabilitiesClass.RSASignatureAlgorithmEnum.NotSupported,
+                KeyManagementCapabilitiesClass.RSACryptAlgorithmEnum.NotSupported,
+                KeyManagementCapabilitiesClass.RSAKeyCheckModeEnum.NotSupported,
+                KeyManagementCapabilitiesClass.SignatureSchemeEnum.NotSupported,
+                KeyManagementCapabilitiesClass.EMVImportSchemeEnum.NotSupported,
+                KeyManagementCapabilitiesClass.KeyBlockImportFormatEmum.NotSupported,
+                false,
+                KeyManagementCapabilitiesClass.DESKeyLengthEmum.NotSupported,
+                KeyManagementCapabilitiesClass.CertificateTypeEnum.NotSupported,
+                [],
+                KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
+                KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.NotSupported,
+                [],
+                [],
+                []);
 
         public Task<DeviceResult> ClearAsync(ClearDataRequest ClearMode, CancellationToken cancellation)
         {
@@ -222,7 +215,7 @@ namespace Biometric.BiometricTemplate
 
         public Task<DeviceResult> ResetDevice(CancellationToken cancellation)
         {
-            return Task.FromResult(new DeviceResult(MessagePayload.CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         public Task<RSASignedItemResult> ExportEPPId(ExportEPPIdRequest request, CancellationToken cancellation)

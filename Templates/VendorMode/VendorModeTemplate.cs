@@ -63,12 +63,13 @@ namespace VendorMode.VendorModeTemplate
         /// <summary>
         /// Stores Commons status
         /// </summary>
-        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(Device: CommonStatusClass.DeviceEnum.Online,
-                                                                                    DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
-                                                                                    PowerSaveRecoveryTime: 0,
-                                                                                    AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                                                    Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
-                                                                                    CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(
+            Device: CommonStatusClass.DeviceEnum.Online,
+            DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
+            PowerSaveRecoveryTime: 0,
+            AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+            Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+            CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         /// <summary>
         /// Stores Common Capabilities

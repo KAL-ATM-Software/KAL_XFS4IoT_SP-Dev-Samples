@@ -78,12 +78,14 @@ namespace Auxiliaries.AuxiliariesTemplate
 
         #region Common Interface
 
-        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+        public CommonStatusClass CommonStatus { get; set; } = 
+            new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
@@ -157,22 +159,23 @@ namespace Auxiliaries.AuxiliariesTemplate
         /// <summary>
         /// Lights Capabilities
         /// </summary>
-        public LightsCapabilitiesClass LightsCapabilities { get; set; } = new LightsCapabilitiesClass(
-            new Dictionary<LightsCapabilitiesClass.DeviceEnum, LightsCapabilitiesClass.Light>()
-            {
+        public LightsCapabilitiesClass LightsCapabilities { get; set; } = 
+            new LightsCapabilitiesClass(
+                new Dictionary<LightsCapabilitiesClass.DeviceEnum, LightsCapabilitiesClass.Light>()
                 {
-                    LightsCapabilitiesClass.DeviceEnum.CardReader,
-                        new LightsCapabilitiesClass.Light(
-                            (LightsCapabilitiesClass.FlashRateEnum.Continuous |
-                             LightsCapabilitiesClass.FlashRateEnum.Medium |
-                             LightsCapabilitiesClass.FlashRateEnum.Quick |
-                             LightsCapabilitiesClass.FlashRateEnum.Slow |
-                             LightsCapabilitiesClass.FlashRateEnum.Off),
-                            LightsCapabilitiesClass.ColorEnum.Default,
-                            LightsCapabilitiesClass.DirectionEnum.NotSupported,
-                            LightsCapabilitiesClass.LightPostionEnum.Center)
-                }
-            });
+                    {
+                        LightsCapabilitiesClass.DeviceEnum.CardReader,
+                            new LightsCapabilitiesClass.Light(
+                                (LightsCapabilitiesClass.FlashRateEnum.Continuous |
+                                 LightsCapabilitiesClass.FlashRateEnum.Medium |
+                                 LightsCapabilitiesClass.FlashRateEnum.Quick |
+                                 LightsCapabilitiesClass.FlashRateEnum.Slow |
+                                 LightsCapabilitiesClass.FlashRateEnum.Off),
+                                LightsCapabilitiesClass.ColorEnum.Default,
+                                LightsCapabilitiesClass.DirectionEnum.NotSupported,
+                                LightsCapabilitiesClass.LightPostionEnum.Center)
+                    }
+                });
 
         /// <summary>
         /// Stores light status

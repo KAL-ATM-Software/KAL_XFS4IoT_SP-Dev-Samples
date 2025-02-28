@@ -92,12 +92,13 @@ namespace VendorApplication.VendorApplicationTemplate
         /// <summary>
         /// Stores Commons status
         /// </summary>
-        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(Device: CommonStatusClass.DeviceEnum.Online,
-                                                                                    DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
-                                                                                    PowerSaveRecoveryTime: 0,
-                                                                                    AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                                                    Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
-                                                                                    CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(
+            Device: CommonStatusClass.DeviceEnum.Online,
+            DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
+            PowerSaveRecoveryTime: 0,
+            AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+            Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+            CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         /// <summary>
         /// Stores Common Capabilities
@@ -125,8 +126,8 @@ namespace VendorApplication.VendorApplicationTemplate
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.VendorAppExitedEvent,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new(
                             ModelName: "ModelName",
                             SerialNumber: "SerialNumber",
@@ -145,7 +146,7 @@ namespace VendorApplication.VendorApplicationTemplate
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
                             ])
-                },
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

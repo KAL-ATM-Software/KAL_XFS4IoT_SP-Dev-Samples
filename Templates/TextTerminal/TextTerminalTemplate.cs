@@ -33,16 +33,18 @@ namespace TextTerminal.TextTerminalTemplate
             Logger.IsNotNull($"Invalid parameter received in the {nameof(TextTerminalTemplate)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            TextTerminalStatus = new TextTerminalStatusClass(TextTerminalStatusClass.KeyboardEnum.Off,
-                                                             TextTerminalStatusClass.KeyLockEnum.NotAvailable,
-                                                             0, 0);
+            TextTerminalStatus = new TextTerminalStatusClass(
+                TextTerminalStatusClass.KeyboardEnum.Off,
+                TextTerminalStatusClass.KeyLockEnum.NotAvailable,
+                0, 0);
         }
 
         /// <summary>
@@ -62,25 +64,26 @@ namespace TextTerminal.TextTerminalTemplate
         /// </summary>
         public KeyDetails GetKeyDetail()
         {
-            return new KeyDetails(Keys:
-                                    [ "zero", "one", "two", "three",
-                                      "four", "five", "six", "seven",
-                                      "eight", "nine",
-                                    ],
-                                  CommandKeys: new()
-                                    {
-                                      { "enter", true },
-                                      { "cancel", true },
-                                      { "clear", false },
-                                      { "fdk01", false },
-                                      { "fdk02", false },
-                                      { "fdk03", false },
-                                      { "fdk04", false },
-                                      { "fdk05", false },
-                                      { "fdk06", false },
-                                      { "fdk07", false },
-                                      { "fdk08", false }
-                                    });
+            return new KeyDetails(
+                Keys:
+                [ "zero", "one", "two", "three",
+                    "four", "five", "six", "seven",
+                    "eight", "nine",
+                ],
+                CommandKeys: new()
+                {
+                    { "enter", true },
+                    { "cancel", true },
+                    { "clear", false },
+                    { "fdk01", false },
+                    { "fdk02", false },
+                    { "fdk03", false },
+                    { "fdk04", false },
+                    { "fdk05", false },
+                    { "fdk06", false },
+                    { "fdk07", false },
+                    { "fdk08", false }
+                });
         }
 
         /// <summary>

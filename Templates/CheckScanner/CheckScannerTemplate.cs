@@ -619,6 +619,43 @@ namespace CheckScanner.CheckScannerTemplate
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
         public Task<SetCashStorageResult> SetCashStorageAsync(SetCashStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The Check service provider doesn't support card related operations.");
 
+        /// <summary>
+        /// Return printer storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetPrinterStorageConfiguration(out Dictionary<string, PrinterUnitStorageConfiguration> newPrinterUnits) => throw new NotSupportedException($"The Check service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetPrinterUnitCounts(out Dictionary<string, PrinterUnitCount> unitCounts) => throw new NotSupportedException($"The Check service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage status (retract bin, passbook storage).
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterStorageStatus(out Dictionary<string, PrinterUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The Check service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer unit status (retract bin, passbook storage) maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterUnitStatus(out Dictionary<string, XFS4IoTFramework.Storage.PrinterStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The Check service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for printer storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetPrinterStorageAsync(SetPrinterStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The Check service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return IBNS storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// Status object is a reference to report status changes.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The Check service provider doesn't support IBNS related operations.");
+
         #endregion
 
         #region Common Interface

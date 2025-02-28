@@ -9,12 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text;
-using System.Linq;
 using XFS4IoT;
 using XFS4IoTFramework.Lights;
 using XFS4IoTFramework.Common;
-using XFS4IoT.Completions;
 using XFS4IoTServer;
 
 namespace Lights.LightsTemplate
@@ -33,12 +30,13 @@ namespace Lights.LightsTemplate
             Logger.IsNotNull($"Invalid parameter received in the {nameof(LightsTemplate)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(Device: CommonStatusClass.DeviceEnum.Online,
-                                                 DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 PowerSaveRecoveryTime: 0,
-                                                 AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 EndToEndSecurity: CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                Device: CommonStatusClass.DeviceEnum.Online,
+                DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
+                PowerSaveRecoveryTime: 0,
+                AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+                EndToEndSecurity: CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             LightsStatus.Status = new()
             {

@@ -28,20 +28,22 @@ namespace CardReader.CardReaderTemplate
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CardReaderTemplate)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            CardReaderStatus = new CardReaderStatusClass(CardReaderStatusClass.MediaEnum.NotPresent,
-                                                         CardReaderStatusClass.SecurityEnum.NotSupported,
-                                                         CardReaderStatusClass.ChipPowerEnum.NoCard,
-                                                         CardReaderStatusClass.ChipModuleEnum.Ok,
-                                                         CardReaderStatusClass.MagWriteModuleEnum.Ok,
-                                                         CardReaderStatusClass.FrontImageModuleEnum.NotSupported,
-                                                         CardReaderStatusClass.BackImageModuleEnum.NotSupported);
+            CardReaderStatus = new CardReaderStatusClass(
+                CardReaderStatusClass.MediaEnum.NotPresent,
+                CardReaderStatusClass.SecurityEnum.NotSupported,
+                CardReaderStatusClass.ChipPowerEnum.NoCard,
+                CardReaderStatusClass.ChipModuleEnum.Ok,
+                CardReaderStatusClass.MagWriteModuleEnum.Ok,
+                CardReaderStatusClass.FrontImageModuleEnum.NotSupported,
+                CardReaderStatusClass.BackImageModuleEnum.NotSupported);
         }
 
         #region CardReader Interface
@@ -366,6 +368,43 @@ namespace CardReader.CardReaderTemplate
         public Task<SetCashStorageResult> SetCashStorageAsync(SetCashStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"No cash related operation supported in this device.");
 
         /// <summary>
+        /// Return printer storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetPrinterStorageConfiguration(out Dictionary<string, PrinterUnitStorageConfiguration> newPrinterUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetPrinterUnitCounts(out Dictionary<string, PrinterUnitCount> unitCounts) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage status (retract bin, passbook storage).
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterStorageStatus(out Dictionary<string, PrinterUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer unit status (retract bin, passbook storage) maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterUnitStatus(out Dictionary<string, XFS4IoTFramework.Storage.PrinterStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for printer storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetPrinterStorageAsync(SetPrinterStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return IBNS storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// Status object is a reference to report status changes.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support IBNS related operations.");
+
+        /// <summary>
         /// Initiate exchange operation
         /// </summary>
         public Task<StartExchangeResult> StartExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
@@ -383,20 +422,21 @@ namespace CardReader.CardReaderTemplate
         /// <summary>
         /// CardReader Capabilities
         /// </summary>
-        public CardReaderCapabilitiesClass CardReaderCapabilities { get; set; } = new(CardReaderCapabilitiesClass.DeviceTypeEnum.Motor,
-                                                                                      CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track3,
-                                                                                      CardReaderCapabilitiesClass.WritableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track3,
-                                                                                      CardReaderCapabilitiesClass.ChipProtocolsEnum.T0 | CardReaderCapabilitiesClass.ChipProtocolsEnum.T1,
-                                                                                      CardReaderCapabilitiesClass.SecurityTypeEnum.NotSupported,
-                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
-                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
-                                                                                      FluxSensorProgrammable: false,
-                                                                                      ReadWriteAccessFollowingExit: false,
-                                                                                      CardReaderCapabilitiesClass.WriteMethodsEnum.Loco,
-                                                                                      CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Cold | CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Warm,
-                                                                                      CardReaderCapabilitiesClass.MemoryChipProtocolsEnum.NotSupported,
-                                                                                      CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
-                                                                                      true);
+        public CardReaderCapabilitiesClass CardReaderCapabilities { get; set; } = 
+            new(CardReaderCapabilitiesClass.DeviceTypeEnum.Motor,
+                CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track3,
+                CardReaderCapabilitiesClass.WritableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track3,
+                CardReaderCapabilitiesClass.ChipProtocolsEnum.T0 | CardReaderCapabilitiesClass.ChipProtocolsEnum.T1,
+                CardReaderCapabilitiesClass.SecurityTypeEnum.NotSupported,
+                CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                FluxSensorProgrammable: false,
+                ReadWriteAccessFollowingExit: false,
+                CardReaderCapabilitiesClass.WriteMethodsEnum.Loco,
+                CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Cold | CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Warm,
+                CardReaderCapabilitiesClass.MemoryChipProtocolsEnum.NotSupported,
+                CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
+                true);
 
         #endregion
 
@@ -526,12 +566,13 @@ namespace CardReader.CardReaderTemplate
             /// </summary>
             public CardStatusClass.ReplenishmentStatusEnum UnitStatus { get; set; }
 
-            public CardUnitStorageConfiguration CardBin = new("BIN1",
-                                                              50,
-                                                              "SN104827639",
-                                                              new CardCapabilitiesClass(CardCapabilitiesClass.TypeEnum.Retain,
-                                                                                        false),
-                                                              new CardConfigurationClass(40));
+            public CardUnitStorageConfiguration CardBin = 
+                new("BIN1",
+                    50,
+                    "SN104827639",
+                    new CardCapabilitiesClass(CardCapabilitiesClass.TypeEnum.Retain,
+                                            false),
+                    new CardConfigurationClass(40));
         }
 
         private ILogger Logger { get; }
