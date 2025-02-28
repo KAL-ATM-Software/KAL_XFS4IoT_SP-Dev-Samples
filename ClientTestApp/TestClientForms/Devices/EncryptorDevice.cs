@@ -29,7 +29,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Common]);
 
         public async Task Initialization()
         {

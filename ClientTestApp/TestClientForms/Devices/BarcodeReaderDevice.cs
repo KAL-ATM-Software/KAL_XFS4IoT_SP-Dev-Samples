@@ -25,7 +25,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.BarcodeReader, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.BarcodeReader, InterfaceClass.NameEnum.Common]);
 
         public async Task Read()
         {

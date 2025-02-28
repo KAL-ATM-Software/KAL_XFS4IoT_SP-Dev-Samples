@@ -26,7 +26,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.TextTerminal, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.TextTerminal, InterfaceClass.NameEnum.Common]);
 
         public async Task ClearScreen()
         {

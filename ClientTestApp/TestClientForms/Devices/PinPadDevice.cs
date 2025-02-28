@@ -34,7 +34,7 @@ namespace TestClientForms.Devices
         }
 
         public new Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Keyboard, InterfaceClass.NameEnum.PinPad, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.Crypto, InterfaceClass.NameEnum.KeyManagement, InterfaceClass.NameEnum.Keyboard, InterfaceClass.NameEnum.PinPad, InterfaceClass.NameEnum.Common]);
 
         public async Task GetData()
         {

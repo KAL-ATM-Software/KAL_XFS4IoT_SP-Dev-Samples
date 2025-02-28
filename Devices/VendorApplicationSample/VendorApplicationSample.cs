@@ -116,12 +116,14 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
         /// <summary>
         /// Stores Commons status
         /// </summary>
-        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(Device: CommonStatusClass.DeviceEnum.Online,
-                                                                                    DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
-                                                                                    PowerSaveRecoveryTime: 0,
-                                                                                    AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                                                    Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
-                                                                                    CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+        public CommonStatusClass CommonStatus { get; set; } = 
+            new CommonStatusClass(
+                Device: CommonStatusClass.DeviceEnum.Online,
+                DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
+                PowerSaveRecoveryTime: 0,
+                AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         /// <summary>
         /// Stores Common Capabilities
@@ -154,27 +156,27 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
                         CommonCapabilitiesClass.VendorApplicationInterfaceClass.EventEnum.VendorAppExitedEvent,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

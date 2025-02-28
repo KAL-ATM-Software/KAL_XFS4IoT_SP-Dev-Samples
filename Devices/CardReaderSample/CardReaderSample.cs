@@ -14,11 +14,6 @@ using XFS4IoT;
 using XFS4IoTFramework.CardReader;
 using XFS4IoTFramework.Common;
 using XFS4IoTFramework.Storage;
-using XFS4IoT.Common.Commands;
-using XFS4IoT.Common.Completions;
-using XFS4IoT.Common;
-using XFS4IoT.CardReader.Events;
-using XFS4IoT.CardReader;
 using XFS4IoT.CardReader.Completions;
 using XFS4IoTServer;
 
@@ -38,20 +33,22 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CardReaderSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            CardReaderStatus = new CardReaderStatusClass(CardReaderStatusClass.MediaEnum.NotPresent,
-                                                         CardReaderStatusClass.SecurityEnum.NotSupported,
-                                                         CardReaderStatusClass.ChipPowerEnum.NoCard,
-                                                         CardReaderStatusClass.ChipModuleEnum.Ok,
-                                                         CardReaderStatusClass.MagWriteModuleEnum.Ok,
-                                                         CardReaderStatusClass.FrontImageModuleEnum.NotSupported,
-                                                         CardReaderStatusClass.BackImageModuleEnum.NotSupported);
+            CardReaderStatus = new CardReaderStatusClass(
+                CardReaderStatusClass.MediaEnum.NotPresent,
+                CardReaderStatusClass.SecurityEnum.NotSupported,
+                CardReaderStatusClass.ChipPowerEnum.NoCard,
+                CardReaderStatusClass.ChipModuleEnum.Ok,
+                CardReaderStatusClass.MagWriteModuleEnum.Ok,
+                CardReaderStatusClass.FrontImageModuleEnum.NotSupported,
+                CardReaderStatusClass.BackImageModuleEnum.NotSupported);
         }
 
         #region CardReader Interface
@@ -130,8 +127,9 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 }
                 if ((dataToRead.DataToRead & ReadCardRequest.CardDataTypesEnum.Chip) == ReadCardRequest.CardDataTypesEnum.Chip)
                 {
-                    chipATR.Add(new ReadCardResult.CardData(ReadCardResult.CardData.DataStatusEnum.Ok,
-                                new List<byte>() { 0x3b, 0x2a, 0x00, 0x80, 0x65, 0xa2, 0x1, 0x2, 0x1, 0x31, 0x72, 0xd6, 0x43 }));
+                    chipATR.Add(
+                        new ReadCardResult.CardData(ReadCardResult.CardData.DataStatusEnum.Ok,
+                        [0x3b, 0x2a, 0x00, 0x80, 0x65, 0xa2, 0x1, 0x2, 0x1, 0x31, 0x72, 0xd6, 0x43]));
                 }
                 completionCode = MessageHeader.CompletionCodeEnum.Success;
             }
@@ -183,7 +181,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            List<byte> chipData = new() { 0x90, 0x00 };
+            List<byte> chipData = [ 0x90, 0x00 ];
             return new ChipIOResult(MessageHeader.CompletionCodeEnum.Success, chipData);
         }
 
@@ -241,40 +239,46 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// For intelligent contactless card readers, any in-built audio/visual feedback such as Beep/LEDs, need to becontrolled directly by the reader. 
         /// These indications should be implemented based on the EMVCo and payment system'sspecifications.
         /// </summary>
-        public async Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(EMVClessCommandEvents events,
-                                                                                                        EMVContactlessPerformTransactionRequest transactionData,
-                                                                                                        CancellationToken cancellation)
+        public async Task<EMVContactlessPerformTransactionResult> EMVContactlessPerformTransactionAsync(
+            EMVClessCommandEvents events,
+            EMVContactlessPerformTransactionRequest transactionData,
+            CancellationToken cancellation)
         {
             await events.EMVClessReadStatusEvent(100, EMVClessCommandEvents.StatusEnum.ReadyToRead, 0, EMVClessCommandEvents.ValueQualifierEnum.Amount, string.Empty, 978, "EN");
 
             await Task.Delay(1000, cancellation);
 
-            EMVContactlessTransactionDataOutput txnOutput = new(EMVContactlessTransactionDataOutput.TransactionOutcomeEnum.Approve,
-                                                                EMVContactlessTransactionDataOutput.CardholderActionEnum.None,
-                                                                new List<byte>() { 0x9c, 0x1, 0x0, 0x9f, 0x26, 0x08, 0x47, 0x9c, 0x4f, 0x7e, 0xc8, 0x52, 0xd1, 0x6, 0x9f, 0x34, 0x03, 0x1e, 0x00, 0x00 },
-                                                                new EMVContactlessTransactionDataOutput.EMVContactlessOutcome(EMVContactlessTransactionDataOutput.EMVContactlessOutcome.CvmEnum.OnlinePIN,
-                                                                                                                              EMVContactlessTransactionDataOutput.EMVContactlessOutcome.AlternateInterfaceEnum.Contact,
-                                                                                                                              false,
-                                                                                                                              new EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI(3,
-                                                                                                                                                                                                             EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.StatusEnum.CardReadOk,
-                                                                                                                                                                                                             0,
-                                                                                                                                                                                                             EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable,
-                                                                                                                                                                                                             "0",
-                                                                                                                                                                                                             978,
-                                                                                                                                                                                                             "EN"),
-                                                                                                                              null,
-                                                                                                                              0,
-                                                                                                                              0,
-                                                                                                                              new List<byte>() { }));
+            EMVContactlessTransactionDataOutput txnOutput = 
+                new(
+                    EMVContactlessTransactionDataOutput.TransactionOutcomeEnum.Approve,
+                    EMVContactlessTransactionDataOutput.CardholderActionEnum.None,
+                    [ 0x9c, 0x1, 0x0, 0x9f, 0x26, 0x08, 0x47, 0x9c, 0x4f, 0x7e, 0xc8, 0x52, 0xd1, 0x6, 0x9f, 0x34, 0x03, 0x1e, 0x00, 0x00 ],
+                    new EMVContactlessTransactionDataOutput.EMVContactlessOutcome(
+                        EMVContactlessTransactionDataOutput.EMVContactlessOutcome.CvmEnum.OnlinePIN,
+                        EMVContactlessTransactionDataOutput.EMVContactlessOutcome.AlternateInterfaceEnum.Contact,
+                        false,
+                        new EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI(
+                            3,
+                            EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.StatusEnum.CardReadOk,
+                            0,
+                            EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable,
+                            "0",
+                            978,
+                            "EN"),
+                        null,
+                        0,
+                        0,
+                        []));
 
-            return new EMVContactlessPerformTransactionResult(MessageHeader.CompletionCodeEnum.Success, 
-                                                              new() 
-                                                              { 
-                                                                  { 
-                                                                      EMVContactlessPerformTransactionResult.DataSourceTypeEnum.Chip, 
-                                                                      txnOutput 
-                                                                  } 
-                                                              });
+            return new EMVContactlessPerformTransactionResult(
+                MessageHeader.CompletionCodeEnum.Success, 
+                new() 
+                { 
+                    { 
+                        EMVContactlessPerformTransactionResult.DataSourceTypeEnum.Chip, 
+                        txnOutput 
+                    } 
+                });
         }
 
         /// <summary>
@@ -284,29 +288,34 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// The command enables the contactless card reader and waits for the customer to re-tap their card.
         /// The contactless chip card reader waits for the period of time specified in the command all for a card to be tapped.
         /// </summary>
-        public async Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(EMVClessCommandEvents events,
-                                                                                            EMVContactlessIssuerUpdateRequest transactionData,
-                                                                                            CancellationToken cancellation)
+        public async Task<EMVContactlessIssuerUpdateResult> EMVContactlessIssuerUpdateAsync(
+            EMVClessCommandEvents events,
+            EMVContactlessIssuerUpdateRequest transactionData,
+            CancellationToken cancellation)
         {
             await Task.Delay(1000, cancellation);
 
-            EMVContactlessTransactionDataOutput txnOutput = new (EMVContactlessTransactionDataOutput.TransactionOutcomeEnum.Approve,
-                                                                 EMVContactlessTransactionDataOutput.CardholderActionEnum.None, 
-                                                                 new List<byte>() { 0x9c, 0x1, 0x0, 0x9f, 0x26, 0x08, 0x47, 0x9c, 0x4f, 0x7e, 0xc8, 0x52, 0xd1, 0x6, 0x9f, 0x34, 0x03, 0x1e, 0x00, 0x00}, 
-                                                                 new EMVContactlessTransactionDataOutput.EMVContactlessOutcome(EMVContactlessTransactionDataOutput.EMVContactlessOutcome.CvmEnum.OnlinePIN,
-                                                                                                                               EMVContactlessTransactionDataOutput.EMVContactlessOutcome.AlternateInterfaceEnum.Contact, 
-                                                                                                                               false, 
-                                                                                                                               new EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI(3,
-                                                                                                                                                                                                              EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.StatusEnum.CardReadOk, 
-                                                                                                                                                                                                              0,
-                                                                                                                                                                                                              EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable, 
-                                                                                                                                                                                                              "0", 
-                                                                                                                                                                                                              978, 
-                                                                                                                                                                                                              "EN"), 
-                                                                                                                               null, 
-                                                                                                                               0, 
-                                                                                                                               0, 
-                                                                                                                               new List<byte>() { }));
+            EMVContactlessTransactionDataOutput txnOutput =  
+                new(
+                    EMVContactlessTransactionDataOutput.TransactionOutcomeEnum.Approve,
+                    EMVContactlessTransactionDataOutput.CardholderActionEnum.None, 
+                    [ 0x9c, 0x1, 0x0, 0x9f, 0x26, 0x08, 0x47, 0x9c, 0x4f, 0x7e, 0xc8, 0x52, 0xd1, 0x6, 0x9f, 0x34, 0x03, 0x1e, 0x00, 0x00 ], 
+                    new EMVContactlessTransactionDataOutput.EMVContactlessOutcome(
+                        EMVContactlessTransactionDataOutput.EMVContactlessOutcome.CvmEnum.OnlinePIN,
+                        EMVContactlessTransactionDataOutput.EMVContactlessOutcome.AlternateInterfaceEnum.Contact, 
+                        false, 
+                        new EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI(
+                            3,
+                            EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.StatusEnum.CardReadOk, 
+                            0,
+                            EMVContactlessTransactionDataOutput.EMVContactlessOutcome.EMVContactlessUI.ValueQualifierEnum.NotApplicable, 
+                            "0", 
+                            978, 
+                            "EN"), 
+                        null, 
+                        0, 
+                        0,
+                        []));
 
             return new EMVContactlessIssuerUpdateResult(MessageHeader.CompletionCodeEnum.Success, txnOutput);
         }
@@ -350,11 +359,11 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// </summary>
         public QueryIFMIdentifierResult QueryIFMIdentifier()
         {
-            return new QueryIFMIdentifierResult(MessageHeader.CompletionCodeEnum.Success,
-                                                new List<IFMIdentifierInfo>()
-                                                {
-                                                new IFMIdentifierInfo(IFMIdentifierInfo.IFMAuthorityEnum.EMV, "1234" )
-                                                });
+            return new QueryIFMIdentifierResult(
+                MessageHeader.CompletionCodeEnum.Success,
+                [
+                new IFMIdentifierInfo(IFMIdentifierInfo.IFMAuthorityEnum.EMV, "1234" )
+                ]);
         }
 
         /// <summary>
@@ -366,8 +375,8 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             List<EMVApplication> AIDList = new()
             {
-                new EMVApplication(Encoding.UTF8.GetBytes("A0000000031010").ToList(), null),
-                new EMVApplication(Encoding.UTF8.GetBytes("A0000000041010").ToList(), null)
+                new EMVApplication([.. Encoding.UTF8.GetBytes("A0000000031010")], null),
+                new EMVApplication([.. Encoding.UTF8.GetBytes("A0000000041010")], null)
             };
             return new QueryEMVApplicationResult(MessageHeader.CompletionCodeEnum.Success, AIDList);
         }
@@ -392,16 +401,18 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         {
             if (moveCardInfo.From.Position == MovePosition.MovePositionEnum.Storage)
             {
-                return new MoveCardResult(MessageHeader.CompletionCodeEnum.InvalidData,
-                                          $"This device doesn't support dispensing card capability. {moveCardInfo.From.Position}");
+                return new MoveCardResult(
+                    MessageHeader.CompletionCodeEnum.InvalidData,
+                    $"This device doesn't support dispensing card capability. {moveCardInfo.From.Position}");
             }
             else
             {
                 if (CardReaderStatus.Media == CardReaderStatusClass.MediaEnum.NotPresent)
                 {
-                    return new MoveCardResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
-                                              $"No card present in the reader.",
-                                              MoveCompletion.PayloadData.ErrorCodeEnum.NoMedia);
+                    return new MoveCardResult(
+                        MessageHeader.CompletionCodeEnum.CommandErrorCode,
+                        $"No card present in the reader.",
+                        MoveCompletion.PayloadData.ErrorCodeEnum.NoMedia);
                 }
             }
 
@@ -460,7 +471,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <returns></returns>
         public bool GetCardStorageConfiguration(out Dictionary<string, CardUnitStorageConfiguration> newCardUnits)
         {
-            newCardUnits = new();
+            newCardUnits = [];
             newCardUnits.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.CardBin);
             return true;
         }
@@ -471,9 +482,13 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <returns>Return true if the device maintains hardware counters for the card units</returns>
         public bool GetCardUnitCounts(out Dictionary<string, CardUnitCount> unitCounts)
         {
-            unitCounts = new();
-            unitCounts.Add(cardUnitInfo.CardBin.PositionName, new (cardUnitInfo.InitialCount,
-                                                                   cardUnitInfo.CurrentCount));
+            unitCounts = [];
+            unitCounts.Add(
+                cardUnitInfo.CardBin.PositionName, 
+                new(
+                    cardUnitInfo.InitialCount,
+                    cardUnitInfo.CurrentCount)
+                );
             return true;
         }
 
@@ -484,7 +499,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <returns>Return true if the device maintains hardware card unit status</returns>
         public bool GetCardUnitStatus(out Dictionary<string, CardStatusClass.ReplenishmentStatusEnum> unitStatus)
         {
-            unitStatus = new();
+            unitStatus = [];
             unitStatus.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.UnitStatus);
             return true;
         }
@@ -495,7 +510,7 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <returns>Return true if the device maintains hardware card storage status</returns>
         public bool GetCardStorageStatus(out Dictionary<string, CardUnitStorage.StatusEnum> storageStatus)
         {
-            storageStatus = new();
+            storageStatus = [];
             storageStatus.Add(cardUnitInfo.CardBin.PositionName, cardUnitInfo.StorageStatus);
             return true;
         }
@@ -543,10 +558,13 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                 }
             }
 
-            Dictionary<string, SetCardUnitStorage> newCardStorage = new();
-            newCardStorage.Add(cardUnitInfo.CardBin.PositionName, new SetCardUnitStorage(new (cardUnitInfo.CardBin.Configuration.Threshold,
-                                                                                              cardUnitInfo.CardBin.Configuration.CardId),
-                                                                                         cardUnitInfo.InitialCount));
+            Dictionary<string, SetCardUnitStorage> newCardStorage = [];
+            newCardStorage.Add(
+                cardUnitInfo.CardBin.PositionName, 
+                new SetCardUnitStorage(
+                    new (cardUnitInfo.CardBin.Configuration.Threshold,
+                        cardUnitInfo.CardBin.Configuration.CardId),
+                    cardUnitInfo.InitialCount));
 
             return new SetCardStorageResult(MessageHeader.CompletionCodeEnum.Success, newCardStorage);
         }
@@ -637,6 +655,43 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         public Task<SetCheckStorageResult> SetCheckStorageAsync(SetCheckStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CardReader service provider doesn't support check related operations.");
 
         /// <summary>
+        /// Return printer storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetPrinterStorageConfiguration(out Dictionary<string, PrinterUnitStorageConfiguration> newPrinterUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetPrinterUnitCounts(out Dictionary<string, PrinterUnitCount> unitCounts) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage status (retract bin, passbook storage).
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterStorageStatus(out Dictionary<string, PrinterUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer unit status (retract bin, passbook storage) maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterUnitStatus(out Dictionary<string, XFS4IoTFramework.Storage.PrinterStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for printer storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetPrinterStorageAsync(SetPrinterStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CardReader service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return IBNS storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// Status object is a reference to report status changes.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support IBNS related operations.");
+
+        /// <summary>
         /// CardReader Status
         /// </summary>
         public CardReaderStatusClass CardReaderStatus { get; set; }
@@ -644,20 +699,21 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
         /// <summary>
         /// CardReader Capabilities
         /// </summary>
-        public CardReaderCapabilitiesClass CardReaderCapabilities { get; set; } = new(CardReaderCapabilitiesClass.DeviceTypeEnum.Motor,
-                                                                                      CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track3,
-                                                                                      CardReaderCapabilitiesClass.WritableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track3,
-                                                                                      CardReaderCapabilitiesClass.ChipProtocolsEnum.T0 | CardReaderCapabilitiesClass.ChipProtocolsEnum.T1,
-                                                                                      CardReaderCapabilitiesClass.SecurityTypeEnum.NotSupported,
-                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
-                                                                                      CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
-                                                                                      FluxSensorProgrammable: false,
-                                                                                      ReadWriteAccessFollowingExit: false,
-                                                                                      CardReaderCapabilitiesClass.WriteMethodsEnum.Loco,
-                                                                                      CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Cold | CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Warm,
-                                                                                      CardReaderCapabilitiesClass.MemoryChipProtocolsEnum.NotSupported,
-                                                                                      CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
-                                                                                      true);
+        public CardReaderCapabilitiesClass CardReaderCapabilities { get; set; } = 
+            new(CardReaderCapabilitiesClass.DeviceTypeEnum.Motor,
+                CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.ReadableDataTypesEnum.Track3,
+                CardReaderCapabilitiesClass.WritableDataTypesEnum.Track1 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track2 | CardReaderCapabilitiesClass.WritableDataTypesEnum.Track3,
+                CardReaderCapabilitiesClass.ChipProtocolsEnum.T0 | CardReaderCapabilitiesClass.ChipProtocolsEnum.T1,
+                CardReaderCapabilitiesClass.SecurityTypeEnum.NotSupported,
+                CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                CardReaderCapabilitiesClass.PowerOptionEnum.Transport,
+                FluxSensorProgrammable: false,
+                ReadWriteAccessFollowingExit: false,
+                CardReaderCapabilitiesClass.WriteMethodsEnum.Loco,
+                CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Cold | CardReaderCapabilitiesClass.ChipPowerOptionsEnum.Warm,
+                CardReaderCapabilitiesClass.MemoryChipProtocolsEnum.NotSupported,
+                CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
+                true);
 
         #endregion
 
@@ -792,15 +848,17 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
             /// </summary>
             public CardStatusClass.ReplenishmentStatusEnum UnitStatus { get; set; }
 
-            public CardUnitStorageConfiguration CardBin = new("unitBIN1",
-                                                              50,
-                                                              "SN104827639",
-                                                              new CardCapabilitiesClass(CardCapabilitiesClass.TypeEnum.Retain,
-                                                                                        false),
-                                                              new CardConfigurationClass(40));
+            public CardUnitStorageConfiguration CardBin = new(
+                "unitBIN1",
+                50,
+                "SN104827639",
+                new CardCapabilitiesClass(
+                    CardCapabilitiesClass.TypeEnum.Retain,
+                    false),
+                new CardConfigurationClass(40));
         }
 
-        private CardUnitInfo cardUnitInfo = new ();
+        private readonly CardUnitInfo cardUnitInfo = new ();
 
         private ILogger Logger { get; }
 

@@ -18,6 +18,8 @@ using XFS4IoT.Storage.Commands;
 using XFS4IoT.Storage.Completions;
 using XFS4IoT.Storage.Events;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
+using XFS4IoT.CardReader.Events;
 
 namespace TestClientForms.Devices
 {
@@ -29,7 +31,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.CardReader, InterfaceClass.NameEnum.Common, InterfaceClass.NameEnum.Storage });
+            => DoServiceDiscovery([ InterfaceClass.NameEnum.CardReader, InterfaceClass.NameEnum.Common, InterfaceClass.NameEnum.Storage ]);
 
         public async Task AcceptCard()
         {
@@ -138,6 +140,14 @@ namespace TestClientForms.Devices
                         base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                         break;
 
+                    case XFS4IoT.Storage.Events.StorageChangedEvent storageChangedEv:
+                        base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
+                        break;
+
+                    case XFS4IoT.Storage.Events.CountsChangedEvent countChangedEv:
+                        base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                        break;
+
                     case Acknowledge ack:
                         break;
 
@@ -191,6 +201,10 @@ namespace TestClientForms.Devices
                         base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                         break;
 
+                    case XFS4IoT.Storage.Events.CountsChangedEvent countChangedEv:
+                        base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                        break;
+
                     case Acknowledge ack:
                         break;
                     default:
@@ -230,6 +244,14 @@ namespace TestClientForms.Devices
 
                     case XFS4IoT.CardReader.Events.MediaRemovedEvent removedEv:
                         base.OnXFS4IoTMessages(this, removedEv.Serialise());
+                        break;
+
+                    case XFS4IoT.Storage.Events.StorageChangedEvent storageChangedEv:
+                        base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
+                        break;
+
+                    case XFS4IoT.Storage.Events.CountsChangedEvent countChangedEv:
+                        base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
                         break;
 
                     case Acknowledge ack:
@@ -330,9 +352,105 @@ namespace TestClientForms.Devices
                         base.OnXFS4IoTMessages(this, storageThresholdEv.Serialise());
                         break;
 
+                    case XFS4IoT.Storage.Events.CountsChangedEvent countChangedEv:
+                        base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                        break;
+
                     case Acknowledge ack:
                         break;
 
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
+        }
+
+        public async Task EMVClessQueryApplications()
+        {
+            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await cardReader.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            var emvQueryAppCmd = new EMVClessQueryApplicationsCommand(
+                RequestId.NewID(),
+                Timeout: CommandTimeout);
+
+            base.OnXFS4IoTMessages(this, emvQueryAppCmd.Serialise());
+
+            await cardReader.SendCommandAsync(emvQueryAppCmd);
+
+            while (true)
+            {
+                switch (await cardReader.ReceiveMessageAsync())
+                {
+                    case EMVClessQueryApplicationsCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChanged:
+                        base.OnXFS4IoTMessages(this, statusChanged.Serialise());
+                        break;
+                    case Acknowledge ack:
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
+        }
+
+        public async Task EMVClessPerformTransaction()
+        {
+            var cardReader = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
+
+            try
+            {
+                await cardReader.ConnectAsync();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            var emvPerformTxnCmd = new EMVClessPerformTransactionCommand(
+                RequestId.NewID(), 
+                new EMVClessPerformTransactionCommand.PayloadData(
+                    Data: 
+                    [
+                        0x5F, 0x36, 0x01, 0x03,
+                        0x5F, 0x2A, 0x02, 0x09, 0x78,
+                        0x9F, 0x1A, 0x02, 0x03, 0x80,
+                        0x9F, 0x02, 0x06, 00, 00, 00, 00, 00, 00, 
+                        0x9C, 0x01, 0x01
+                    ]),
+                Timeout: CommandTimeout);
+
+            base.OnXFS4IoTMessages(this, emvPerformTxnCmd.Serialise());
+
+            await cardReader.SendCommandAsync(emvPerformTxnCmd);
+
+            while (true)
+            {
+                switch (await cardReader.ReceiveMessageAsync())
+                {
+                    case EMVClessPerformTransactionCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case MediaRemovedEvent mediaRemoved:
+                        base.OnXFS4IoTMessages(this, mediaRemoved.Serialise());
+                        break;
+                    case StatusChangedEvent statusChanged:
+                        base.OnXFS4IoTMessages(this, statusChanged.Serialise());
+                        break;
+                    case Acknowledge ack:
+                        break;
                     default:
                         base.OnXFS4IoTMessages(this, "<Unknown Event>");
                         break;

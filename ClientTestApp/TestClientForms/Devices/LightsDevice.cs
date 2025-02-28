@@ -24,10 +24,10 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Lights, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.Lights, InterfaceClass.NameEnum.Common]);
 
 
-        public async Task SetLight(string lightName, XFS4IoT.Lights.LightStateClass.FlashRateEnum flashRate)
+        public async Task SetLight(string lightName, XFS4IoT.Lights.PositionStatusClass.FlashRateEnum flashRate)
         {
             var lights = new XFS4IoTClient.ClientConnection(new Uri($"{ServiceUriBox.Text}"));
 
@@ -39,8 +39,11 @@ namespace TestClientForms.Devices
             {
                 return;
             }
-            var payload = new SetLightCommand.PayloadData();
-            payload.ExtendedProperties = new() { { lightName, new(XFS4IoT.Lights.LightStateClass.PositionEnum.Default, flashRate, XFS4IoT.Lights.LightStateClass.ColorEnum.Red) } };
+
+            XFS4IoT.Lights.PositionStatusClass pos = new(flashRate, XFS4IoT.Lights.PositionStatusClass.ColorEnum.Red);
+            Dictionary<string, XFS4IoT.Lights.PositionStatusClass> device = new() { { "center", pos } };
+
+            var payload = new SetLightCommand.PayloadData(CardReader: device);
 
             var cmd = new SetLightCommand(RequestId.NewID(), payload, CommandTimeout);
 

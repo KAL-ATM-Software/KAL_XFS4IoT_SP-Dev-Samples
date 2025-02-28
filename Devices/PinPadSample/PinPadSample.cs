@@ -45,15 +45,17 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(PinPadSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
-                                                               KeyManagementStatusClass.CertificateStateEnum.Unknown);
+            KeyManagementStatus = new KeyManagementStatusClass(
+                KeyManagementStatusClass.EncryptionStateEnum.Initialized,
+                KeyManagementStatusClass.CertificateStateEnum.Unknown);
 
             KeyboardStatus = new KeyboardStatusClass(KeyboardStatusClass.AutoBeepModeEnum.InActive);
         }
@@ -299,11 +301,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         /// </summary>
         public PCIPTSDeviceIdClass GetPCIPTSDeviceId()
         {
-            return new PCIPTSDeviceIdClass("KAL",
-                                           "EPP-V5",
-                                           "131-659-4900",
-                                           "EH7-4HG",
-                                           "XFS4IoTSP_Dev");
+            return new PCIPTSDeviceIdClass(
+                "KAL",
+                "EPP-V5",
+                "131-659-4900",
+                "EH7-4HG",
+                "XFS4IoTSP_Dev");
         }
 
         /// <summary>
@@ -600,11 +603,12 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 }
             }
 
-            return new ImportKeyResult(MessageHeader.CompletionCodeEnum.Success, 
-                                       new KeyInformationBase(), 
-                                       keyCheckValue,
-                                       verifyAttrib,
-                                       keyLength);
+            return new ImportKeyResult(
+                MessageHeader.CompletionCodeEnum.Success, 
+                new KeyInformationBase(), 
+                keyCheckValue,
+                verifyAttrib,
+                keyLength);
         }
 
         /// <summary>
@@ -856,12 +860,14 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 KeyContainerName = request.KeyName
             });
 
-            return new GenerateRSAKeyPairResult(MessageHeader.CompletionCodeEnum.Success, 
-                                                new GenerateRSAKeyPairResult.LoadedKeyInformation("S0",
-                                                                                                  "R",
-                                                                                                  "S",
-                                                                                                  rsaServiceProvider.KeySize,
-                                                                                                  Exportability: "S"));
+            return new GenerateRSAKeyPairResult(
+                MessageHeader.CompletionCodeEnum.Success, 
+                new GenerateRSAKeyPairResult.LoadedKeyInformation(
+                    "S0",
+                    "R",
+                    "S",
+                    rsaServiceProvider.KeySize,
+                    Exportability: "S"));
         }
 
         /// <summary>
@@ -964,11 +970,11 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             await Task.Delay(200, cancellation);
 
-            List<byte> digest = new()
-            {
+            List<byte> digest =
+            [
                 0xA2, 0x7A, 0xCC, 0x48, 0xDF, 0x26, 0x6D, 0x1B, 0xCB, 0x0B, 0x56, 0x76, 0x05, 0x9B, 0xDB, 0x9B,
                 0x7B, 0x38, 0xCA, 0xA4, 0xBA, 0x39, 0x9B, 0xCB, 0x4F, 0x58, 0x4A, 0x99, 0x85, 0x99, 0x69, 0x7D
-            };
+            ];
             return new ReplaceCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                 digest);
         }
@@ -1005,7 +1011,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             foreach (var option in KeyManagementCapabilities.LoadCertificationOptions)
             {
                 if (request.Signer == ImportCertificateRequest.SignerEnum.CA &&
-                    option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA ||
+                    option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA_TR34 ||
                     request.Signer == ImportCertificateRequest.SignerEnum.HL &&
                     option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.HL ||
                     request.Signer == ImportCertificateRequest.SignerEnum.Host &&
@@ -1028,11 +1034,11 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             await Task.Delay(200, cancellation);
 
-            List<byte> digest = new()
-            {
+            List<byte> digest =
+            [
                 0xFD, 0x77, 0x17, 0xC0, 0x3D, 0xAB, 0x76, 0x5C, 0x54, 0x7E, 0xF3, 0x53, 0x41, 0x00, 0xCD, 0x04,
                 0x04, 0xE9, 0xB0, 0xBF, 0x71, 0x05, 0xE9, 0xAE, 0x50, 0xC0, 0x81, 0x75, 0xA1, 0x8B, 0x92, 0x62
-            };
+            ];
             return new ImportCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                ImportCertificateResult.RSAKeyCheckModeEnum.SHA256,
                                                digest);
@@ -1079,10 +1085,10 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             KeyImportThroughParts: true,
             DESKeyLength: KeyManagementCapabilitiesClass.DESKeyLengthEmum.Double,
             CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
-            LoadCertificationOptions: new()
-            {
-                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
-            },
+            LoadCertificationOptions:
+            [
+                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA_TR34, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
+            ],
             CRKLLoadOption: KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
             SymmetricKeyManagementMethods: KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.MasterKey,
             KeyAttributes: new()
@@ -1166,7 +1172,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 ICryptoTransform transForm = tDESEncrypt.CreateEncryptor();
                 MemoryStream memStream = new();
                 CryptoStream cryptoStream = new(memStream, transForm, CryptoStreamMode.Write);
-                cryptoStream.Write(request.Data.ToArray(), 0, request.Data.Count);
+                cryptoStream.Write([.. request.Data], 0, request.Data.Count);
                 cryptoStream.FlushFinalBlock();
 
                 return new CryptoDataResult(MessageHeader.CompletionCodeEnum.Success,
@@ -1477,30 +1483,24 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             var bytes = new byte[Constants.RandomNumberLength];
             new Random().NextBytes(bytes);
 
-            return bytes.ToList();
+            return [.. bytes];
         }
 
-        private class LoadedKeyInfo
+        private class LoadedKeyInfo(
+            string KeyName,
+            LoadedKeyInfo.AlgorithmKeyEnum Algorithm,
+            List<byte> KeyData)
         {
             public enum AlgorithmKeyEnum
             {
                 TDES
             }
 
-            public LoadedKeyInfo(string KeyName,
-                                 AlgorithmKeyEnum Algorithm,
-                                 List<byte> KeyData)
-            {
-                this.KeyName = KeyName;
-                this.Algorithm = Algorithm;
-                this.KeyData = KeyData;
-            }
+            public string KeyName { get; init; } = KeyName;
 
-            public string KeyName { get; init; }
+            public List<byte> KeyData { get; init; } = KeyData;
 
-            public List<byte> KeyData { get; init; }
-
-            public AlgorithmKeyEnum Algorithm { get; init; }
+            public AlgorithmKeyEnum Algorithm { get; init; } = Algorithm;
         }
 
         private bool StoreKeys(Dictionary<string, LoadedKeyInfo> obj)
@@ -1572,7 +1572,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 if (serviceInitialized)
                     return;
 
-                List<string> preLoadedKeys = new() { Constants.EPPVendorKeyName, Constants.EPPVendorSigKeyName };
+                List<string> preLoadedKeys = [Constants.EPPVendorKeyName, Constants.EPPVendorSigKeyName];
                 foreach (var keyName in preLoadedKeys)
                 {
                     RSACryptoServiceProvider rsaServiceProvider = new(new CspParameters()
@@ -1582,21 +1582,22 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
                     if (pinPadServiceProvider.GetKeyDetail(keyName) is null)
                     {
-                        pinPadServiceProvider.AddKey(keyName,
-                                                     pinPadServiceProvider.FindKeySlot(keyName),
-                                                     "S0",
-                                                     "R",
-                                                     keyName switch
-                                                     {
-                                                        Constants.EPPVendorKeyName =>"V",
-                                                        _ => "T"
-                                                     },
-                                                     rsaServiceProvider.KeySize,
-                                                     KeyDetail.KeyStatusEnum.Loaded,
-                                                     true,
-                                                     string.Empty,
-                                                     "00",
-                                                     "S");
+                        pinPadServiceProvider.AddKey(
+                            keyName,
+                            pinPadServiceProvider.FindKeySlot(keyName),
+                            "S0",
+                            "R",
+                            keyName switch
+                            {
+                            Constants.EPPVendorKeyName =>"V",
+                            _ => "T"
+                            },
+                            rsaServiceProvider.KeySize,
+                            KeyDetail.KeyStatusEnum.Loaded,
+                            true,
+                            string.Empty,
+                            "00",
+                            "S");
                     }
                 }
 

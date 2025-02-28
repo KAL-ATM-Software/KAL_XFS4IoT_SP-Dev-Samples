@@ -96,27 +96,27 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
                         CommonCapabilitiesClass.BiometricInterfaceClass.EventEnum.OrientationEvent
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
@@ -227,7 +227,7 @@ namespace KAL.XFS4IoTSP.Biometric.Sample
             if (request.DataTypes is { Count: > 0 })
             return new ReadResult(MessageHeader.CompletionCodeEnum.Success, new List<BiometricData>() 
             { 
-                new BiometricData(new BiometricDataType(BiometricCapabilitiesClass.FormatEnum.ReservedTemplate1), SampleData) 
+                new(new BiometricDataType(BiometricCapabilitiesClass.FormatEnum.ReservedTemplate1), SampleData) 
             });
 
             return new ReadResult(MessageHeader.CompletionCodeEnum.Success, null);

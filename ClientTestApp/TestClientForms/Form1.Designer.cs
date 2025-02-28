@@ -57,6 +57,8 @@ namespace TestClientForms
             CaptureCard = new System.Windows.Forms.Button();
             testClientTabControl = new System.Windows.Forms.TabControl();
             CardReaderTab = new System.Windows.Forms.TabPage();
+            buttonEMVClessPerformTransaction = new System.Windows.Forms.Button();
+            buttonEMVClessQueryApplications = new System.Windows.Forms.Button();
             cardReaderRawBox = new System.Windows.Forms.TextBox();
             cardReaderTreeView = new System.Windows.Forms.TreeView();
             ResetBinCount = new System.Windows.Forms.Button();
@@ -178,11 +180,12 @@ namespace TestClientForms
             label30 = new System.Windows.Forms.Label();
             label31 = new System.Windows.Forms.Label();
             PrinterTabPage = new System.Windows.Forms.TabPage();
+            PrinterSetMedia = new System.Windows.Forms.Button();
             printerRawBox = new System.Windows.Forms.TextBox();
             printerTreeView = new System.Windows.Forms.TreeView();
             label39 = new System.Windows.Forms.Label();
             PrinterFormFields = new System.Windows.Forms.TextBox();
-            PrinterLoadDefinition = new System.Windows.Forms.Button();
+            PrinterSetForm = new System.Windows.Forms.Button();
             PrinterMediaListBox = new System.Windows.Forms.ListBox();
             PrinterQueryForm = new System.Windows.Forms.Button();
             PrinterEject = new System.Windows.Forms.Button();
@@ -214,7 +217,6 @@ namespace TestClientForms
             label45 = new System.Windows.Forms.Label();
             LightsFlashRate = new System.Windows.Forms.ComboBox();
             label40 = new System.Windows.Forms.Label();
-            txtLightName = new System.Windows.Forms.TextBox();
             LightsSetLight = new System.Windows.Forms.Button();
             label41 = new System.Windows.Forms.Label();
             lblLightsStatus = new System.Windows.Forms.TextBox();
@@ -399,6 +401,7 @@ namespace TestClientForms
             CheckScannerURI = new System.Windows.Forms.TextBox();
             label86 = new System.Windows.Forms.Label();
             label87 = new System.Windows.Forms.Label();
+            comboLightDevice = new System.Windows.Forms.ComboBox();
             testClientTabControl.SuspendLayout();
             CardReaderTab.SuspendLayout();
             DispenserTab.SuspendLayout();
@@ -652,6 +655,8 @@ namespace TestClientForms
             // 
             // CardReaderTab
             // 
+            CardReaderTab.Controls.Add(buttonEMVClessPerformTransaction);
+            CardReaderTab.Controls.Add(buttonEMVClessQueryApplications);
             CardReaderTab.Controls.Add(cardReaderRawBox);
             CardReaderTab.Controls.Add(cardReaderTreeView);
             CardReaderTab.Controls.Add(ResetBinCount);
@@ -683,6 +688,26 @@ namespace TestClientForms
             CardReaderTab.TabIndex = 0;
             CardReaderTab.Text = "CardReader";
             CardReaderTab.UseVisualStyleBackColor = true;
+            // 
+            // buttonEMVClessPerformTransaction
+            // 
+            buttonEMVClessPerformTransaction.Location = new System.Drawing.Point(955, 223);
+            buttonEMVClessPerformTransaction.Name = "buttonEMVClessPerformTransaction";
+            buttonEMVClessPerformTransaction.Size = new System.Drawing.Size(249, 29);
+            buttonEMVClessPerformTransaction.TabIndex = 132;
+            buttonEMVClessPerformTransaction.Text = "EMVClessPerformTransaction";
+            buttonEMVClessPerformTransaction.UseVisualStyleBackColor = true;
+            buttonEMVClessPerformTransaction.Click += buttonEMVClessPerformTransaction_Click;
+            // 
+            // buttonEMVClessQueryApplications
+            // 
+            buttonEMVClessQueryApplications.Location = new System.Drawing.Point(955, 179);
+            buttonEMVClessQueryApplications.Name = "buttonEMVClessQueryApplications";
+            buttonEMVClessQueryApplications.Size = new System.Drawing.Size(249, 29);
+            buttonEMVClessQueryApplications.TabIndex = 131;
+            buttonEMVClessQueryApplications.Text = "EMVClessQueryApplications";
+            buttonEMVClessQueryApplications.UseVisualStyleBackColor = true;
+            buttonEMVClessQueryApplications.Click += buttonEMVClessQueryApplications_Click;
             // 
             // cardReaderRawBox
             // 
@@ -2012,11 +2037,12 @@ namespace TestClientForms
             // 
             // PrinterTabPage
             // 
+            PrinterTabPage.Controls.Add(PrinterSetMedia);
             PrinterTabPage.Controls.Add(printerRawBox);
             PrinterTabPage.Controls.Add(printerTreeView);
             PrinterTabPage.Controls.Add(label39);
             PrinterTabPage.Controls.Add(PrinterFormFields);
-            PrinterTabPage.Controls.Add(PrinterLoadDefinition);
+            PrinterTabPage.Controls.Add(PrinterSetForm);
             PrinterTabPage.Controls.Add(PrinterMediaListBox);
             PrinterTabPage.Controls.Add(PrinterQueryForm);
             PrinterTabPage.Controls.Add(PrinterEject);
@@ -2048,6 +2074,16 @@ namespace TestClientForms
             PrinterTabPage.TabIndex = 5;
             PrinterTabPage.Text = "Printer";
             PrinterTabPage.UseVisualStyleBackColor = true;
+            // 
+            // PrinterSetMedia
+            // 
+            PrinterSetMedia.Location = new System.Drawing.Point(1090, 83);
+            PrinterSetMedia.Name = "PrinterSetMedia";
+            PrinterSetMedia.Size = new System.Drawing.Size(113, 29);
+            PrinterSetMedia.TabIndex = 130;
+            PrinterSetMedia.Text = "SetMedia";
+            PrinterSetMedia.UseVisualStyleBackColor = true;
+            PrinterSetMedia.Click += PrinterSetMedia_Click;
             // 
             // printerRawBox
             // 
@@ -2084,16 +2120,16 @@ namespace TestClientForms
             PrinterFormFields.TabIndex = 126;
             PrinterFormFields.Text = "Field1=Value1,Field2=Field Value2";
             // 
-            // PrinterLoadDefinition
+            // PrinterSetForm
             // 
-            PrinterLoadDefinition.Location = new System.Drawing.Point(1090, 48);
-            PrinterLoadDefinition.Margin = new System.Windows.Forms.Padding(0);
-            PrinterLoadDefinition.Name = "PrinterLoadDefinition";
-            PrinterLoadDefinition.Size = new System.Drawing.Size(113, 29);
-            PrinterLoadDefinition.TabIndex = 124;
-            PrinterLoadDefinition.Text = "LoadDefinition";
-            PrinterLoadDefinition.UseVisualStyleBackColor = true;
-            PrinterLoadDefinition.Click += PrinterLoadDefinition_Click;
+            PrinterSetForm.Location = new System.Drawing.Point(1090, 48);
+            PrinterSetForm.Margin = new System.Windows.Forms.Padding(0);
+            PrinterSetForm.Name = "PrinterSetForm";
+            PrinterSetForm.Size = new System.Drawing.Size(113, 29);
+            PrinterSetForm.TabIndex = 124;
+            PrinterSetForm.Text = "SetForm";
+            PrinterSetForm.UseVisualStyleBackColor = true;
+            PrinterSetForm.Click += PrinterLoadDefinition_Click;
             // 
             // PrinterMediaListBox
             // 
@@ -2339,13 +2375,13 @@ namespace TestClientForms
             // 
             // lightsTab
             // 
+            lightsTab.Controls.Add(comboLightDevice);
             lightsTab.Controls.Add(lightsTreeView);
             lightsTab.Controls.Add(lightsRawBox);
             lightsTab.Controls.Add(LightsServiceDiscovery);
             lightsTab.Controls.Add(label45);
             lightsTab.Controls.Add(LightsFlashRate);
             lightsTab.Controls.Add(label40);
-            lightsTab.Controls.Add(txtLightName);
             lightsTab.Controls.Add(LightsSetLight);
             lightsTab.Controls.Add(label41);
             lightsTab.Controls.Add(lblLightsStatus);
@@ -2423,15 +2459,6 @@ namespace TestClientForms
             label40.Size = new System.Drawing.Size(86, 20);
             label40.TabIndex = 132;
             label40.Text = "Light Name";
-            // 
-            // txtLightName
-            // 
-            txtLightName.Location = new System.Drawing.Point(1178, 12);
-            txtLightName.Margin = new System.Windows.Forms.Padding(0);
-            txtLightName.Name = "txtLightName";
-            txtLightName.Size = new System.Drawing.Size(121, 27);
-            txtLightName.TabIndex = 131;
-            txtLightName.Text = "cardReader";
             // 
             // LightsSetLight
             // 
@@ -4422,6 +4449,14 @@ namespace TestClientForms
             label87.TabIndex = 83;
             label87.Text = "Service URI";
             // 
+            // comboLightDevice
+            // 
+            comboLightDevice.FormattingEnabled = true;
+            comboLightDevice.Location = new System.Drawing.Point(1178, 12);
+            comboLightDevice.Name = "comboLightDevice";
+            comboLightDevice.Size = new System.Drawing.Size(121, 28);
+            comboLightDevice.TabIndex = 138;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -4629,7 +4664,7 @@ namespace TestClientForms
         private System.Windows.Forms.TextBox PrinterURI;
         private System.Windows.Forms.Label label37;
         private System.Windows.Forms.Label label38;
-        private System.Windows.Forms.Button PrinterLoadDefinition;
+        private System.Windows.Forms.Button PrinterSetForm;
         private System.Windows.Forms.Label label39;
         private System.Windows.Forms.TextBox PrinterFormFields;
         private System.Windows.Forms.TabPage lightsTab;
@@ -4645,7 +4680,6 @@ namespace TestClientForms
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.Label label44;
         private System.Windows.Forms.Label label40;
-        private System.Windows.Forms.TextBox txtLightName;
         private System.Windows.Forms.Label label45;
         private System.Windows.Forms.ComboBox LightsFlashRate;
         private System.Windows.Forms.Button LightsServiceDiscovery;
@@ -4838,6 +4872,10 @@ namespace TestClientForms
         private System.Windows.Forms.Label label86;
         private System.Windows.Forms.Label label87;
         private System.Windows.Forms.Button viewTxnStatus;
+        private System.Windows.Forms.Button buttonEMVClessPerformTransaction;
+        private System.Windows.Forms.Button buttonEMVClessQueryApplications;
+        private System.Windows.Forms.Button PrinterSetMedia;
+        private System.Windows.Forms.ComboBox comboLightDevice;
     }
 }
 

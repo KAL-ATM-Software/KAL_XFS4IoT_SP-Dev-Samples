@@ -33,12 +33,13 @@ namespace KAL.XFS4IoTSP.Lights.Sample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(LightsSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(Device: CommonStatusClass.DeviceEnum.Online,
-                                                 DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 PowerSaveRecoveryTime: 0,
-                                                 AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 EndToEndSecurity: CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                Device: CommonStatusClass.DeviceEnum.Online,
+                DevicePosition: CommonStatusClass.PositionStatusEnum.InPosition,
+                PowerSaveRecoveryTime: 0,
+                AntiFraudModule: CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                Exchange: CommonStatusClass.ExchangeEnum.NotSupported,
+                EndToEndSecurity: CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
             LightsStatus.Status = new()
             {
@@ -57,11 +58,16 @@ namespace KAL.XFS4IoTSP.Lights.Sample
         {
             await Task.Delay(200, cancellation);
 
-            if (!request.StdLights.ContainsKey(LightsCapabilitiesClass.DeviceEnum.CardReader))
+            if (!request.StdLightOperations.ContainsKey(LightsCapabilitiesClass.DeviceEnum.CardReader))
             {
-                return new SetLightResult(MessageHeader.CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLights.Keys}");
+                return new SetLightResult(MessageHeader.CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLightOperations.Keys}");
             }
-            LightsStatus.Status[LightsCapabilitiesClass.DeviceEnum.CardReader] = new(LightsStatusClass.LightOperation.PositionEnum.Center, request.StdLights[LightsCapabilitiesClass.DeviceEnum.CardReader].FlashRate, LightsStatusClass.LightOperation.ColourEnum.Default, LightsStatusClass.LightOperation.DirectionEnum.None);
+            List<LightsStatusClass.LightOperation> ops = request.StdLightOperations[LightsCapabilitiesClass.DeviceEnum.CardReader];
+            if (ops.Count == 0)
+            {
+                return new SetLightResult(MessageHeader.CompletionCodeEnum.InvalidData, $"No light operation specified.");
+            }
+            LightsStatus.Status[LightsCapabilitiesClass.DeviceEnum.CardReader] = new(ops[0].Position, ops[0].FlashRate, ops[0].Colour, ops[0].Direction);
             return new SetLightResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
@@ -132,27 +138,27 @@ namespace KAL.XFS4IoTSP.Lights.Sample
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

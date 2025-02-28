@@ -63,11 +63,14 @@ namespace TestClientForms
             CameraDev = new("Camera", CameraServiceURI, CameraPortNum, CameraURI);
             CheckScannerDev = new("ChecKScanner", CheckScannerServiceURI, CheckScannerPortNum, CheckScannerURI);
 
-            LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.LightStateClass.FlashRateEnum));
-            LightsFlashRate.SelectedItem = XFS4IoT.Lights.LightStateClass.FlashRateEnum.Continuous;
+            LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.PositionStatusClass.FlashRateEnum));
+            LightsFlashRate.SelectedItem = XFS4IoT.Lights.PositionStatusClass.FlashRateEnum.Continuous;
 
-            comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum));
-            comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum.Specific;
+            comboLightDevice.DataSource = new List<string>() { "cardReader" };
+            LightsFlashRate.SelectedItem = "cardReader";
+
+            comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum));
+            comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Specific;
         }
 
 
@@ -242,6 +245,17 @@ namespace TestClientForms
         {
             await CardReaderDev.ResetBinCount();
         }
+
+        private async void buttonEMVClessQueryApplications_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.EMVClessQueryApplications();
+        }
+
+        private async void buttonEMVClessPerformTransaction_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.EMVClessPerformTransaction();
+        }
+
         #endregion
 
         #region CashDispenser
@@ -718,7 +732,7 @@ namespace TestClientForms
 
             string selectedMedia = (string)PrinterMediaListBox.Items[mediaIndex];
 
-            Dictionary<string, string> fields = new();
+            Dictionary<string, List<string>> fields = [];
             if (!string.IsNullOrWhiteSpace(PrinterFormFields.Text))
             {
                 string[] pairs = PrinterFormFields.Text.Split(',');
@@ -730,7 +744,8 @@ namespace TestClientForms
                         MessageBox.Show($"Invalid form field \"{pair}\"");
                         return;
                     }
-                    fields.Add(split[0], split[1]);
+                    List<string> list = [split[1]];
+                    fields.Add(split[0], list);
                 }
             }
 
@@ -762,7 +777,7 @@ namespace TestClientForms
         {
             OpenFileDialog ofd = new()
             {
-                Title = "Select definition file to load."
+                Title = "Select json form to load."
             };
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -770,9 +785,26 @@ namespace TestClientForms
                     return;
 
                 string contents = await File.ReadAllTextAsync(ofd.FileName);
-                await PrinterDev.DoLoadDefinition(contents);
+                await PrinterDev.DoSetFormOrMedia(contents, true);
             }
         }
+
+        private async void PrinterSetMedia_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new()
+            {
+                Title = "Select json media to load."
+            };
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                if (!File.Exists(ofd.FileName))
+                    return;
+
+                string contents = await File.ReadAllTextAsync(ofd.FileName);
+                await PrinterDev.DoSetFormOrMedia(contents, false);
+            }
+        }
+
         #endregion
 
         #region Lights
@@ -789,13 +821,7 @@ namespace TestClientForms
 
         private async void LightsSetLight_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtLightName.Text))
-            {
-                MessageBox.Show("Light name must be specified.");
-                return;
-            }
-
-            await LightsDev.SetLight(txtLightName.Text, (XFS4IoT.Lights.LightStateClass.FlashRateEnum)LightsFlashRate.SelectedItem);
+            await LightsDev.SetLight((string)comboLightDevice.SelectedItem, (XFS4IoT.Lights.PositionStatusClass.FlashRateEnum)LightsFlashRate.SelectedItem);
         }
 
         private async void LightsServiceDiscovery_Click(object sender, EventArgs e)
@@ -823,7 +849,7 @@ namespace TestClientForms
 
         private async void btnSetAutoStartup_Click(object sender, EventArgs e)
         {
-            await AuxDev.SetAutoStartupTime(autoStartupDateTime.Value, (XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum)comboAutoStartupModes.SelectedItem);
+            await AuxDev.SetAutoStartupTime(autoStartupDateTime.Value, (XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum)comboAutoStartupModes.SelectedItem);
         }
 
         private async void btnGetAutoStartup_Click(object sender, EventArgs e)
@@ -1457,7 +1483,6 @@ namespace TestClientForms
                 MessageBox.Show($"'TreeView_AfterSelect' method exception {Environment.NewLine} {ex.Message}");
             }
         }
-        #endregion
-
+        #endregion 
     }
 }

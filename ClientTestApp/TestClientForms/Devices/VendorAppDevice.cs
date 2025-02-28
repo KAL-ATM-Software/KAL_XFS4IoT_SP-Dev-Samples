@@ -27,7 +27,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.VendorApplication, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.VendorApplication, InterfaceClass.NameEnum.Common]);
 
         public async Task StartLocalApplication(string appName)
         {

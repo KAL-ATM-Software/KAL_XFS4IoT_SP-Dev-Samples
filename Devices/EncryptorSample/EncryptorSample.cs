@@ -42,15 +42,17 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(EncryptorSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            KeyManagementStatus = new KeyManagementStatusClass(KeyManagementStatusClass.EncryptionStateEnum.Initialized,
-                                                               KeyManagementStatusClass.CertificateStateEnum.Primary);
+            KeyManagementStatus = new KeyManagementStatusClass(
+                KeyManagementStatusClass.EncryptionStateEnum.Initialized,
+                KeyManagementStatusClass.CertificateStateEnum.Primary);
         }
 
         #region KeyManagement interface
@@ -408,12 +410,14 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 KeyContainerName = request.KeyName
             });
 
-            return new GenerateRSAKeyPairResult(MessageHeader.CompletionCodeEnum.Success,
-                                                new GenerateRSAKeyPairResult.LoadedKeyInformation("S0",
-                                                                                                  "R",
-                                                                                                  "S",
-                                                                                                  rsaServiceProvider.KeySize,
-                                                                                                  Exportability: "S"));
+            return new GenerateRSAKeyPairResult(
+                MessageHeader.CompletionCodeEnum.Success,
+                new GenerateRSAKeyPairResult.LoadedKeyInformation(
+                    "S0",
+                    "R",
+                    "S",
+                    rsaServiceProvider.KeySize,
+                    Exportability: "S"));
         }
 
         /// <summary>
@@ -557,7 +561,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             foreach (var option in KeyManagementCapabilities.LoadCertificationOptions)
             {
                 if (request.Signer == ImportCertificateRequest.SignerEnum.CA &&
-                    option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA ||
+                    option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA_TR34 ||
                     request.Signer == ImportCertificateRequest.SignerEnum.HL &&
                     option.Signer == KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.HL ||
                     request.Signer == ImportCertificateRequest.SignerEnum.Host &&
@@ -618,10 +622,10 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             KeyImportThroughParts: true,
             DESKeyLength: KeyManagementCapabilitiesClass.DESKeyLengthEmum.Double,
             CertificateTypes: KeyManagementCapabilitiesClass.CertificateTypeEnum.HostKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.EncKey | KeyManagementCapabilitiesClass.CertificateTypeEnum.VerificationKey,
-            LoadCertificationOptions: new()
-            {
-                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
-            },
+            LoadCertificationOptions:
+            [
+                new KeyManagementCapabilitiesClass.SingerCapabilities(KeyManagementCapabilitiesClass.LoadCertificateSignerEnum.CA_TR34, KeyManagementCapabilitiesClass.LoadCertificateOptionEnum.NewHost, false)
+            ],
             CRKLLoadOption: KeyManagementCapabilitiesClass.CRKLLoadOptionEnum.NotSupported,
             SymmetricKeyManagementMethods: KeyManagementCapabilitiesClass.SymmetricKeyManagementMethodEnum.MasterKey,
             KeyAttributes: new()
@@ -704,7 +708,7 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                 ICryptoTransform transForm = tDESEncrypt.CreateEncryptor();
                 MemoryStream memStream = new();
                 CryptoStream cryptoStream = new(memStream, transForm, CryptoStreamMode.Write);
-                cryptoStream.Write(request.Data.ToArray(), 0, request.Data.Count);
+                cryptoStream.Write([.. request.Data], 0, request.Data.Count);
                 cryptoStream.FlushFinalBlock();
 
                 return new CryptoDataResult(MessageHeader.CompletionCodeEnum.Success,
@@ -943,27 +947,27 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
                         CommonCapabilitiesClass.CryptoInterfaceClass.CommandEnum.VerifyAuthentication,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
@@ -986,30 +990,24 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
             var bytes = new byte[Constants.RandomNumberLength];
             new Random().NextBytes(bytes);
 
-            return bytes.ToList();
+            return [.. bytes];
         }
 
-        private class LoadedKeyInfo
+        private class LoadedKeyInfo(
+            string KeyName,
+            LoadedKeyInfo.AlgorithmKeyEnum Algorithm,
+            List<byte> KeyData)
         {
             public enum AlgorithmKeyEnum
             {
                 TDES
             }
 
-            public LoadedKeyInfo(string KeyName,
-                                 AlgorithmKeyEnum Algorithm,
-                                 List<byte> KeyData)
-            {
-                this.KeyName = KeyName;
-                this.Algorithm = Algorithm;
-                this.KeyData = KeyData;
-            }
+            public string KeyName { get; init; } = KeyName;
 
-            public string KeyName { get; init; }
+            public List<byte> KeyData { get; init; } = KeyData;
 
-            public List<byte> KeyData { get; init; }
-
-            public AlgorithmKeyEnum Algorithm { get; init; }
+            public AlgorithmKeyEnum Algorithm { get; init; } = Algorithm;
         }
 
         private bool StoreKeys(Dictionary<string, LoadedKeyInfo> obj)
@@ -1091,21 +1089,22 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
                     if (cryptoServiceProvider.GetKeyDetail(keyName) is null)
                     {
-                        cryptoServiceProvider.AddKey(keyName,
-                                                     cryptoServiceProvider.FindKeySlot(keyName),
-                                                     "S0",
-                                                     "R",
-                                                     keyName switch
-                                                     {
-                                                        Constants.EPPVendorKeyName =>"V",
-                                                        _ => "T"
-                                                     },
-                                                     rsaServiceProvider.KeySize,
-                                                     KeyDetail.KeyStatusEnum.Loaded,
-                                                     true,
-                                                     string.Empty,
-                                                     "00",
-                                                     "S");
+                        cryptoServiceProvider.AddKey(
+                            keyName,
+                            cryptoServiceProvider.FindKeySlot(keyName),
+                            "S0",
+                            "R",
+                            keyName switch
+                            {
+                            Constants.EPPVendorKeyName =>"V",
+                            _ => "T"
+                            },
+                            rsaServiceProvider.KeySize,
+                            KeyDetail.KeyStatusEnum.Loaded,
+                            true,
+                            string.Empty,
+                            "00",
+                            "S");
                     }
                 }
 
@@ -1119,17 +1118,18 @@ namespace KAL.XFS4IoTSP.Encryptor.Sample
 
                 if (cryptoServiceProvider.GetKeyDetail(Constants.MasterKeyName) is null)
                 {
-                    cryptoServiceProvider.AddKey(Constants.MasterKeyName,
-                                                 cryptoServiceProvider.FindKeySlot(Constants.MasterKeyName),
-                                                 "K0",
-                                                 "T",
-                                                 "B",
-                                                 keyData.Count,
-                                                 KeyDetail.KeyStatusEnum.Loaded,
-                                                 true,
-                                                 string.Empty,
-                                                 "00",
-                                                 "S");
+                    cryptoServiceProvider.AddKey(
+                        Constants.MasterKeyName,
+                        cryptoServiceProvider.FindKeySlot(Constants.MasterKeyName),
+                        "K0",
+                        "T",
+                        "B",
+                        keyData.Count,
+                        KeyDetail.KeyStatusEnum.Loaded,
+                        true,
+                        string.Empty,
+                        "00",
+                        "S");
                 }
 
                 serviceInitialized = true;

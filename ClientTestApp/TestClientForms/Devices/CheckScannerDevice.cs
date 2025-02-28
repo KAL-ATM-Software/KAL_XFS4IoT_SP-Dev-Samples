@@ -132,6 +132,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -154,7 +158,7 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GetTransactionStatusCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new GetTransactionStatusCommand(RequestId.NewID(), new GetTransactionStatusCommand.PayloadData(true), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -242,6 +246,14 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                }
+                else if (cmdResponse is StorageChangedEvent storageChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, storageChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -301,6 +313,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StatusChangedEvent statusChangedEv)
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }
@@ -395,6 +411,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -459,6 +479,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -522,6 +546,10 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
                 }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
                 { }
                 else
@@ -576,6 +604,10 @@ namespace TestClientForms.Devices
                 else if (cmdResponse is StatusChangedEvent statusChangedEv)
                 {
                     base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is CountsChangedEvent countChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, countChangedEv.Serialise());
                 }
                 else if (cmdResponse is Acknowledge)
                 { }

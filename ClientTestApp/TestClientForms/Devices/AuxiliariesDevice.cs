@@ -25,7 +25,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery(new InterfaceClass.NameEnum[] { InterfaceClass.NameEnum.Auxiliaries, InterfaceClass.NameEnum.Lights, InterfaceClass.NameEnum.Common });
+            => DoServiceDiscovery([InterfaceClass.NameEnum.Auxiliaries, InterfaceClass.NameEnum.Lights, InterfaceClass.NameEnum.Common]);
 
 
         public async Task Register()
@@ -57,12 +57,11 @@ namespace TestClientForms.Devices
             } while (!completed);
         }
 
-        public async Task SetAutoStartupTime(DateTime time, XFS4IoT.Auxiliaries.Commands.SetAutoStartUpTimeCommand.PayloadData.ModeEnum mode)
+        public async Task SetAutoStartupTime(DateTime time, XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum mode)
         {
             var device = await GetConnection();
 
-            var cmd = new SetAutoStartUpTimeCommand(RequestId.NewID(), new SetAutoStartUpTimeCommand.PayloadData(mode, new(time.Year, time.Month, time.DayOfWeek switch
-            {
+            var cmd = new SetAutoStartupTimeCommand(RequestId.NewID(), new SetAutoStartupTimeCommand.PayloadData(mode, new(time.Year, time.Month, time.DayOfWeek switch {
                 DayOfWeek.Monday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Monday,
                 DayOfWeek.Tuesday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Tuesday,
                 DayOfWeek.Wednesday => XFS4IoT.Auxiliaries.SystemTimeClass.DayOfWeekEnum.Wednesday,
@@ -85,7 +84,7 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is SetAutoStartUpTimeCompletion response)
+                if (cmdResponse is SetAutoStartupTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
@@ -101,7 +100,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new ClearAutoStartUpTimeCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new ClearAutoStartupTimeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -114,7 +113,7 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is ClearAutoStartUpTimeCompletion response)
+                if (cmdResponse is ClearAutoStartupTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
@@ -130,7 +129,7 @@ namespace TestClientForms.Devices
         {
             var device = await GetConnection();
 
-            var cmd = new GetAutoStartUpTimeCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new GetAutoStartupTimeCommand(RequestId.NewID(), CommandTimeout);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
@@ -143,7 +142,7 @@ namespace TestClientForms.Devices
             do
             {
                 object cmdResponse = await device.ReceiveMessageAsync();
-                if (cmdResponse is GetAutoStartUpTimeCompletion response)
+                if (cmdResponse is GetAutoStartupTimeCompletion response)
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;

@@ -61,46 +61,46 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(CashRecyclerSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.Inactive,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotEnforced);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.Inactive,
+                CommonStatusClass.EndToEndSecurityEnum.NotEnforced);
 
-            CashAcceptorStatus = new CashAcceptorStatusClass(CashAcceptorStatusClass.IntermediateStackerEnum.Empty,
-                                                             CashAcceptorStatusClass.StackerItemsEnum.NoItems,
-                                                             CashAcceptorStatusClass.BanknoteReaderEnum.Ok,
-                                                             false,
-                                                             new()
-                                                               {
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.InCenter,  positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.InDefault, positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.OutCenter, positionStatus },
-                                                                   { CashManagementCapabilitiesClass.PositionEnum.OutDefault,positionStatus },
-                                                             });
+            CashAcceptorStatus = new CashAcceptorStatusClass(
+                CashAcceptorStatusClass.IntermediateStackerEnum.Empty,
+                CashAcceptorStatusClass.StackerItemsEnum.NoItems,
+                CashAcceptorStatusClass.BanknoteReaderEnum.Ok,
+                false,
+                new()
+                {
+                    { CashManagementCapabilitiesClass.PositionEnum.InCenter,  positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.InDefault, positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.OutCenter, positionStatus },
+                    { CashManagementCapabilitiesClass.PositionEnum.OutDefault,positionStatus },
+                });
 
-            CashDispenserStatus = new CashDispenserStatusClass(CashDispenserStatusClass.IntermediateStackerEnum.Empty,
-                                                               new()
-                                                               {
-                                                                   { CashManagementCapabilitiesClass.OutputPositionEnum.Center, positionStatus },
-                                                                   { CashManagementCapabilitiesClass.OutputPositionEnum.Default, positionStatus },
-                                                               });
+            CashDispenserStatus = new CashDispenserStatusClass(
+                CashDispenserStatusClass.IntermediateStackerEnum.Empty,
+                new()
+                {
+                    { CashManagementCapabilitiesClass.OutputPositionEnum.Center, positionStatus },
+                    { CashManagementCapabilitiesClass.OutputPositionEnum.Default, positionStatus },
+                });
 
-            CashManagementStatus = new CashManagementStatusClass(CashManagementStatusClass.DispenserEnum.Ok,
-                                                                 CashManagementStatusClass.AcceptorEnum.NotSupported);
+            CashManagementStatus = new CashManagementStatusClass(
+                CashManagementStatusClass.DispenserEnum.Ok,
+                CashManagementStatusClass.AcceptorEnum.NotSupported);
 
             Firmware = KAL.XFS4IoTSP.CashDispenser.Sample.Firmware.GetFirmware(new FirmwareLogger(Logger));
         }
 
-        internal class FirmwareLogger : KAL.XFS4IoTSP.CashDispenser.Sample.ILogger
+        internal class FirmwareLogger(XFS4IoT.ILogger Logger) : KAL.XFS4IoTSP.CashDispenser.Sample.ILogger
         {
-            private readonly XFS4IoT.ILogger Logger;
+            private readonly XFS4IoT.ILogger Logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
 
-            public FirmwareLogger(XFS4IoT.ILogger Logger)
-            {
-                this.Logger = Logger ?? throw new ArgumentNullException(nameof(Logger));
-            }
             public override void Log(string Message) => this.Logger.Log("Firmware", Message);
         }
 
@@ -183,14 +183,16 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
                 }
                 else
                 {
-                    StorageCashOutCountClass stacked = new();
-                    stacked.Stacked = new StorageCashCountClass(0, new Dictionary<string, CashItemCountClass>()
+                    StorageCashOutCountClass stacked = new()
                     {
+                        Stacked = new StorageCashCountClass(0, new Dictionary<string, CashItemCountClass>()
                         {
-                            noteId,
-                            new CashItemCountClass(item.Value, 0, 0, 0, 0)
-                        }
-                    });
+                            {
+                                noteId,
+                                new CashItemCountClass(item.Value, 0, 0, 0, 0)
+                            }
+                        })
+                    };
 
                     LastDispenseResult.Add(item.Key, new CashUnitCountClass(stacked, null, -1 * stacked.Stacked.Total));
                 }
@@ -249,13 +251,15 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
             positionStatus.PositionStatus = CashManagementStatusClass.PositionStatusEnum.Empty;
             positionStatus.Shutter = CashManagementStatusClass.ShutterEnum.Closed;
 
-            Dictionary<string, CashUnitCountClass> cashMovement = new();
-            StorageCashInCountClass cashInCount = new();
-            cashInCount.Rejected = new StorageCashCountClass(3, new()
+            Dictionary<string, CashUnitCountClass> cashMovement = [];
+            StorageCashInCountClass cashInCount = new()
             {
-                { "typeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
-                { "typeEUR20", new CashItemCountClass(2, 0, 0, 0, 0) }
-            });
+                Rejected = new StorageCashCountClass(3, new()
+                {
+                    { "typeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
+                    { "typeEUR20", new CashItemCountClass(2, 0, 0, 0, 0) }
+                })
+            };
             cashMovement.Add("unit1", new CashUnitCountClass(null, cashInCount, cashInCount.Rejected.Total));
 
             LastDispenseResult.Clear();
@@ -278,21 +282,25 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
             // If it is reject cassette, dispense one item from each cash unit
             // In the end update count and status of tested cash units and the reject cassette 
 
-            Dictionary<string, CashUnitCountClass> cashMovement = new();
-            StorageCashInCountClass cashInCount = new();
-            cashInCount.Rejected = new StorageCashCountClass(0, new()
+            Dictionary<string, CashUnitCountClass> cashMovement = [];
+            StorageCashInCountClass cashInCount = new()
             {
-                { "typeEUR5", new CashItemCountClass(1, 0, 0, 0, 0) },
-                { "tupeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
-                { "typeEUR20", new CashItemCountClass(1, 0, 0, 0, 0) }
-            });
-            StorageCashOutCountClass cashOutCount = new();
-            cashOutCount.Rejected = new StorageCashCountClass(0, new()
+                Rejected = new StorageCashCountClass(0, new()
+                {
+                    { "typeEUR5", new CashItemCountClass(1, 0, 0, 0, 0) },
+                    { "tupeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
+                    { "typeEUR20", new CashItemCountClass(1, 0, 0, 0, 0) }
+                })
+            };
+            StorageCashOutCountClass cashOutCount = new()
             {
-                { "typeEUR5", new CashItemCountClass(1, 0, 0, 0, 0) },
-                { "typeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
-                { "typeEUR20", new CashItemCountClass(1, 0, 0, 0, 0) }
-            });
+                Rejected = new StorageCashCountClass(0, new()
+                {
+                    { "typeEUR5", new CashItemCountClass(1, 0, 0, 0, 0) },
+                    { "typeEUR10", new CashItemCountClass(1, 0, 0, 0, 0) },
+                    { "typeEUR20", new CashItemCountClass(1, 0, 0, 0, 0) }
+                })
+            };
             cashMovement.Add("PH2", new CashUnitCountClass(cashOutCount, cashInCount, cashOutCount.Rejected.Total));
 
             return new TestCashUnitsResult(MessageHeader.CompletionCodeEnum.Success, cashMovement);
@@ -307,7 +315,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         {
             await Task.Delay(1000, cancellation);
 
-            Dictionary<string, CashUnitCountClass> cashMovement = new();
+            Dictionary<string, CashUnitCountClass> cashMovement = [];
             StorageCashOutCountClass cashOutCount = new();
             if (countInfo.StorageUnitIds is not null)
             {
@@ -503,7 +511,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
 
             await Task.Delay(100, cancellation);
 
-            Dictionary<string, CashItemCountClass> identified = new();
+            Dictionary<string, CashItemCountClass> identified = [];
             if (AcceptedItems?.Count > 0)
             {
                 identified.Add("typeEUR50", new CashItemCountClass(1, 0, 0, 0 , 0));
@@ -534,10 +542,11 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.NotEmpty;
             CashAcceptorStatus.StackerItems = CashAcceptorStatusClass.StackerItemsEnum.NoCustomerAccess;
 
-            return new CashInResult(MessageHeader.CompletionCodeEnum.Success,
-                                    identified,
-                                    null,
-                                    0);
+            return new CashInResult(
+                MessageHeader.CompletionCodeEnum.Success,
+                identified,
+                null,
+                0);
         }
 
         /// <summary>
@@ -567,13 +576,15 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
 
             await Task.Delay(1000, cancellation);
 
-            Dictionary<string, CashUnitCountClass> cashMovement = new();
+            Dictionary<string, CashUnitCountClass> cashMovement = [];
 
             foreach (var item in AcceptedItems)
             {
                 StorageCashInCountClass cashInCount = new();
-                Dictionary<string, CashItemCountClass> itemCount = new();
-                itemCount.Add(item.Key, item.Value);
+                Dictionary<string, CashItemCountClass> itemCount = new()
+                {
+                    { item.Key, item.Value }
+                };
                 cashInCount.Deposited = new StorageCashCountClass(0, itemCount);
                 bool foundDestination = false;
                 foreach (var unit in CashRecyclerService.CashUnits)
@@ -981,13 +992,17 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
                                          RetractCompletion.PayloadData.ErrorCodeEnum.NoItems);
             }
 
-            Dictionary<string, CashUnitCountClass> cashMovement = new();
-            StorageCashInCountClass cashInCount = new();
-            cashInCount.Retracted = new StorageCashCountClass(3, new() 
-                                                                 { 
-                                                                    { "typeEUR5",  new CashItemCountClass(1, 0, 0, 0, 0) },
-                                                                    { "typeEUR20", new CashItemCountClass(3, 0, 0, 0, 0) } 
-                                                                 });
+            Dictionary<string, CashUnitCountClass> cashMovement = [];
+            StorageCashInCountClass cashInCount = new()
+            {
+                Retracted = new StorageCashCountClass(
+                    3, 
+                    new()
+                    {
+                        { "typeEUR5",  new CashItemCountClass(1, 0, 0, 0, 0) },
+                        { "typeEUR20", new CashItemCountClass(3, 0, 0, 0, 0) }
+                    })
+            };
             cashMovement.Add("unit2", new CashUnitCountClass(null, cashInCount, cashInCount.Retracted.Total));
 
             CashAcceptorStatus.IntermediateStacker = CashAcceptorStatusClass.IntermediateStackerEnum.Empty;
@@ -1107,138 +1122,159 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         {
             if (CashUnitInfo.Count == 0)
             {
-                CashStorageInfo reject = new(new("REJ",
-                                                 "PHP1",
-                                                 2000,
-                                                 "sn90376878-0209",
-                                                 new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.Reject | CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
-                                                                           CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                           CashCapabilitiesClass.ItemsEnum.Unrecognized |
-                                                                           CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                           true,
-                                                                           1,
-                                                                           new List<string>(AllBanknoteIDs.Keys)),
-                                                 new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.Reject,
-                                                                            CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                            CashCapabilitiesClass.ItemsEnum.Unrecognized |
-                                                                            CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                            "",
-                                                                            0,
-                                                                            1900,
-                                                                            50,
-                                                                            false,
-                                                                            false,
-                                                                            new List<string>(AllBanknoteIDs.Keys)),
-                                                 new CashUnitAdditionalInfoClass(1, false)));
+                CashStorageInfo reject = 
+                    new(
+                        new(
+                            "REJ",
+                            "PHP1",
+                            2000,
+                            "sn90376878-0209",
+                            new CashCapabilitiesClass(
+                                CashCapabilitiesClass.TypesEnum.Reject | CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unrecognized |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                true,
+                                1,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashConfigurationClass(
+                                CashCapabilitiesClass.TypesEnum.Reject,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unrecognized |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                "",
+                                0,
+                                1900,
+                                50,
+                                false,
+                                false,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashUnitAdditionalInfoClass(1, false)));
 
                 CashUnitInfo.Add("unit1", reject);
 
-                CashStorageInfo retract = new(new("RET",
-                                                  "PHP2",
-                                                  2000,
-                                                  "sn90376878-0228",
-                                                  new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
-                                                                            CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                            CashCapabilitiesClass.ItemsEnum.Unrecognized |
-                                                                            CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                            true,
-                                                                            1,
-                                                                            new List<string>(AllBanknoteIDs.Keys)),
-                                                  new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
-                                                                             CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                             CashCapabilitiesClass.ItemsEnum.Unrecognized |
-                                                                             CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                             "",
-                                                                             0,
-                                                                             1900,
-                                                                             50,
-                                                                             false,
-                                                                             false,
-                                                                             new List<string>(AllBanknoteIDs.Keys)),
-                                                  new CashUnitAdditionalInfoClass(2, false)));
+                CashStorageInfo retract = 
+                    new(
+                        new(
+                            "RET",
+                            "PHP2",
+                            2000,
+                            "sn90376878-0228",
+                            new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unrecognized |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                true,
+                                1,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashConfigurationClass(
+                                CashCapabilitiesClass.TypesEnum.CashOutRetract | CashCapabilitiesClass.TypesEnum.CashInRetract,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unrecognized |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                "",
+                                0,
+                                1900,
+                                50,
+                                false,
+                                false,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashUnitAdditionalInfoClass(2, false)));
 
                 CashUnitInfo.Add("unit2", retract);
 
-                CashStorageInfo eur5 = new(new("LOG1",
-                                               "PHP3",
-                                               1500,
-                                               "sn90376878-0228",
-                                               new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                         CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                         CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                         true,
-                                                                         0,
-                                                                         new List<string>(AllBanknoteIDs.Keys)),
-                                               new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                          CashCapabilitiesClass.ItemsEnum.Fit,
-                                                                          "EUR",
-                                                                          5.0,
-                                                                          1400,
-                                                                          50,
-                                                                          false,
-                                                                          false,
-                                                                          new()
-                                                                          {
-                                                                              "typeEUR5"
-                                                                          }),
-                                               new CashUnitAdditionalInfoClass(3, false)));
+                CashStorageInfo eur5 = 
+                    new(
+                        new(
+                            "LOG1",
+                            "PHP3",
+                            1500,
+                            "sn90376878-0228",
+                            new CashCapabilitiesClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                true,
+                                0,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashConfigurationClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit,
+                                "EUR",
+                                5.0,
+                                1400,
+                                50,
+                                false,
+                                false,
+                                [
+                                    "typeEUR5"
+                                ]),
+                            new CashUnitAdditionalInfoClass(3, false)));
 
                 CashUnitInfo.Add("unit3", eur5);
 
-                CashStorageInfo eur10 = new(new("LOG2",
-                                                "PHP4",
-                                                1500,
-                                                "sn90376878-0229",
-                                                new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                          CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                          CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                          true,
-                                                                          0,
-                                                                          new List<string>(AllBanknoteIDs.Keys)),
-                                                new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                           CashCapabilitiesClass.ItemsEnum.Fit,
-                                                                           "EUR",
-                                                                           10.0,
-                                                                           1400,
-                                                                           50,
-                                                                           false,
-                                                                           false,
-                                                                           new()
-                                                                           {
-                                                                               "typeEUR10"
-                                                                           }),
-                                                new CashUnitAdditionalInfoClass(4, false)));
+                CashStorageInfo eur10 = 
+                    new(
+                        new(
+                            "LOG2",
+                            "PHP4",
+                            1500,
+                            "sn90376878-0229",
+                            new CashCapabilitiesClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                true,
+                                0,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashConfigurationClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit,
+                                "EUR",
+                                10.0,
+                                1400,
+                                50,
+                                false,
+                                false,
+                                [
+                                    "typeEUR10"
+                                ]),
+                            new CashUnitAdditionalInfoClass(4, false)));
 
                 CashUnitInfo.Add("unit4", eur10);
 
-                CashStorageInfo eur20 = new(new("LOG3",
-                                                "PHP5",
-                                                1500,
-                                                "sn90376878-0230",
-                                                new CashCapabilitiesClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                          CashCapabilitiesClass.ItemsEnum.Fit |
-                                                                          CashCapabilitiesClass.ItemsEnum.Unfit,
-                                                                          true,
-                                                                          0,
-                                                                          new List<string>(AllBanknoteIDs.Keys)),
-                                                new CashConfigurationClass(CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
-                                                                           CashCapabilitiesClass.ItemsEnum.Fit,
-                                                                           "EUR",
-                                                                           20.0,
-                                                                           1400,
-                                                                           50,
-                                                                           false,
-                                                                           false,
-                                                                           new()
-                                                                           {
-                                                                               "typeEUR20"
-                                                                           }),
-                                                new CashUnitAdditionalInfoClass(5, false)));
+                CashStorageInfo eur20 = 
+                    new(
+                        new(
+                            "LOG3",
+                            "PHP5",
+                            1500,
+                            "sn90376878-0230",
+                            new CashCapabilitiesClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit |
+                                CashCapabilitiesClass.ItemsEnum.Unfit,
+                                true,
+                                0,
+                                [.. AllBanknoteIDs.Keys]),
+                            new CashConfigurationClass(
+                                CashCapabilitiesClass.TypesEnum.CashIn | CashCapabilitiesClass.TypesEnum.CashOut,
+                                CashCapabilitiesClass.ItemsEnum.Fit,
+                                "EUR",
+                                20.0,
+                                1400,
+                                50,
+                                false,
+                                false,
+                                [
+                                    "typeEUR20"
+                                ]),
+                            new CashUnitAdditionalInfoClass(5, false)));
 
                 CashUnitInfo.Add("unit5", eur20);
             }
 
-            newCashUnits = new();
+            newCashUnits = [];
             foreach (var unit in CashUnitInfo)
             {
                 newCashUnits.Add(unit.Key, unit.Value.CashUnitStorageConfig);
@@ -1252,7 +1288,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         /// <returns>Return true if the device class maintained counts, otherwise false</returns>
         public bool GetCashUnitCounts(out Dictionary<string, CashUnitCountClass> unitCounts)
         {
-            unitCounts = new();
+            unitCounts = [];
             foreach (var unit in CashUnitInfo)
             {
                 unitCounts.Add(unit.Key, unit.Value.UnitCount);
@@ -1277,7 +1313,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
         public bool GetCashStorageStatus(out Dictionary<string, CashUnitStorage.StatusEnum> storageStatus)
         {
-            storageStatus = new();
+            storageStatus = [];
             foreach (var unit in CashUnitInfo)
             {
                 storageStatus.Add(unit.Key, unit.Value.StorageStatus);
@@ -1292,7 +1328,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
         public bool GetCashUnitStatus(out Dictionary<string, CashStatusClass.ReplenishmentStatusEnum> unitStatus)
         {
-            unitStatus = new();
+            unitStatus = [];
             foreach (var unit in CashUnitInfo)
             {
                 unitStatus.Add(unit.Key, unit.Value.UnitStatus);
@@ -1477,6 +1513,44 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
         public Task<SetCheckStorageResult> SetCheckStorageAsync(SetCheckStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashRecycler service provider doesn't support check related operations.");
 
+        /// <summary>
+        /// Return printer storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetPrinterStorageConfiguration(out Dictionary<string, PrinterUnitStorageConfiguration> newPrinterUnits) => throw new NotSupportedException($"The CashRecycler service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetPrinterUnitCounts(out Dictionary<string, PrinterUnitCount> unitCounts) => throw new NotSupportedException($"The CashRecycler service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer storage status (retract bin, passbook storage).
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterStorageStatus(out Dictionary<string, PrinterUnitStorage.StatusEnum> storageStatus) => throw new NotSupportedException($"The CashRecycler service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return printer unit status (retract bin, passbook storage) maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class uses hardware status, otherwise false</returns>
+        public bool GetPrinterUnitStatus(out Dictionary<string, XFS4IoTFramework.Storage.PrinterStatusClass.ReplenishmentStatusEnum> unitStatus) => throw new NotSupportedException($"The CashRecycler service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for printer storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetPrinterStorageAsync(SetPrinterStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashRecycler service provider doesn't support printer related operations.");
+
+        /// <summary>
+        /// Return IBNS storage (retract bin, passbook storage) information for current configuration and capabilities on the startup.
+        /// Status object is a reference to report status changes.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CashRecycler service provider doesn't support IBNS related operations.");
+
+
         #endregion
 
         #region Common Interface
@@ -1583,27 +1657,27 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
                         CommonCapabilitiesClass.StorageInterfaceClass.EventEnum.StorageErrorEvent,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
@@ -1620,8 +1694,10 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         {
             string nonce = Firmware.GetCommandNonce();
 
-            return Task.FromResult(new GetCommandNonceResult(MessageHeader.CompletionCodeEnum.Success,
-                                                             nonce));
+            return Task.FromResult(
+                new GetCommandNonceResult(
+                    MessageHeader.CompletionCodeEnum.Success,
+                    nonce));
         }
         public Task<DeviceResult> ClearCommandNonce()
         {

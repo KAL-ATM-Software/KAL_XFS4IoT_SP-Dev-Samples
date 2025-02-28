@@ -43,16 +43,18 @@ namespace TextTerminalSample
             Logger.IsNotNull($"Invalid parameter received in the {nameof(TextTerminalSample)} constructor. {nameof(Logger)}");
             this.Logger = Logger;
 
-            CommonStatus = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+            CommonStatus = new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
-            TextTerminalStatus = new TextTerminalStatusClass(TextTerminalStatusClass.KeyboardEnum.Off,
-                                                             TextTerminalStatusClass.KeyLockEnum.NotAvailable,
-                                                             0, 0);
+            TextTerminalStatus = new TextTerminalStatusClass(
+                TextTerminalStatusClass.KeyboardEnum.Off,
+                TextTerminalStatusClass.KeyLockEnum.NotAvailable,
+                0, 0);
         }
 
         /// <summary>
@@ -78,25 +80,26 @@ namespace TextTerminalSample
         /// </summary>
         public KeyDetails GetKeyDetail()
         {
-            return new KeyDetails(Keys: new()
-                                    { "zero", "one", "two", "three",
-                                      "four", "five", "six", "seven",
-                                      "eight", "nine", 
-                                    },
-                                  CommandKeys: new()
-                                    {
-                                      { "enter", true },
-                                      { "cancel", true },
-                                      { "clear", false },
-                                      { "fdk01", false },
-                                      { "fdk02", false },
-                                      { "fdk03", false },
-                                      { "fdk04", false },
-                                      { "fdk05", false },
-                                      { "fdk06", false },
-                                      { "fdk07", false },
-                                      { "fdk08", false }
-                                    });
+            return new KeyDetails(
+                Keys:
+                [ "zero", "one", "two", "three",
+                    "four", "five", "six", "seven",
+                    "eight", "nine", 
+                ],
+                CommandKeys: new()
+                {
+                    { "enter", true },
+                    { "cancel", true },
+                    { "clear", false },
+                    { "fdk01", false },
+                    { "fdk02", false },
+                    { "fdk03", false },
+                    { "fdk04", false },
+                    { "fdk05", false },
+                    { "fdk06", false },
+                    { "fdk07", false },
+                    { "fdk08", false }
+                });
         }
 
         /// <summary>
@@ -147,7 +150,7 @@ namespace TextTerminalSample
         public async Task<ReadResult> ReadAsync(ReadCommandEvents events, ReadRequest readInfo, CancellationToken cancellation)
         {
             TextTerminalUI.SetReading(true);
-            StringBuilder buffer = new StringBuilder(readInfo.NumChars);
+            StringBuilder buffer = new(readInfo.NumChars);
 
             for (; buffer.Length < readInfo.NumChars || !readInfo.AutoEnd;)
             {
@@ -238,8 +241,7 @@ namespace TextTerminalSample
         /// </summary>
         public TextTerminalCapabilitiesClass TextTerminalCapabilities { get; set; } = new TextTerminalCapabilitiesClass(
             Type: TextTerminalCapabilitiesClass.TypeEnum.Fixed,
-            Resolutions: new()
-            { new(32, 16), new(16, 16) },
+            Resolutions: [new(32, 16), new(16, 16)],
             KeyLock: false,
             Cursor: true,
             Forms: false
@@ -288,27 +290,27 @@ namespace TextTerminalSample
                         CommonCapabilitiesClass.TextTerminalInterfaceClass.EventEnum.KeyEvent,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
+                            Firmware:
+                            [
                                 new CommonCapabilitiesClass.FirmwareClass(
                                         FirmwareName: "XFS4 SP",
                                         FirmwareVersion: "1.0",
                                         HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
+                            ],
+                            Software:
+                            [
                                 new CommonCapabilitiesClass.SoftwareClass(
                                         SoftwareName: "XFS4 SP",
                                         SoftwareVersion: "1.0")
-                            })
-                },
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 

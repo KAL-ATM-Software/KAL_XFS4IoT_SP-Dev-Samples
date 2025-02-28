@@ -16,7 +16,6 @@ using XFS4IoTFramework.Auxiliaries;
 using XFS4IoTFramework.Common;
 using XFS4IoTFramework.Lights;
 using XFS4IoTServer;
-using static XFS4IoT.Completions.MessagePayload;
 
 namespace KAL.XFS4IoTSP.Auxiliaries.Sample
 {
@@ -35,9 +34,17 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; }
 
-        public AuxiliariesCapabilitiesClass AuxiliariesCapabilities { get; set; } = new AuxiliariesCapabilitiesClass(HandsetSensor: AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Manual | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Microphone | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Auto | AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.SemiAuto,
-                                                                                                           AutoStartupMode: AuxiliariesCapabilitiesClass.AutoStartupModes.Daily | AuxiliariesCapabilitiesClass.AutoStartupModes.Weekly | AuxiliariesCapabilitiesClass.AutoStartupModes.Specific,
-                                                                                                           AuxiliariesSupported: AuxiliariesCapabilitiesClass.AuxiliariesSupportedEnum.Heating);
+        public AuxiliariesCapabilitiesClass AuxiliariesCapabilities { get; set; } = 
+            new AuxiliariesCapabilitiesClass(
+                HandsetSensor: AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Manual | 
+                               AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Microphone | 
+                               AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.Auto | 
+                               AuxiliariesCapabilitiesClass.HandsetSensorCapabilities.SemiAuto,
+                AutoStartupMode: AuxiliariesCapabilitiesClass.AutoStartupModes.Daily | 
+                                 AuxiliariesCapabilitiesClass.AutoStartupModes.Weekly | 
+                                 AuxiliariesCapabilitiesClass.AutoStartupModes.Specific,
+                AuxiliariesSupported: AuxiliariesCapabilitiesClass.AuxiliariesSupportedEnum.Heating);
+
         public AuxiliariesStatusClass AuxiliariesStatus { get; set; } = new AuxiliariesStatusClass(HandsetSensor: AuxiliariesStatusClass.HandsetSensorStatusEnum.OffTheHook, Heating: AuxiliariesStatusClass.SensorEnum.Off);
         private ILogger Logger { get; }
 
@@ -83,17 +90,19 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
 
             sendStatusChangedEventSignal.Release();
 
-            return Task.FromResult(new DeviceResult(CompletionCodeEnum.Success));
+            return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
         #region Common Interface
 
-        public CommonStatusClass CommonStatus { get; set; } = new CommonStatusClass(CommonStatusClass.DeviceEnum.Online,
-                                                 CommonStatusClass.PositionStatusEnum.InPosition,
-                                                 0,
-                                                 CommonStatusClass.AntiFraudModuleEnum.NotSupported,
-                                                 CommonStatusClass.ExchangeEnum.NotSupported,
-                                                 CommonStatusClass.EndToEndSecurityEnum.NotSupported);
+        public CommonStatusClass CommonStatus { get; set; } = 
+            new CommonStatusClass(
+                CommonStatusClass.DeviceEnum.Online,
+                CommonStatusClass.PositionStatusEnum.InPosition,
+                0,
+                CommonStatusClass.AntiFraudModuleEnum.NotSupported,
+                CommonStatusClass.ExchangeEnum.NotSupported,
+                CommonStatusClass.EndToEndSecurityEnum.NotSupported);
 
         public CommonCapabilitiesClass CommonCapabilities { get; set; } = new CommonCapabilitiesClass(
                 CommonInterface: new CommonCapabilitiesClass.CommonInterfaceClass
@@ -127,27 +136,27 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
                         CommonCapabilitiesClass.LightsInterfaceClass.CommandEnum.SetLight,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
-                    new CommonCapabilitiesClass.DeviceInformationClass(
-                            ModelName: "Simulator",
-                            SerialNumber: "123456-78900001",
-                            RevisionNumber: "1.0",
-                            ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
-                                new CommonCapabilitiesClass.FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
-                                new CommonCapabilitiesClass.SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            })
-                },
+                DeviceInformation:
+                [
+                    new(
+                        ModelName: "Simulator",
+                        SerialNumber: "123456-78900001",
+                        RevisionNumber: "1.0",
+                        ModelDescription: "KAL simualtor",
+                        Firmware:
+                        [
+                            new CommonCapabilitiesClass.FirmwareClass(
+                                    FirmwareName: "XFS4 SP",
+                                    FirmwareVersion: "1.0",
+                                    HardwareRevision: "1.0")
+                        ],
+                        Software:
+                        [
+                            new CommonCapabilitiesClass.SoftwareClass(
+                                    SoftwareName: "XFS4 SP",
+                                    SoftwareVersion: "1.0")
+                        ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false);
 
@@ -172,10 +181,10 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
 
             if (!request.StdLights.ContainsKey(LightsCapabilitiesClass.DeviceEnum.CardReader))
             {
-                return new SetLightResult(CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLights.Keys}");
+                return new SetLightResult(MessageHeader.CompletionCodeEnum.InvalidData, $"Unsupported light received. {request.StdLights.Keys}");
             }
             LightsStatus.Status[LightsCapabilitiesClass.DeviceEnum.CardReader] = new(LightsStatusClass.LightOperation.PositionEnum.Center, request.StdLights[LightsCapabilitiesClass.DeviceEnum.CardReader].FlashRate, LightsStatusClass.LightOperation.ColourEnum.Default, LightsStatusClass.LightOperation.DirectionEnum.None);
-            return new SetLightResult(CompletionCodeEnum.Success);
+            return new SetLightResult(MessageHeader.CompletionCodeEnum.Success);
         }
 
         /// <summary>
