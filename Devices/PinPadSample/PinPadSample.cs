@@ -3,8 +3,6 @@
  * KAL ATM Software GmbH licenses this file to you under the MIT license.
  * See the LICENSE file in the project root for more information.
 \***********************************************************************************************/
-#pragma warning disable CA1416 // Validate platform compatibility, only works for windows
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -156,7 +154,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             while (PinPadUI.KeyPressChannel.Reader.TryRead(out _)) ;
 
             int keysPressed = 0;
-            List<DataEntryResult.EnteredKey> keys = new();
+            List<DataEntryResult.EnteredKey> keys = [];
             EntryCompletionEnum? EntryCompletion = null;
             while (keysPressed < keyMax || !request.AutoEnd)
             {
@@ -247,7 +245,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             return new SecureKeyEntryResult(MessageHeader.CompletionCodeEnum.Success,
                                             request.KeyLen,
                                             request.AutoEnd ? EntryCompletionEnum.Auto : EntryCompletionEnum.Enter,
-                                            new() { 0x76, 0xf6, 0x3e });
+                                            [0x76, 0xf6, 0x3e]);
         }
 
         /// <summary>
@@ -357,7 +355,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(100, cancellation);
             return new PINBlockResult(MessageHeader.CompletionCodeEnum.Success,
-                                      PINBlock: new() { 0x37, 0x0f, 0xa6, 0x85, 0x72, 0x3d, 0xcc, 0xb5 });
+                                      PINBlock: [0x37, 0x0f, 0xa6, 0x85, 0x72, 0x3d, 0xcc, 0xb5]);
         }
 
         /// <summary>
@@ -371,7 +369,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             await Task.Delay(100, cancellation);
             return new PresentIDCResult(MessageHeader.CompletionCodeEnum.Success,
                                         request.ChipProtocol,
-                                        new List<byte>() { 0x90, 0x00 });
+                                        [0x90, 0x00]);
         }
 
         /// <summary>
@@ -410,7 +408,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
             {
                 Mode = CipherMode.ECB,
-                Key = keyData.ToArray()
+                Key = [.. keyData]
             };
 
             List<byte> keyCheckValue = null;
@@ -486,7 +484,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
             {
                 Mode = CipherMode.ECB,
-                Key = keyData.ToArray()
+                Key = [.. keyData]
             };
 
             List<byte> keyCheckValue = null;
@@ -566,7 +564,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
             {
                 Mode = CipherMode.ECB,
-                Key = request.KeyData.ToArray()
+                Key = [.. request.KeyData]
             };
 
             if (request.VerifyAttribute is null)
@@ -582,7 +580,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 else
                 {
                     verifyAttrib = new ImportKeyResult.VerifyAttributeClass("00", "R", "V", ImportKeyRequest.VerifyAttributeClass.VerifyMethodEnum.RSASSA_PSS, ImportKeyRequest.VerifyAttributeClass.HashAlgorithmEnum.SHA256);
-                    keyCheckValue = new SHA256CryptoServiceProvider().ComputeHash(request.KeyData.ToArray()).ToList();
+                    keyCheckValue = [.. new SHA256CryptoServiceProvider().ComputeHash(request.KeyData.ToArray())];
                     keyLength = 2048;
                 }
 
@@ -681,7 +679,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
             {
                 Mode = CipherMode.ECB,
-                Key = keys[request.KeyName].KeyData.ToArray()
+                Key = [.. keys[request.KeyName].KeyData]
             };
             byte[] checkKey = tDESEncrypt.Key;
             if (request.KVCMode == GenerateKCVRequest.KeyCheckValueEnum.Zero)
@@ -790,7 +788,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         {
             await Task.Delay(100, cancellation);
 
-            List<byte> eppID = Encoding.ASCII.GetBytes(Constants.EPPUID).ToList();
+            List<byte> eppID = [.. Encoding.ASCII.GetBytes(Constants.EPPUID)];
 
             // Sign ID with EPP private key
             RSACryptoServiceProvider rsaServiceProvider = new(new CspParameters()
@@ -816,8 +814,8 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 KeyContainerName = Constants.EPPVendorKeyName
             });
 
-            List<byte> publicKey = rsaServiceProvider.ExportRSAPublicKey().ToList();
-            List<byte> signed = rsaServiceProvider.SignHash(publicKey.ToArray(), CryptoConfig.MapNameToOID("SHA256")).ToList();
+            List<byte> publicKey = [.. rsaServiceProvider.ExportRSAPublicKey()];
+            List<byte> signed = [.. rsaServiceProvider.SignHash(publicKey.ToArray(), CryptoConfig.MapNameToOID("SHA256"))];
 
             return new RSASignedItemResult(MessageHeader.CompletionCodeEnum.Success, 
                                            Data: publicKey, 
@@ -888,8 +886,8 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             await Task.Delay(200, cancellation);
 
-            List<byte> certificate = new()
-            {
+            List<byte> certificate =
+            [
                 0x30, 0x82, 0x03, 0x6C, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x02, 0xA0, 
                 0x82, 0x03, 0x5D, 0x30, 0x82, 0x03, 0x59, 0x02, 0x01, 0x01, 0x31, 0x00, 0x30, 0x0F, 0x06, 0x09, 
                 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x07, 0x01, 0xA0, 0x02, 0x04, 0x00, 0xA0, 0x82, 0x03, 
@@ -945,7 +943,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 0x87, 0x05, 0x77, 0xB7, 0xF7, 0x52, 0xDC, 0x47, 0x9B, 0x29, 0xD5, 0x01, 0x21, 0x39, 0x1C, 0xCF, 
                 0xCA, 0x81, 0x78, 0xC8, 0x6B, 0x1A, 0xAD, 0x76, 0x9B, 0x58, 0x4E, 0x68, 0x17, 0xE1, 0x62, 0xB0, 
                 0x5A, 0x31, 0x19, 0x30, 0xF8, 0xA4, 0xF1, 0xDD, 0xD7, 0x52, 0x74, 0x20, 0xD7, 0xB1, 0x31, 0x00
-            };
+            ];
 
             return new ExportCertificateResult(MessageHeader.CompletionCodeEnum.Success,
                                                certificate);
@@ -1167,7 +1165,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                 TripleDES tDESEncrypt = new TripleDESCryptoServiceProvider
                 {
                     Mode = CipherMode.ECB,
-                    Key = keysLoaded[request.KeyName].KeyData.ToArray()
+                    Key = [.. keysLoaded[request.KeyName].KeyData]
                 };
                 ICryptoTransform transForm = tDESEncrypt.CreateEncryptor();
                 MemoryStream memStream = new();
@@ -1218,7 +1216,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             }
 
             return new GenerateAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success,
-                                                        rsaServiceProvider.SignHash(request.Data.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1).ToList());
+                                                        [.. rsaServiceProvider.SignHash(request.Data.ToArray(), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)]);
         }
 
         /// This command can be used for Message Authentication Code generation (i.e. macing).
@@ -1265,7 +1263,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                                           VerifyAuthenticationCompletion.PayloadData.ErrorCodeEnum.KeyNotFound);
             }
 
-            bool verified = rsaServiceProvider.VerifyData(request.Data.ToArray(), HashAlgorithmName.SHA256, request.VerificationData.ToArray());
+            bool verified = rsaServiceProvider.VerifyData([.. request.Data], HashAlgorithmName.SHA256, request.VerificationData.ToArray());
 
             return verified ? new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.Success) :
                               new VerifyAuthenticationDataResult(MessageHeader.CompletionCodeEnum.CommandErrorCode,
@@ -1299,7 +1297,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                                                 ErrorDescription: $"SHA1 is not supported.");
             }
             return new GenerateDigestResult(MessageHeader.CompletionCodeEnum.Success,
-                                            new SHA256CryptoServiceProvider().ComputeHash(request.DataToHash.ToArray()).ToList());
+                                            [.. new SHA256CryptoServiceProvider().ComputeHash(request.DataToHash.ToArray())]);
         }
 
         /// <summary>
@@ -1342,7 +1340,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
 
             for (; ; )
             {
-                await initializedSignal?.WaitAsync();
+                await initializedSignal?.WaitAsync(cancel);
                 await pinPadServiceProvider.InitializedEvent();
             }
         }
@@ -1440,27 +1438,25 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
                         CommonCapabilitiesClass.KeyboardInterfaceClass.EventEnum.LayoutEvent,
                     ]
                 ),
-                DeviceInformation: new List<CommonCapabilitiesClass.DeviceInformationClass>()
-                {
+                DeviceInformation:
+                [
                     new CommonCapabilitiesClass.DeviceInformationClass(
                             ModelName: "Simulator",
                             SerialNumber: "123456-78900001",
                             RevisionNumber: "1.0",
                             ModelDescription: "KAL simualtor",
-                            Firmware: new List<CommonCapabilitiesClass.FirmwareClass>()
-                            {
-                                new CommonCapabilitiesClass.FirmwareClass(
-                                        FirmwareName: "XFS4 SP",
-                                        FirmwareVersion: "1.0",
-                                        HardwareRevision: "1.0")
-                            },
-                            Software: new List<CommonCapabilitiesClass.SoftwareClass>()
-                            {
-                                new CommonCapabilitiesClass.SoftwareClass(
-                                        SoftwareName: "XFS4 SP",
-                                        SoftwareVersion: "1.0")
-                            })
-                },
+                            Firmware:
+                            [
+                                new(FirmwareName: "XFS4 SP",
+                                    FirmwareVersion: "1.0",
+                                    HardwareRevision: "1.0")
+                            ],
+                            Software:
+                            [
+                                new(SoftwareName: "XFS4 SP",
+                                    SoftwareVersion: "1.0")
+                            ])
+                ],
                 PowerSaveControl: false,
                 AntiFraudModule: false,
                 EndToEndSecurity: new CommonCapabilitiesClass.EndToEndSecurityClass
@@ -1544,7 +1540,7 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
             catch (Exception ex)
             {
                 Logger.Warning(nameof(PinPadSample), $"Exception caught on reading persistent data. {Constants.PERSIT}, {ex.Message}");
-                return new Dictionary<string, LoadedKeyInfo>();
+                return [];
             }
 
             Dictionary<string, LoadedKeyInfo> value;
@@ -1616,8 +1612,8 @@ namespace KAL.XFS4IoTSP.PinPad.Sample
         private bool serviceInitialized = false;
         private PinPadUI PinPadUI;
 
-        private XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum encryptionState = XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum.NotInitialized;
-        private XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum certState = XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Primary;
+        private readonly XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum encryptionState = XFS4IoT.KeyManagement.StatusClass.EncryptionStateEnum.NotInitialized;
+        private readonly XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum certState = XFS4IoT.KeyManagement.StatusClass.CertificateStateEnum.Primary;
 
         private readonly Dictionary<EntryModeEnum, List<FrameClass>> keyLayouts = new()
         {

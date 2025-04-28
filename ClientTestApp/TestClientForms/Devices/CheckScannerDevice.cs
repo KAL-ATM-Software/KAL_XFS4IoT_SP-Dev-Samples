@@ -53,13 +53,26 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
-
+            await client.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
-           
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is GetStorageCompletion response)
+
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case GetStorageCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -159,15 +172,26 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetTransactionStatusCommand(RequestId.NewID(), new GetTransactionStatusCommand.PayloadData(true), CommandTimeout);
-
+            await client.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is GetTransactionStatusCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-
-                GetTransactionStatusPayload = response.Payload;
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case GetTransactionStatusCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 

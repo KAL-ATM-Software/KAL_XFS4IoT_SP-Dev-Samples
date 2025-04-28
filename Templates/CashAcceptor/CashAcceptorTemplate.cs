@@ -721,6 +721,23 @@ namespace CashAcceptor.CashAcceptorTemplate
         /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
         public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support IBNS related operations.");
 
+        /// <summary>
+        /// Return deposit storage (box or bag) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetDepositStorageConfiguration(out Dictionary<string, DepositUnitStorageConfiguration> newDepositUnits) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Return deposit storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetDepositUnitInfo(out Dictionary<string, DepositUnitInfo> unitCounts) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for deposit storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetDepositStorageAsync(SetDepositStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashAcceptor service provider doesn't support deposit related operations.");
 
         /// <summary>
         /// Start cash unit exchange operation
@@ -879,40 +896,32 @@ namespace CashAcceptor.CashAcceptorTemplate
         public Task<DeviceResult> ClearCommandNonce() => throw new NotImplementedException();
         #endregion
 
-        private CashManagementStatusClass.PositionStatusClass positionStatus = new(CashManagementStatusClass.ShutterEnum.Closed,
-                                                                                   CashManagementStatusClass.PositionStatusEnum.Empty,
-                                                                                   CashManagementStatusClass.TransportEnum.Ok,
-                                                                                   CashManagementStatusClass.TransportStatusEnum.Empty);
+        private readonly CashManagementStatusClass.PositionStatusClass positionStatus = new(
+            CashManagementStatusClass.ShutterEnum.Closed,
+            CashManagementStatusClass.PositionStatusEnum.Empty,
+            CashManagementStatusClass.TransportEnum.Ok,
+            CashManagementStatusClass.TransportStatusEnum.Empty);
          
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
         private CashAcceptorServiceProvider CashAcceptorService { get; set; } = null;
 
-        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; } = new();
+        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; } = [];
 
         // Holding identified and accepted note types and counts
-        private Dictionary<string, CashItemCountClass> AcceptedItems { get;  } = new();
+        private Dictionary<string, CashItemCountClass> AcceptedItems { get;  } = [];
 
-        private sealed class CashStorageInfo
+        private sealed class CashStorageInfo(CashUnitStorageConfiguration CashUnitStorageConfig)
         {
-            public CashStorageInfo(CashUnitStorageConfiguration CashUnitStorageConfig)
-            {
-                StorageStatus = CashUnitStorage.StatusEnum.Good;
-                UnitStatus = CashStatusClass.ReplenishmentStatusEnum.Healthy;
-                UnitCount = new CashUnitCountClass(StorageCashOutCount: null, StorageCashInCount: new(), 0);
-                this.CashUnitStorageConfig = CashUnitStorageConfig;
-                Accuracy = CashUnitStorageConfig.CashUnitAdditionalInfo.AccuracySupported ? CashStatusClass.AccuracyEnum.Unknown : CashStatusClass.AccuracyEnum.NotSupported;
-            }
+            public CashUnitStorage.StatusEnum StorageStatus { get; set; } = CashUnitStorage.StatusEnum.Good;
 
-            public CashUnitStorage.StatusEnum StorageStatus { get; set; }
-            
-            public CashStatusClass.ReplenishmentStatusEnum UnitStatus { get; set; }
+            public CashStatusClass.ReplenishmentStatusEnum UnitStatus { get; set; } = CashStatusClass.ReplenishmentStatusEnum.Healthy;
 
-            public CashUnitCountClass UnitCount { get; init; }
+            public CashUnitCountClass UnitCount { get; init; } = new CashUnitCountClass(StorageCashOutCount: null, StorageCashInCount: new(), 0);
 
-            public CashUnitStorageConfiguration CashUnitStorageConfig { get; init; }
+            public CashUnitStorageConfiguration CashUnitStorageConfig { get; init; } = CashUnitStorageConfig;
 
-            public CashStatusClass.AccuracyEnum Accuracy { get; set; }
+            public CashStatusClass.AccuracyEnum Accuracy { get; set; } = CashUnitStorageConfig.CashUnitAdditionalInfo.AccuracySupported ? CashStatusClass.AccuracyEnum.Unknown : CashStatusClass.AccuracyEnum.NotSupported;
         }
 
         private static readonly Dictionary<string, CashManagementCapabilitiesClass.BanknoteItem> AllBanknoteIDs = new()

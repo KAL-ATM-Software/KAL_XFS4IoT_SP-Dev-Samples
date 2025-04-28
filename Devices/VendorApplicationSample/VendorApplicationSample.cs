@@ -94,7 +94,7 @@ namespace KAL.XFS4IoTSP.VendorApplication.Sample
 
             for (; ; )
             {
-                await appStartedSignal.WaitAsync();
+                await appStartedSignal.WaitAsync(cancel);
                 await process.WaitForExitAsync();
                 await vendorAppServiceProvider.IsNotNull().VendorAppExitedEvent();
             }

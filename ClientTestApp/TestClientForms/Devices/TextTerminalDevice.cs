@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using XFS4IoT;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Events;
+using XFS4IoT.Lights.Completions;
 using XFS4IoT.TextTerminal.Commands;
 using XFS4IoT.TextTerminal.Completions;
 
@@ -41,17 +42,24 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var clearScreenCmd = new ClearScreenCommand(RequestId.NewID(), new ClearScreenCommand.PayloadData(), CommandTimeout);
+            var cmd = new ClearScreenCommand(RequestId.NewID(), new ClearScreenCommand.PayloadData(), CommandTimeout);
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, clearScreenCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, clearScreenCmd);
-            if (cmdResponse is ClearScreenCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await textTerminal.ReceiveMessageAsync())
+                {
+                    case ClearScreenCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -68,24 +76,34 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var writeCmd = new WriteCommand(RequestId.NewID(), new WriteCommand.PayloadData(
-                                                                                            XFS4IoT.TextTerminal.ModesEnum.Absolute,
-                                                                                            0,
-                                                                                            0,
-                                                                                            new(),
-                                                                                            "This is some sample text.\nWhich is output on\r\nmultiple lines\n\rthrough newline characters.\rAny text which overflows the current device width will be output on the next available line."),
-                                                                                            CommandTimeout);
+            var cmd = new WriteCommand(
+                RequestId.NewID(), 
+                new WriteCommand.PayloadData(
+                    XFS4IoT.TextTerminal.ModesEnum.Absolute,
+                    0,
+                    0,
+                    new(),
+                    "This is some sample text.\nWhich is output on\r\nmultiple lines\n\rthrough newline characters.\rAny text which overflows the current device width will be output on the next available line."),
+                CommandTimeout);
 
-            base.OnXFS4IoTMessages(this, writeCmd.Serialise());
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, writeCmd);
-            if (cmdResponse is WriteCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await textTerminal.ReceiveMessageAsync())
+                {
+                    case WriteCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
         public async Task Read()
         {
@@ -100,46 +118,43 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var writeCmd = new ReadCommand(RequestId.NewID(), new ReadCommand.PayloadData(5,
-                                                                                          XFS4IoT.TextTerminal.ModesEnum.Absolute,
-                                                                                          0,
-                                                                                          0,
-                                                                                          ReadCommand.PayloadData.EchoModeEnum.Text,
-                                                                                          new ReadCommand.PayloadData.EchoAttrClass(false, false, false),
-                                                                                          false,
-                                                                                          false,
-                                                                                          true,
-                                                                                          new() { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero" },
-                                                                                          new() { { "enter", new(true) }, { "cancel", new(true) }, { "clear", new(false) }, { "fdk01", new(false) }, { "fdk02", new(false) }, { "fdk03", new(false) }, { "fdk04", new(false) }, { "fdk05", new(false) }, { "fdk06", new(false) }, { "fdk07", new(false) }, { "fdk08", new(false) }, }),
-                                                                                          CommandTimeout);
+            var cmd = new ReadCommand(
+                RequestId.NewID(), 
+                new ReadCommand.PayloadData(
+                    5,
+                    XFS4IoT.TextTerminal.ModesEnum.Absolute,
+                    0,
+                    0,
+                    ReadCommand.PayloadData.EchoModeEnum.Text,
+                    new ReadCommand.PayloadData.EchoAttrClass(false, false, false),
+                    false,
+                    false,
+                    true,
+                    ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "zero"],
+                    new() { { "enter", new(true) }, { "cancel", new(true) }, { "clear", new(false) }, { "fdk01", new(false) }, { "fdk02", new(false) }, { "fdk03", new(false) }, { "fdk04", new(false) }, { "fdk05", new(false) }, { "fdk06", new(false) }, { "fdk07", new(false) }, { "fdk08", new(false) }, }),
+                CommandTimeout);
 
-            base.OnXFS4IoTMessages(this, writeCmd.Serialise());
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            await textTerminal.SendCommandAsync(writeCmd);
-
-            
-            
-
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
-
-            while(cmdResponse is not ReadCompletion)
+            while (true)
             {
-                if(cmdResponse is XFS4IoT.TextTerminal.Events.KeyEvent evt)
+                switch (await textTerminal.ReceiveMessageAsync())
                 {
-                    base.OnXFS4IoTMessages(this, evt.Serialise());
+                    case ReadCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case XFS4IoT.TextTerminal.Events.KeyEvent keyEvent:
+                        base.OnXFS4IoTMessages(this, keyEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
                 }
-                else if (cmdResponse is StatusChangedEvent statusChangedEv)
-                {
-                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
-                }
-                else if (cmdResponse is Acknowledge)
-                { }
-                cmdResponse = await textTerminal.ReceiveMessageAsync();
             }
-            if (cmdResponse is ReadCompletion response)
-            {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
         }
 
         public async Task GetKeyDetail()
@@ -155,18 +170,25 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var keyDetailCmd = new GetKeyDetailCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new GetKeyDetailCommand(RequestId.NewID(), CommandTimeout);
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, keyDetailCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, keyDetailCmd);
-            if (cmdResponse is GetKeyDetailCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await textTerminal.ReceiveMessageAsync())
+                {
+                    case GetKeyDetailCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task Beep()
@@ -182,18 +204,25 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var beepCmd = new BeepCommand(RequestId.NewID(), new BeepCommand.PayloadData(new(null, BeepCommand.PayloadData.BeepClass.BeepTypeEnum.Exclamation)), CommandTimeout);
+            var cmd = new BeepCommand(RequestId.NewID(), new BeepCommand.PayloadData(new(null, BeepCommand.PayloadData.BeepClass.BeepTypeEnum.Exclamation)), CommandTimeout);
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, beepCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, beepCmd);
-            if (cmdResponse is BeepCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await textTerminal.ReceiveMessageAsync())
+                {
+                    case BeepCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task Reset()
@@ -209,28 +238,25 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var resetCmd = new ResetCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new ResetCommand(RequestId.NewID(), CommandTimeout);
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, resetCmd.Serialise());
-
-            await textTerminal.SendCommandAsync(resetCmd);
-
-            object cmdResponse = await textTerminal.ReceiveMessageAsync();
-
-            while (cmdResponse is not ResetCompletion)
+            while (true)
             {
-                if (cmdResponse is StatusChangedEvent statusChangedEv)
+                switch (await textTerminal.ReceiveMessageAsync())
                 {
-                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                    case ResetCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
                 }
-                else if (cmdResponse is Acknowledge)
-                { }
-                cmdResponse = await textTerminal.ReceiveMessageAsync();
             }
-            if (cmdResponse is ResetCompletion response)
-            {
-                base.OnXFS4IoTMessages(this, response.Serialise());
-            }            
         }
 
         public async Task SetResolution()
@@ -246,18 +272,25 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var setResolutionCmd = new SetResolutionCommand(RequestId.NewID(), new SetResolutionCommand.PayloadData(new(16, 16)), CommandTimeout);
+            var cmd = new SetResolutionCommand(RequestId.NewID(), new SetResolutionCommand.PayloadData(new(16, 16)), CommandTimeout);
+            await textTerminal.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, setResolutionCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(textTerminal, setResolutionCmd);
-            if (cmdResponse is SetResolutionCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await textTerminal.ReceiveMessageAsync())
+                {
+                    case SetResolutionCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
     }
 }

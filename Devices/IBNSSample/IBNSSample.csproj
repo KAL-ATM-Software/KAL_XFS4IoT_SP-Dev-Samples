@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>XFS4IoT.SP.IBNS</AssemblyName>
+    <RootNamespace>KAL.XFS4IoTSP.IBNS.Sample</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.BanknoteNeutralization" Version="3.1.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Storage" Version="3.1.0" />
+  </ItemGroup>
+
+</Project>

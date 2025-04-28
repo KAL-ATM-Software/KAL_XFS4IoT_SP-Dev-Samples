@@ -211,6 +211,7 @@ namespace TestClientForms
             label37 = new System.Windows.Forms.Label();
             label38 = new System.Windows.Forms.Label();
             lightsTab = new System.Windows.Forms.TabPage();
+            comboLightDevice = new System.Windows.Forms.ComboBox();
             lightsTreeView = new System.Windows.Forms.TreeView();
             lightsRawBox = new System.Windows.Forms.TextBox();
             LightsServiceDiscovery = new System.Windows.Forms.Button();
@@ -401,7 +402,25 @@ namespace TestClientForms
             CheckScannerURI = new System.Windows.Forms.TextBox();
             label86 = new System.Windows.Forms.Label();
             label87 = new System.Windows.Forms.Label();
-            comboLightDevice = new System.Windows.Forms.ComboBox();
+            tabPage1 = new System.Windows.Forms.TabPage();
+            GetIBNSUnitInfo = new System.Windows.Forms.Button();
+            comboSetProtection = new System.Windows.Forms.ComboBox();
+            ibnsTreeView = new System.Windows.Forms.TreeView();
+            ibnsRawBox = new System.Windows.Forms.TextBox();
+            IBNSSetProtection = new System.Windows.Forms.Button();
+            label89 = new System.Windows.Forms.Label();
+            StIBNS = new System.Windows.Forms.TextBox();
+            IBNSCapabilities = new System.Windows.Forms.Button();
+            IBNSStatus = new System.Windows.Forms.Button();
+            IBNSServiceURI = new System.Windows.Forms.TextBox();
+            IBNSServiceDiscovery = new System.Windows.Forms.Button();
+            IBNSPortNum = new System.Windows.Forms.TextBox();
+            label90 = new System.Windows.Forms.Label();
+            IBNSURI = new System.Windows.Forms.TextBox();
+            label91 = new System.Windows.Forms.Label();
+            label92 = new System.Windows.Forms.Label();
+            IBNSTriggerNeutralization = new System.Windows.Forms.Button();
+            comboTriggerNeutralization = new System.Windows.Forms.ComboBox();
             testClientTabControl.SuspendLayout();
             CardReaderTab.SuspendLayout();
             DispenserTab.SuspendLayout();
@@ -418,6 +437,7 @@ namespace TestClientForms
             CashAccTabPage.SuspendLayout();
             CamTabPage.SuspendLayout();
             CheckTabPage.SuspendLayout();
+            tabPage1.SuspendLayout();
             SuspendLayout();
             // 
             // AcceptCard
@@ -646,6 +666,7 @@ namespace TestClientForms
             testClientTabControl.Controls.Add(CashAccTabPage);
             testClientTabControl.Controls.Add(CamTabPage);
             testClientTabControl.Controls.Add(CheckTabPage);
+            testClientTabControl.Controls.Add(tabPage1);
             testClientTabControl.Location = new System.Drawing.Point(8, 3);
             testClientTabControl.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             testClientTabControl.Name = "testClientTabControl";
@@ -2401,6 +2422,14 @@ namespace TestClientForms
             lightsTab.TabIndex = 6;
             lightsTab.Text = "Lights";
             lightsTab.UseVisualStyleBackColor = true;
+            // 
+            // comboLightDevice
+            // 
+            comboLightDevice.FormattingEnabled = true;
+            comboLightDevice.Location = new System.Drawing.Point(1178, 12);
+            comboLightDevice.Name = "comboLightDevice";
+            comboLightDevice.Size = new System.Drawing.Size(121, 28);
+            comboLightDevice.TabIndex = 138;
             // 
             // lightsTreeView
             // 
@@ -4449,13 +4478,206 @@ namespace TestClientForms
             label87.TabIndex = 83;
             label87.Text = "Service URI";
             // 
-            // comboLightDevice
+            // tabPage1
             // 
-            comboLightDevice.FormattingEnabled = true;
-            comboLightDevice.Location = new System.Drawing.Point(1178, 12);
-            comboLightDevice.Name = "comboLightDevice";
-            comboLightDevice.Size = new System.Drawing.Size(121, 28);
-            comboLightDevice.TabIndex = 138;
+            tabPage1.Controls.Add(comboTriggerNeutralization);
+            tabPage1.Controls.Add(IBNSTriggerNeutralization);
+            tabPage1.Controls.Add(GetIBNSUnitInfo);
+            tabPage1.Controls.Add(comboSetProtection);
+            tabPage1.Controls.Add(ibnsTreeView);
+            tabPage1.Controls.Add(ibnsRawBox);
+            tabPage1.Controls.Add(IBNSSetProtection);
+            tabPage1.Controls.Add(label89);
+            tabPage1.Controls.Add(StIBNS);
+            tabPage1.Controls.Add(IBNSCapabilities);
+            tabPage1.Controls.Add(IBNSStatus);
+            tabPage1.Controls.Add(IBNSServiceURI);
+            tabPage1.Controls.Add(IBNSServiceDiscovery);
+            tabPage1.Controls.Add(IBNSPortNum);
+            tabPage1.Controls.Add(label90);
+            tabPage1.Controls.Add(IBNSURI);
+            tabPage1.Controls.Add(label91);
+            tabPage1.Controls.Add(label92);
+            tabPage1.Location = new System.Drawing.Point(4, 29);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            tabPage1.Size = new System.Drawing.Size(1346, 691);
+            tabPage1.TabIndex = 15;
+            tabPage1.Text = "IBNS";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // GetIBNSUnitInfo
+            // 
+            GetIBNSUnitInfo.Location = new System.Drawing.Point(931, 99);
+            GetIBNSUnitInfo.Margin = new System.Windows.Forms.Padding(0);
+            GetIBNSUnitInfo.Name = "GetIBNSUnitInfo";
+            GetIBNSUnitInfo.Size = new System.Drawing.Size(134, 29);
+            GetIBNSUnitInfo.TabIndex = 120;
+            GetIBNSUnitInfo.Text = "GetIBNSUnitInfo";
+            GetIBNSUnitInfo.UseVisualStyleBackColor = true;
+            GetIBNSUnitInfo.Click += GetIBNSUnitInfo_Click;
+            // 
+            // comboSetProtection
+            // 
+            comboSetProtection.FormattingEnabled = true;
+            comboSetProtection.Location = new System.Drawing.Point(809, 143);
+            comboSetProtection.Name = "comboSetProtection";
+            comboSetProtection.Size = new System.Drawing.Size(106, 28);
+            comboSetProtection.TabIndex = 119;
+            // 
+            // ibnsTreeView
+            // 
+            ibnsTreeView.Location = new System.Drawing.Point(23, 273);
+            ibnsTreeView.Name = "ibnsTreeView";
+            ibnsTreeView.Size = new System.Drawing.Size(892, 405);
+            ibnsTreeView.TabIndex = 118;
+            // 
+            // ibnsRawBox
+            // 
+            ibnsRawBox.Location = new System.Drawing.Point(931, 273);
+            ibnsRawBox.Multiline = true;
+            ibnsRawBox.Name = "ibnsRawBox";
+            ibnsRawBox.ReadOnly = true;
+            ibnsRawBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            ibnsRawBox.Size = new System.Drawing.Size(407, 405);
+            ibnsRawBox.TabIndex = 117;
+            // 
+            // IBNSSetProtection
+            // 
+            IBNSSetProtection.Location = new System.Drawing.Point(931, 143);
+            IBNSSetProtection.Margin = new System.Windows.Forms.Padding(0);
+            IBNSSetProtection.Name = "IBNSSetProtection";
+            IBNSSetProtection.Size = new System.Drawing.Size(134, 29);
+            IBNSSetProtection.TabIndex = 116;
+            IBNSSetProtection.Text = "Set Protection";
+            IBNSSetProtection.UseVisualStyleBackColor = true;
+            IBNSSetProtection.Click += IBNSSetProtection_Click;
+            // 
+            // label89
+            // 
+            label89.AutoSize = true;
+            label89.Location = new System.Drawing.Point(691, 18);
+            label89.Margin = new System.Windows.Forms.Padding(0);
+            label89.Name = "label89";
+            label89.Size = new System.Drawing.Size(96, 20);
+            label89.TabIndex = 110;
+            label89.Text = "Device status";
+            // 
+            // StIBNS
+            // 
+            StIBNS.Location = new System.Drawing.Point(794, 15);
+            StIBNS.Margin = new System.Windows.Forms.Padding(0);
+            StIBNS.Name = "StIBNS";
+            StIBNS.ReadOnly = true;
+            StIBNS.Size = new System.Drawing.Size(121, 27);
+            StIBNS.TabIndex = 113;
+            // 
+            // IBNSCapabilities
+            // 
+            IBNSCapabilities.Location = new System.Drawing.Point(930, 55);
+            IBNSCapabilities.Margin = new System.Windows.Forms.Padding(0);
+            IBNSCapabilities.Name = "IBNSCapabilities";
+            IBNSCapabilities.Size = new System.Drawing.Size(103, 29);
+            IBNSCapabilities.TabIndex = 112;
+            IBNSCapabilities.Text = "Capabilities";
+            IBNSCapabilities.UseVisualStyleBackColor = true;
+            IBNSCapabilities.Click += IBNSCapabilities_Click;
+            // 
+            // IBNSStatus
+            // 
+            IBNSStatus.Location = new System.Drawing.Point(930, 14);
+            IBNSStatus.Margin = new System.Windows.Forms.Padding(0);
+            IBNSStatus.Name = "IBNSStatus";
+            IBNSStatus.Size = new System.Drawing.Size(103, 29);
+            IBNSStatus.TabIndex = 111;
+            IBNSStatus.Text = "Status";
+            IBNSStatus.UseVisualStyleBackColor = true;
+            IBNSStatus.Click += IBNSStatus_Click;
+            // 
+            // IBNSServiceURI
+            // 
+            IBNSServiceURI.Location = new System.Drawing.Point(119, 23);
+            IBNSServiceURI.Margin = new System.Windows.Forms.Padding(0);
+            IBNSServiceURI.Name = "IBNSServiceURI";
+            IBNSServiceURI.Size = new System.Drawing.Size(530, 27);
+            IBNSServiceURI.TabIndex = 108;
+            // 
+            // IBNSServiceDiscovery
+            // 
+            IBNSServiceDiscovery.Location = new System.Drawing.Point(506, 134);
+            IBNSServiceDiscovery.Margin = new System.Windows.Forms.Padding(0);
+            IBNSServiceDiscovery.Name = "IBNSServiceDiscovery";
+            IBNSServiceDiscovery.Size = new System.Drawing.Size(133, 31);
+            IBNSServiceDiscovery.TabIndex = 103;
+            IBNSServiceDiscovery.Text = "Service Discovery";
+            IBNSServiceDiscovery.UseVisualStyleBackColor = true;
+            IBNSServiceDiscovery.Click += IBNSServiceDiscovery_Click;
+            // 
+            // IBNSPortNum
+            // 
+            IBNSPortNum.Location = new System.Drawing.Point(119, 55);
+            IBNSPortNum.Margin = new System.Windows.Forms.Padding(0);
+            IBNSPortNum.Name = "IBNSPortNum";
+            IBNSPortNum.ReadOnly = true;
+            IBNSPortNum.Size = new System.Drawing.Size(121, 27);
+            IBNSPortNum.TabIndex = 104;
+            // 
+            // label90
+            // 
+            label90.AutoSize = true;
+            label90.Location = new System.Drawing.Point(9, 89);
+            label90.Margin = new System.Windows.Forms.Padding(0);
+            label90.Name = "label90";
+            label90.Size = new System.Drawing.Size(68, 20);
+            label90.TabIndex = 105;
+            label90.Text = "IBNS URI";
+            // 
+            // IBNSURI
+            // 
+            IBNSURI.Location = new System.Drawing.Point(119, 86);
+            IBNSURI.Margin = new System.Windows.Forms.Padding(0);
+            IBNSURI.Name = "IBNSURI";
+            IBNSURI.ReadOnly = true;
+            IBNSURI.Size = new System.Drawing.Size(530, 27);
+            IBNSURI.TabIndex = 106;
+            // 
+            // label91
+            // 
+            label91.AutoSize = true;
+            label91.Location = new System.Drawing.Point(11, 55);
+            label91.Margin = new System.Windows.Forms.Padding(0);
+            label91.Name = "label91";
+            label91.Size = new System.Drawing.Size(93, 20);
+            label91.TabIndex = 107;
+            label91.Text = "Port Number";
+            // 
+            // label92
+            // 
+            label92.AutoSize = true;
+            label92.Location = new System.Drawing.Point(11, 23);
+            label92.Margin = new System.Windows.Forms.Padding(0);
+            label92.Name = "label92";
+            label92.Size = new System.Drawing.Size(83, 20);
+            label92.TabIndex = 109;
+            label92.Text = "Service URI";
+            // 
+            // IBNSTriggerNeutralization
+            // 
+            IBNSTriggerNeutralization.Location = new System.Drawing.Point(931, 187);
+            IBNSTriggerNeutralization.Name = "IBNSTriggerNeutralization";
+            IBNSTriggerNeutralization.Size = new System.Drawing.Size(181, 29);
+            IBNSTriggerNeutralization.TabIndex = 121;
+            IBNSTriggerNeutralization.Text = "TriggerNeutralization";
+            IBNSTriggerNeutralization.UseVisualStyleBackColor = true;
+            IBNSTriggerNeutralization.Click += IBNSTriggerNeutralization_Click;
+            // 
+            // comboTriggerNeutralization
+            // 
+            comboTriggerNeutralization.FormattingEnabled = true;
+            comboTriggerNeutralization.Location = new System.Drawing.Point(811, 188);
+            comboTriggerNeutralization.Name = "comboTriggerNeutralization";
+            comboTriggerNeutralization.Size = new System.Drawing.Size(104, 28);
+            comboTriggerNeutralization.TabIndex = 122;
             // 
             // Form1
             // 
@@ -4502,6 +4724,8 @@ namespace TestClientForms
             CamTabPage.PerformLayout();
             CheckTabPage.ResumeLayout(false);
             CheckTabPage.PerformLayout();
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -4876,6 +5100,25 @@ namespace TestClientForms
         private System.Windows.Forms.Button buttonEMVClessQueryApplications;
         private System.Windows.Forms.Button PrinterSetMedia;
         private System.Windows.Forms.ComboBox comboLightDevice;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TreeView ibnsTreeView;
+        private System.Windows.Forms.TextBox ibnsRawBox;
+        private System.Windows.Forms.Button IBNSSetProtection;
+        private System.Windows.Forms.Label label89;
+        private System.Windows.Forms.TextBox StIBNS;
+        private System.Windows.Forms.Button IBNSCapabilities;
+        private System.Windows.Forms.Button IBNSStatus;
+        private System.Windows.Forms.TextBox IBNSServiceURI;
+        private System.Windows.Forms.Button IBNSServiceDiscovery;
+        private System.Windows.Forms.TextBox IBNSPortNum;
+        private System.Windows.Forms.Label label90;
+        private System.Windows.Forms.TextBox IBNSURI;
+        private System.Windows.Forms.Label label91;
+        private System.Windows.Forms.Label label92;
+        private System.Windows.Forms.ComboBox comboSetProtection;
+        private System.Windows.Forms.Button GetIBNSUnitInfo;
+        private System.Windows.Forms.ComboBox comboTriggerNeutralization;
+        private System.Windows.Forms.Button IBNSTriggerNeutralization;
     }
 }
 

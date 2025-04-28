@@ -42,7 +42,7 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
             for (; ;)
             {
                 // Check if presented cash is taken. When cash is taken, set output position empty, shutter closed and fire ItemsTakenEvent
-                await mediaTakenSignal?.WaitAsync();
+                await mediaTakenSignal?.WaitAsync(cancel);
                 if (positionStatus.PositionStatus != CheckScannerStatusClass.PositionStatusEnum.NotEmpty)
                     continue;
                 positionStatus.PositionStatus = CheckScannerStatusClass.PositionStatusEnum.Empty;
@@ -916,6 +916,24 @@ namespace KAL.XFS4IoTSP.CheckScanner.Sample
         /// </summary>
         /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
         public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The Check service provider doesn't support IBNS related operations.");
+
+        /// <summary>
+        /// Return deposit storage (box or bag) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetDepositStorageConfiguration(out Dictionary<string, DepositUnitStorageConfiguration> newDepositUnits) => throw new NotSupportedException($"The Check service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Return deposit storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetDepositUnitInfo(out Dictionary<string, DepositUnitInfo> unitCounts) => throw new NotSupportedException($"The Check service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for deposit storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetDepositStorageAsync(SetDepositStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The Check service provider doesn't support deposit related operations.");
 
 
         #endregion

@@ -18,6 +18,8 @@ using XFS4IoT.Crypto.Completions;
 using XFS4IoT;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Events;
+using XFS4IoT.Storage.Completions;
+using XFS4IoT.Storage.Events;
 
 namespace TestClientForms.Devices
 {
@@ -45,32 +47,27 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new InitializationCommand(RequestId.NewID(), null, CommandTimeout);
-
             base.OnXFS4IoTMessages(this, cmd.Serialise());
-
             await encryptor.SendCommandAsync(cmd);
 
-            bool completed = false;
-            do
+            while (true)
             {
-                object cmdResponse = await encryptor.ReceiveMessageAsync();
-                if (cmdResponse is InitializationCompletion response)
+                switch (await encryptor.ReceiveMessageAsync())
                 {
-                    base.OnXFS4IoTMessages(this,response.Serialise());
-                    completed = true;
+                    case InitializationCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case InitializedEvent initializedEvent:
+                        base.OnXFS4IoTMessages(this, initializedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
                 }
-                else if (cmdResponse is InitializedEvent eventResp)
-                { 
-                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
-                }
-                else if (cmdResponse is StatusChangedEvent statusChangedEv)
-                {
-                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
-                }
-                else if (cmdResponse is Acknowledge)
-                {
-                }
-            } while (!completed);
+            }
         }
 
         public async Task<GetKeyDetailCompletion> GetKeyNames()
@@ -87,19 +84,24 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetKeyDetailCommand(RequestId.NewID(), new GetKeyDetailCommand.PayloadData(), CommandTimeout);
-
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is GetKeyDetailCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case GetKeyDetailCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return response;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
-
-            return (GetKeyDetailCompletion)cmdResponse;
         }
 
         public async Task Reset()
@@ -116,34 +118,27 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new ResetCommand(RequestId.NewID(), CommandTimeout);
-
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            await encryptor.SendCommandAsync(cmd);
-
-            
-            
-       
-            bool completed = false;
-            do
+            while (true)
             {
-                object cmdResponse = await encryptor.ReceiveMessageAsync();
-                if (cmdResponse is ResetCompletion response)
+                switch (await encryptor.ReceiveMessageAsync())
                 {
-                    base.OnXFS4IoTMessages(this,response.Serialise());
-                    completed = true;
+                    case ResetCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case InitializedEvent initializedEvent:
+                        base.OnXFS4IoTMessages(this, initializedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
                 }
-                else if (cmdResponse is InitializedEvent eventResp)
-                { 
-                    base.OnXFS4IoTMessages(this, eventResp.Serialise());
-                }
-                else if (cmdResponse is StatusChangedEvent statusChangedEv)
-                {
-                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
-                }
-                else if (cmdResponse is Acknowledge)
-                { }
-            } while (!completed);
+            }
         }
 
         public async Task LoadKey(string keyName, string keyUsage, string modeOfUse, List<byte> data)
@@ -159,24 +154,34 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new ImportKeyCommand(RequestId.NewID(), new ImportKeyCommand.PayloadData( 
-                                                                                               keyName, 
-                                                                                               new ImportKeyCommand.PayloadData.KeyAttributesClass(keyUsage, "T", modeOfUse),
-                                                                                               Value:data,
-                                                                                               DecryptKey: "MASTERKEY",
-                                                                                               DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb),
-                                                                                               CommandTimeout);
+            var cmd = new ImportKeyCommand(
+                RequestId.NewID(), 
+                new ImportKeyCommand.PayloadData( 
+                    keyName, 
+                    new ImportKeyCommand.PayloadData.KeyAttributesClass(keyUsage, "T", modeOfUse),
+                    Value:data,
+                    DecryptKey: "MASTERKEY",
+                    DecryptMethod: ImportKeyCommand.PayloadData.DecryptMethodEnum.Ecb),
+                CommandTimeout);
 
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is ImportKeyCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case ImportKeyCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task GenerateMAC(string keyName, List<byte> data)
@@ -192,18 +197,28 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new GenerateAuthenticationCommand(RequestId.NewID(), new GenerateAuthenticationCommand.PayloadData(keyName, data), CommandTimeout);
-
+            var cmd = new GenerateAuthenticationCommand(
+                RequestId.NewID(), 
+                new GenerateAuthenticationCommand.PayloadData(keyName, data), 
+                CommandTimeout);
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is GenerateAuthenticationCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case GenerateAuthenticationCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task GenerateRandom()
@@ -220,17 +235,24 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GenerateRandomCommand(RequestId.NewID(), CommandTimeout);
-
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is GenerateRandomCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case GenerateRandomCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task Encrypt(string keyName, List<byte> Data)
@@ -246,22 +268,32 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CryptoDataCommand(RequestId.NewID(), new CryptoDataCommand.PayloadData(
-                                                                                                 Key: keyName,
-                                                                                                 Data: Data,
-                                                                                                 CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb),
-                                                                                                 CommandTimeout);
+            var cmd = new CryptoDataCommand(
+                RequestId.NewID(), 
+                new CryptoDataCommand.PayloadData(
+                    Key: keyName,
+                    Data: Data,
+                    CryptoMethod: CryptoDataCommand.PayloadData.CryptoMethodEnum.Ecb),
+                CommandTimeout);
 
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is CryptoDataCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case CryptoDataCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
 
         public async Task DeleteKey(string keyName)
@@ -277,18 +309,28 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new DeleteKeyCommand(RequestId.NewID(), new DeleteKeyCommand.PayloadData(Key: keyName), CommandTimeout);
-
+            var cmd = new DeleteKeyCommand(
+                RequestId.NewID(), 
+                new DeleteKeyCommand.PayloadData(Key: keyName), 
+                CommandTimeout);
+            await encryptor.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(encryptor, cmd);
-            if (cmdResponse is DeleteKeyCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
-            }            
+                switch (await encryptor.ReceiveMessageAsync())
+                {
+                    case DeleteKeyCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
+            }
         }
     }
 }

@@ -24,6 +24,8 @@ using XFS4IoT.Storage.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Events;
+using XFS4IoT.BanknoteNeutralization.Completions;
+using XFS4IoTServer;
 
 namespace TestClientForms.Devices
 {
@@ -51,15 +53,27 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
+            await client.SendCommandAsync(cmd);
 
             base.OnXFS4IoTMessages(this, cmd.Serialise());
-            
-            
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is GetStorageCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case GetStorageCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -188,15 +202,26 @@ namespace TestClientForms.Devices
             }
 
             var cmd = new GetCashInStatusCommand(RequestId.NewID(), CommandTimeout);
-
+            await client.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
-            
-            
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is GetCashInStatusCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case GetCashInStatusCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
         public async Task ConfigureBanknoteTypes()
@@ -225,15 +250,26 @@ namespace TestClientForms.Devices
                                                         new ConfigureNoteTypesCommand.PayloadData.ItemsClass("typeEUR500", true),
                                                     }), CommandTimeout);
 
+            await client.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is ConfigureNoteTypesCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case ConfigureNoteTypesCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -357,21 +393,35 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var cmd = new CashInStartCommand(RequestId.NewID(), new(
-                                                                           UseRecycleUnits: false, 
-                                                                           OutputPosition: OutputPositionEnum.OutDefault, 
-                                                                           InputPosition: InputPositionEnum.InDefault, 
-                                                                           TotalItemsLimit: 200),
-                                                                           CommandTimeout);
+            var cmd = new CashInStartCommand(
+                RequestId.NewID(), 
+                new(
+                    UseRecycleUnits: false,
+                    OutputPosition: OutputPositionEnum.OutDefault, 
+                    InputPosition: InputPositionEnum.InDefault, 
+                    TotalItemsLimit: 200),
+                    CommandTimeout);
 
+            await client.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
-            
-            
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(client, cmd);
-            if (cmdResponse is CashInStartCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await client.ReceiveMessageAsync())
+                {
+                    case CashInStartCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
         public async Task Reset()

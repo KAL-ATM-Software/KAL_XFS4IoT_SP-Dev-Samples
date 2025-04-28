@@ -214,6 +214,18 @@ namespace Server
                 simCheckDevice.SetServiceProvider = checkService;
                 Publisher.Add(checkService);
 
+                /// IBNS Service Provider
+                var simIBNSDevice = new KAL.XFS4IoTSP.IBNS.Sample.IBNSSample(Logger);
+                var ibnsService = new IBNSServiceProvider(
+                    EndpointDetails,
+                    ServiceName: "SimIBNS",
+                    simIBNSDevice,
+                    Logger,
+                    new FilePersistentData(Logger));
+
+                simIBNSDevice.SetServiceProvider = ibnsService;
+                Publisher.Add(ibnsService);
+
                 // TODO: adding other services
 
                 // CancellationSource object allows to restart service when it's signalled.

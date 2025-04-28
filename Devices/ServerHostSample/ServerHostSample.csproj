@@ -33,9 +33,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JsonSchema.Net" Version="7.3.3" />
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.0.0" />
-    <PackageReference Include="NJsonSchema" Version="11.1.0" />
+    <PackageReference Include="JsonSchema.Net" Version="7.3.4" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.1.0" />
+    <PackageReference Include="NJsonSchema" Version="11.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +49,7 @@
     <ProjectReference Include="..\CashDispenserSample\CashDispenserSample.csproj" />
     <ProjectReference Include="..\CheckScannerSample\CheckScannerSample.csproj" />
     <ProjectReference Include="..\EncryptorSample\EncryptorSample.csproj" />
+    <ProjectReference Include="..\IBNSSample\IBNSSample.csproj" />
     <ProjectReference Include="..\LightsSample\LightsSample.csproj" />
     <ProjectReference Include="..\PinPadSample\PinPadSample.csproj" />
     <ProjectReference Include="..\PrinterSample\PrinterSample.csproj" />

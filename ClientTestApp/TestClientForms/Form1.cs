@@ -46,6 +46,7 @@ namespace TestClientForms
             CashAcceptorServiceURI.Text = "ws://localhost";
             CameraServiceURI.Text = "ws://localhost";
             CheckScannerServiceURI.Text = "ws://localhost";
+            IBNSServiceURI.Text = "ws://localhost";
 
             CashDispenserDev = new("CashDispenser", DispenserServiceURI, DispenserPortNum, DispenserDispURI);
             TextTerminalDev = new("TextTerminal", TextTerminalServiceURI, TextTerminalPortNum, TextTerminalURI);
@@ -62,6 +63,7 @@ namespace TestClientForms
             CashAcceptorDev = new("CashAcceptor", CashAcceptorServiceURI, CashAcceptorPortNum, CashAcceptorAccURI);
             CameraDev = new("Camera", CameraServiceURI, CameraPortNum, CameraURI);
             CheckScannerDev = new("ChecKScanner", CheckScannerServiceURI, CheckScannerPortNum, CheckScannerURI);
+            IBNSDev = new("IBNS", IBNSServiceURI, IBNSPortNum, IBNSURI);
 
             LightsFlashRate.DataSource = Enum.GetValues(typeof(XFS4IoT.Lights.PositionStatusClass.FlashRateEnum));
             LightsFlashRate.SelectedItem = XFS4IoT.Lights.PositionStatusClass.FlashRateEnum.Continuous;
@@ -71,6 +73,13 @@ namespace TestClientForms
 
             comboAutoStartupModes.DataSource = Enum.GetValues(typeof(XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum));
             comboAutoStartupModes.SelectedItem = XFS4IoT.Auxiliaries.Commands.SetAutoStartupTimeCommand.PayloadData.ModeEnum.Specific;
+
+            comboSetProtection.DataSource = Enum.GetValues(typeof(XFS4IoT.BanknoteNeutralization.Commands.SetProtectionCommand.PayloadData.NewStateEnum));
+            comboSetProtection.SelectedItem = XFS4IoT.BanknoteNeutralization.Commands.SetProtectionCommand.PayloadData.NewStateEnum.Arm;
+
+
+            comboTriggerNeutralization.DataSource = Enum.GetValues(typeof(XFS4IoT.BanknoteNeutralization.Commands.TriggerNeutralizationCommand.PayloadData.NeutralizationActionEnum));
+            comboTriggerNeutralization.SelectedItem = XFS4IoT.BanknoteNeutralization.Commands.TriggerNeutralizationCommand.PayloadData.NeutralizationActionEnum.Trigger;
         }
 
 
@@ -90,6 +99,7 @@ namespace TestClientForms
         private CashAcceptorDevice CashAcceptorDev { get; init; }
         private CameraDevice CameraDev { get; init; }
         private CheckScannerDevice CheckScannerDev { get; init; }
+        private IBNSDevice IBNSDev { get; init; }
 
         #region init Form Windows
 
@@ -125,6 +135,7 @@ namespace TestClientForms
                     cashAcceptorTreeView.AfterSelect += TreeView_AfterSelect;
                     cameraTreeView.AfterSelect += TreeView_AfterSelect;
                     checkScannerTreeView.AfterSelect += TreeView_AfterSelect;
+                    ibnsTreeView.AfterSelect += TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages += Device_XFS4IoTMessages;
@@ -141,6 +152,7 @@ namespace TestClientForms
                     CashAcceptorDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     CameraDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                     CheckScannerDev.XFS4IoTMessages += Device_XFS4IoTMessages;
+                    IBNSDev.XFS4IoTMessages += Device_XFS4IoTMessages;
                 }
                 else
                 {
@@ -159,6 +171,7 @@ namespace TestClientForms
                     cashAcceptorTreeView.AfterSelect -= TreeView_AfterSelect;
                     cameraTreeView.AfterSelect -= TreeView_AfterSelect;
                     checkScannerTreeView.AfterSelect -= TreeView_AfterSelect;
+                    ibnsTreeView.AfterSelect -= TreeView_AfterSelect;
 
                     CashDispenserDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     TextTerminalDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
@@ -175,6 +188,7 @@ namespace TestClientForms
                     CashAcceptorDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     CameraDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                     CheckScannerDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
+                    IBNSDev.XFS4IoTMessages -= Device_XFS4IoTMessages;
                 }
             }
             catch (Exception ex)
@@ -1212,6 +1226,41 @@ namespace TestClientForms
 
         #endregion
 
+        #region IBNS
+
+        private async void IBNSServiceDiscovery_Click(object sender, EventArgs e)
+        {
+            await IBNSDev.DoServiceDiscovery();
+        }
+
+        private async void IBNSStatus_Click(object sender, EventArgs e)
+        {
+            var status = await IBNSDev.GetStatus();
+            StIBNS.Text = status?.Payload?.Common?.Device?.ToString() ?? "";
+        }
+
+        private async void IBNSCapabilities_Click(object sender, EventArgs e)
+        {
+            var caps = await IBNSDev.GetCapabilities();
+        }
+
+        private async void IBNSSetProtection_Click(object sender, EventArgs e)
+        {
+            await IBNSDev.SetProtection((XFS4IoT.BanknoteNeutralization.Commands.SetProtectionCommand.PayloadData.NewStateEnum)comboSetProtection.SelectedItem);
+        }
+
+        private async void GetIBNSUnitInfo_Click(object sender, EventArgs e)
+        {
+            await IBNSDev.GetUnitInfo();
+        }
+
+        private async void IBNSTriggerNeutralization_Click(object sender, EventArgs e)
+        {
+            await IBNSDev.TriggerNeutralization((XFS4IoT.BanknoteNeutralization.Commands.TriggerNeutralizationCommand.PayloadData.NeutralizationActionEnum)comboTriggerNeutralization.SelectedItem);
+        }
+
+        #endregion
+
         #region TreeViews manage 
         private void LoadXFS4IoTMsgToTreeView(System.Windows.Forms.TreeView jsonTreeView, string jsonString)
         {
@@ -1224,7 +1273,7 @@ namespace TestClientForms
                 {
                     JsonDocument jsonDocument = JsonDocument.Parse(jsonString);
                     (string Description, Color FontColor) tDecoration = NodeDecoration(jsonDocument);
-                    TreeNode rootNode = new TreeNode($"[{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss.fff")}] {tDecoration.Description}");
+                    TreeNode rootNode = new($"[{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss.fff")}] {tDecoration.Description}");
                     rootNode.Tag = ReturnPretifiedJson(jsonDocument);
                     rootNode.ForeColor = tDecoration.FontColor;
                     jsonTreeView.Nodes.Add(rootNode);
@@ -1397,6 +1446,8 @@ namespace TestClientForms
                         treeViewToUpdate = cameraTreeView;
                     else if (sender is CheckScannerDevice)
                         treeViewToUpdate = checkScannerTreeView;
+                    else if (sender is IBNSDevice)
+                        treeViewToUpdate = ibnsTreeView;
                     else
                         treeViewToUpdate = null;
 
@@ -1472,6 +1523,9 @@ namespace TestClientForms
                         case "checkScannerTreeView":
                             checkScannerRawBox.Text = stringifySelectedNode;
                             break;
+                        case "ibnsTreeView":
+                            ibnsRawBox.Text = stringifySelectedNode;
+                            break;
                         default:
                             break;
                     }
@@ -1483,6 +1537,7 @@ namespace TestClientForms
                 MessageBox.Show($"'TreeView_AfterSelect' method exception {Environment.NewLine} {ex.Message}");
             }
         }
-        #endregion 
+        #endregion
+
     }
 }

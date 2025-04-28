@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="3.0.0" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.CashDispenser" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Auxiliaries" Version="3.0.0" />
+	  <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Auxiliaries" Version="3.1.0-Internal.6" />
 	</ItemGroup>
 
     <ItemGroup>

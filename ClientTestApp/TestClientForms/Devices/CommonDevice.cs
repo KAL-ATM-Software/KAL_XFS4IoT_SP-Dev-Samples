@@ -8,16 +8,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using XFS4IoT;
+using XFS4IoT.BanknoteNeutralization.Completions;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Commands;
 using XFS4IoT.Common.Completions;
+using XFS4IoT.Common.Events;
 using XFS4IoT.ServicePublisher.Commands;
 using XFS4IoT.ServicePublisher.Completions;
+using XFS4IoT.Storage.Events;
+using XFS4IoTServer;
 
 namespace TestClientForms.Devices
 {
@@ -102,12 +107,20 @@ namespace TestClientForms.Devices
                 }
 
                 var getServiceCommand = new GetServicesCommand(RequestId.NewID(), CommandTimeout);
-                string commandString = getServiceCommand.Serialise();
-                XFS4IoTMessages?.Invoke(this, commandString);
+                await Discovery.SendCommandAsync(getServiceCommand);
+                XFS4IoTMessages?.Invoke(this, getServiceCommand.Serialise());
+
+                object cmdResponse = null;
+                while (cmdResponse is not GetServicesCompletion)
+                {
+                    cmdResponse = await Discovery.ReceiveMessageAsync();
+                    if (cmdResponse is null)
+                    {
+                        break;
+                    }
+                }
+
                 string responseString = string.Empty;
-
-                object cmdResponse = await SendAndWaitForCompletionAsync(Discovery, getServiceCommand);
-
                 if (cmdResponse is GetServicesCompletion response)
                 {
                     responseString = response.Serialise();
@@ -199,52 +212,75 @@ namespace TestClientForms.Devices
             var device = await GetConnection();
 
             var statusCmd = new StatusCommand(RequestId.NewID(), CommandTimeout);
+            await device.SendCommandAsync(statusCmd);
             XFS4IoTMessages?.Invoke(this, statusCmd.Serialise());
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(device, statusCmd);
-            if (cmdResponse is StatusCompletion response)
+            for (; ;)
             {
-                XFS4IoTMessages?.Invoke(this, response.Serialise());
-                return response;
+                switch (await device.ReceiveMessageAsync())
+                {
+                    case StatusCompletion response:
+                        XFS4IoTMessages?.Invoke(this, response.Serialise());
+                        return response;
+                    case StatusChangedEvent statusChangedEvent:
+                        XFS4IoTMessages?.Invoke(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        XFS4IoTMessages?.Invoke(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        XFS4IoTMessages?.Invoke(this, "<Unknown Event>");
+                        break;
+                }
             }
-            return null;
         }
 
         public async Task<CapabilitiesCompletion> GetCapabilities(string uri = null)
         {
-            var device = new XFS4IoTClient.ClientConnection(new Uri($"{uri ?? ServiceUriBox.Text}"));
-
-            try
+            XFS4IoTClient.ClientConnection device;
+            if (!string.IsNullOrEmpty(uri))
             {
-                await device.ConnectAsync();
+                device = new XFS4IoTClient.ClientConnection(new Uri($"{uri}"));
+                try
+                {
+                    await device.ConnectAsync();
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
             }
-            catch (Exception)
+            else
             {
-                return null;
+                device = await GetConnection();
             }
 
             var capabilitiesCmd = new CapabilitiesCommand(RequestId.NewID(), CommandTimeout);
-            XFS4IoTMessages?.Invoke(this, capabilitiesCmd.Serialise());
-                      
+            await device.SendCommandAsync(capabilitiesCmd);
+            XFS4IoTMessages?.Invoke(this, capabilitiesCmd.Serialise());      
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(device, capabilitiesCmd);
-            if (cmdResponse is CapabilitiesCompletion response)
+            for (; ; )
             {
-                Capabilities = response;
-                XFS4IoTMessages?.Invoke(this, response.Serialise());
-                return response;
+                switch (await device.ReceiveMessageAsync())
+                {
+                    case CapabilitiesCompletion response:
+                        XFS4IoTMessages?.Invoke(this, response.Serialise());
+                        if (!string.IsNullOrEmpty(uri))
+                        {
+                            await device.DisconnectAsync();
+                        }
+                        return response;
+                    case StatusChangedEvent statusChangedEvent:
+                        XFS4IoTMessages?.Invoke(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        XFS4IoTMessages?.Invoke(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        XFS4IoTMessages?.Invoke(this, "<Unknown Event>");
+                        break;
+                }
             }
-            return null;
-        }
-
-        public async Task<object> SendAndWaitForCompletionAsync(XFS4IoTClient.ClientConnection device, object command)
-        {
-            await device.SendCommandAsync(command);
-
-            object cmdResponse = await device.ReceiveMessageAsync();
-            if (cmdResponse is Acknowledge)
-                cmdResponse = await device.ReceiveMessageAsync();
-            return cmdResponse;
         }
     }
 

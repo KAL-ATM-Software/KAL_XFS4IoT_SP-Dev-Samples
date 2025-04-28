@@ -493,12 +493,12 @@ namespace CashRecycler.CashRecyclerTemplate
         /// Key - The storage id can be used for target of the depletion operation.
         /// Value - List of storage id can be used for source of the depletion operation
         /// </summary>
-        public Dictionary<string, List<string>> GetDepleteCashUnitSources() => new();
+        public Dictionary<string, List<string>> GetDepleteCashUnitSources() => [];
 
         /// <summary>
         /// Which storage units can be specified as targets for a given source storage unit with the CashAcceptor.Replenish command
         /// </summary>
-        public List<string> ReplenishTargets() => new();
+        public List<string> ReplenishTargets() => [];
 
         /// <summary>
         /// CashAcceptor Status
@@ -855,6 +855,25 @@ namespace CashRecycler.CashRecyclerTemplate
         /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
         public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CashRecycler service provider doesn't support IBNS related operations.");
 
+        /// <summary>
+        /// Return deposit storage (box or bag) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetDepositStorageConfiguration(out Dictionary<string, DepositUnitStorageConfiguration> newDepositUnits) => throw new NotSupportedException($"The CashRecycler service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Return deposit storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetDepositUnitInfo(out Dictionary<string, DepositUnitInfo> unitCounts) => throw new NotSupportedException($"The CashRecycler service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for deposit storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetDepositStorageAsync(SetDepositStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CashRecycler service provider doesn't support deposit related operations.");
+
+
         #endregion
 
         #region Common Interface
@@ -991,7 +1010,7 @@ namespace CashRecycler.CashRecyclerTemplate
         }
         #endregion
 
-        private CashManagementStatusClass.PositionStatusClass positionStatus = 
+        private readonly CashManagementStatusClass.PositionStatusClass positionStatus = 
             new(CashManagementStatusClass.ShutterEnum.Closed,
                 CashManagementStatusClass.PositionStatusEnum.Empty,
                 CashManagementStatusClass.TransportEnum.Ok,
@@ -1001,12 +1020,12 @@ namespace CashRecycler.CashRecyclerTemplate
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
         private CashRecyclerServiceProvider CashRecyclerService { get; set; } = null;
 
-        private Dictionary<string, CashUnitCountClass> LastDispenseResult { get; } = new();
+        private Dictionary<string, CashUnitCountClass> LastDispenseResult { get; } = [];
 
-        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; } = new();
+        private Dictionary<string, CashStorageInfo> CashUnitInfo { get; } = [];
 
         // Holding identified and accepted note types and counts
-        private Dictionary<string, CashItemCountClass> AcceptedItems { get; } = new();
+        private Dictionary<string, CashItemCountClass> AcceptedItems { get; } = [];
 
         private sealed class CashStorageInfo
         {

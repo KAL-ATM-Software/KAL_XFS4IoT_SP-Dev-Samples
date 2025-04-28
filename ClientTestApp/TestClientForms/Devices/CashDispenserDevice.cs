@@ -24,6 +24,7 @@ using XFS4IoT.Storage.Events;
 using XFS4IoT;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Events;
+using XFS4IoT.CashAcceptor.Completions;
 
 namespace TestClientForms.Devices
 {
@@ -52,15 +53,27 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getCashUnitInfoCmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new GetStorageCommand(RequestId.NewID(), CommandTimeout);
+            await dispenser.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this, getCashUnitInfoCmd.Serialise());
-                      
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getCashUnitInfoCmd);
-            if (cmdResponse is GetStorageCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this, response.Serialise());
+                switch (await dispenser.ReceiveMessageAsync())
+                {
+                    case GetStorageCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -77,17 +90,27 @@ namespace TestClientForms.Devices
                 return;
             }
 
-            var getMixTypesCmd = new GetMixTypesCommand(RequestId.NewID(), CommandTimeout);
+            var cmd = new GetMixTypesCommand(RequestId.NewID(), CommandTimeout);
+            await dispenser.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this,  getMixTypesCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getMixTypesCmd);
-            if (cmdResponse is GetMixTypesCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this, response.Serialise());
+                switch (await dispenser.ReceiveMessageAsync())
+                {
+                    case GetMixTypesCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 
@@ -106,17 +129,27 @@ namespace TestClientForms.Devices
 
             var nonce = string.IsNullOrWhiteSpace(Nonce)? null : Nonce;
 
-            var getPresentStatusCmd = new GetPresentStatusCommand(RequestId.NewID(), new(OutputPositionEnum.OutDefault, Nonce: nonce), CommandTimeout);
+            var cmd = new GetPresentStatusCommand(RequestId.NewID(), new(OutputPositionEnum.OutDefault, Nonce: nonce), CommandTimeout);
+            await dispenser.SendCommandAsync(cmd);
+            base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            base.OnXFS4IoTMessages(this,  getPresentStatusCmd.Serialise());
-
-            
-            
-
-            object cmdResponse = await SendAndWaitForCompletionAsync(dispenser, getPresentStatusCmd);
-            if (cmdResponse is GetPresentStatusCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this, response.Serialise());
+                switch (await dispenser.ReceiveMessageAsync())
+                {
+                    case XFS4IoT.CashDispenser.Completions.GetPresentStatusCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    case StorageChangedEvent storageChangedEvent:
+                        base.OnXFS4IoTMessages(this, storageChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
 

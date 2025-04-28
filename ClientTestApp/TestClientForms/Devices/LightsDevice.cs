@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using XFS4IoT.Common;
+using XFS4IoT.Common.Events;
+using XFS4IoT.KeyManagement.Completions;
 using XFS4IoT.Lights.Commands;
 using XFS4IoT.Lights.Completions;
 
@@ -46,13 +48,23 @@ namespace TestClientForms.Devices
             var payload = new SetLightCommand.PayloadData(CardReader: device);
 
             var cmd = new SetLightCommand(RequestId.NewID(), payload, CommandTimeout);
-
+            await lights.SendCommandAsync(cmd);
             base.OnXFS4IoTMessages(this, cmd.Serialise());
 
-            object cmdResponse = await SendAndWaitForCompletionAsync(lights, cmd);
-            if (cmdResponse is SetLightCompletion response)
+            while (true)
             {
-                base.OnXFS4IoTMessages(this,response.Serialise());
+                switch (await lights.ReceiveMessageAsync())
+                {
+                    case SetLightCompletion response:
+                        base.OnXFS4IoTMessages(this, response.Serialise());
+                        return;
+                    case StatusChangedEvent statusChangedEvent:
+                        base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
+                        break;
+                    default:
+                        base.OnXFS4IoTMessages(this, "<Unknown Event>");
+                        break;
+                }
             }
         }
     }

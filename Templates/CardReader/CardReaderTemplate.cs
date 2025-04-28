@@ -405,6 +405,25 @@ namespace CardReader.CardReaderTemplate
         public bool GetIBNSStorageInfo(out Dictionary<string, IBNSStorageInfo> newIBNSUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support IBNS related operations.");
 
         /// <summary>
+        /// Return deposit storage (box or bag) information for current configuration and capabilities on the startup.
+        /// </summary>
+        /// <returns>Return true if the storage configuration or capabilities are changed, otherwise false</returns>
+        public bool GetDepositStorageConfiguration(out Dictionary<string, DepositUnitStorageConfiguration> newDepositUnits) => throw new NotSupportedException($"The CardReader service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Return deposit storage counts maintained by the device class
+        /// </summary>
+        /// <returns>Return true if the device class maintained counts, otherwise false</returns>
+        public bool GetDepositUnitInfo(out Dictionary<string, DepositUnitInfo> unitCounts) => throw new NotSupportedException($"The CardReader service provider doesn't support deposit related operations.");
+
+        /// <summary>
+        /// Set new configuration and counters for deposit storage.
+        /// </summary>
+        /// <returns>Return operation is completed successfully or not and report updates storage information.</returns>
+        public Task<SetPrinterStorageResult> SetDepositStorageAsync(SetDepositStorageRequest request, CancellationToken cancellation) => throw new NotSupportedException($"The CardReader service provider doesn't support deposit related operations.");
+
+
+        /// <summary>
         /// Initiate exchange operation
         /// </summary>
         public Task<StartExchangeResult> StartExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
@@ -413,6 +432,10 @@ namespace CardReader.CardReaderTemplate
         /// End exchange operation
         /// </summary>
         public Task<EndExchangeResult> EndExchangeAsync(CancellationToken cancellation) => throw new NotSupportedException($"No exchange operation supported in this device.");
+
+        #endregion
+
+        #region Common Interface
 
         /// <summary>
         /// CardReader Status
@@ -438,9 +461,6 @@ namespace CardReader.CardReaderTemplate
                 CardReaderCapabilitiesClass.PositionsEnum.Exit | CardReaderCapabilitiesClass.PositionsEnum.Transport,
                 true);
 
-        #endregion
-
-        #region Common Interface
         /// <summary>
         /// Stores Commons status
         /// </summary>
