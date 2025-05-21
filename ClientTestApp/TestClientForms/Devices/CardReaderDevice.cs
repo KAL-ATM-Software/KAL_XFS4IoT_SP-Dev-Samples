@@ -31,7 +31,7 @@ namespace TestClientForms.Devices
         }
 
         public Task DoServiceDiscovery()
-            => DoServiceDiscovery([ InterfaceClass.NameEnum.CardReader, InterfaceClass.NameEnum.Common, InterfaceClass.NameEnum.Storage ]);
+            => DoServiceDiscovery([ InterfaceClass.NameEnum.CardReader, InterfaceClass.NameEnum.Common ]);
 
         public async Task AcceptCard()
         {
