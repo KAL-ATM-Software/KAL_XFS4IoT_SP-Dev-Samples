@@ -192,7 +192,7 @@ namespace Server
                 /// CasRecycler Service Provider
                 /*
                 var simCashRecyclerDevice = new KAL.XFS4IoTSP.CashRecycler.Sample.CashRecyclerSample(Logger);
-                var cashRecyclerService = new CashRecyclerServiceProvider(EndpointDetails,
+                var cashRecyclerService = new CashDispenserServiceProvider(EndpointDetails,
                                                                           ServiceName: "SimCashRecycler",
                                                                           simCashRecyclerDevice,
                                                                           Logger,

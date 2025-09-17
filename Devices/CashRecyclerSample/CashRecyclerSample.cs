@@ -35,7 +35,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
         /// <returns></returns>
         public async Task RunAsync(CancellationToken cancel)
         {
-            CashRecyclerService = SetServiceProvider as CashRecyclerServiceProvider;
+            CashRecyclerService = SetServiceProvider as CashAcceptorServiceProvider;
             CashRecyclerService.IsNotNull($"Cash Acceptor Service is set to null.");
 
             for (; ; )
@@ -1731,7 +1731,7 @@ namespace KAL.XFS4IoTSP.CashRecycler.Sample
          
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
-        private CashRecyclerServiceProvider CashRecyclerService { get; set; } = null;
+        private CashAcceptorServiceProvider CashRecyclerService { get; set; } = null;
 
         private Dictionary<string, CashUnitCountClass> LastDispenseResult { get; } = new();
 
