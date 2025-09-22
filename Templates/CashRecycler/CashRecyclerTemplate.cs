@@ -1018,7 +1018,7 @@ namespace CashRecycler.CashRecyclerTemplate
          
 
         public XFS4IoTServer.IServiceProvider SetServiceProvider { get; set; } = null;
-        private CashRecyclerServiceProvider CashRecyclerService { get; set; } = null;
+        private CashAcceptorServiceProvider CashRecyclerService { get; set; } = null;
 
         private Dictionary<string, CashUnitCountClass> LastDispenseResult { get; } = [];
 

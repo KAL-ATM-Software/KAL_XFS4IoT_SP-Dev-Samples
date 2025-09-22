@@ -37,6 +37,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckScannerTemplate", "Che
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBNSTemplate", "IBNS\IBNSTemplate.csproj", "{2EE2BDC6-A55E-57E5-FDDF-08309A15DC75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DKPinPadTemplate", "DKPinPad\DKPinPadTemplate.csproj", "{F3A3F26A-32F1-4F05-E198-4CCC219ED866}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +253,18 @@ Global
 		{2EE2BDC6-A55E-57E5-FDDF-08309A15DC75}.Release|x64.Build.0 = Release|Any CPU
 		{2EE2BDC6-A55E-57E5-FDDF-08309A15DC75}.Release|x86.ActiveCfg = Release|Any CPU
 		{2EE2BDC6-A55E-57E5-FDDF-08309A15DC75}.Release|x86.Build.0 = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|x64.Build.0 = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Debug|x86.Build.0 = Debug|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|x64.ActiveCfg = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|x64.Build.0 = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3A3F26A-32F1-4F05-E198-4CCC219ED866}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

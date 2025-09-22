@@ -6,7 +6,7 @@ using System.IO;
 using XFS4IoT;
 using XFS4IoTServer;
 
-namespace CashRecycler.CashRecyclerTemplate
+namespace PinPad.DKPinPadTemplate
 {
     class Server
     {
@@ -20,16 +20,16 @@ namespace CashRecycler.CashRecyclerTemplate
                 var Publisher = new ServicePublisher(Logger, new ServiceConfiguration(Logger));
                 var EndpointDetails = Publisher.EndpointDetails;
 
-                /// CashRecycler Service Provider
-                var cashRecyclerDevice = new CashRecyclerTemplate(Logger);
-                var cashRecyclerService = new CashAcceptorServiceProvider(EndpointDetails,
-                                                                          ServiceName: "CashRecyclerTemplate",
-                                                                          cashRecyclerDevice,
-                                                                          Logger,
-                                                                          new FilePersistentData(Logger));
+                /// PinPad Service Provider
+                var pinPadDevice = new DKPinPadTemplate(Logger);
+                var pinPadService = new PinPadServiceProvider(EndpointDetails,
+                                                              ServiceName: "DKPinPadTemplate",
+                                                              pinPadDevice,
+                                                              Logger,
+                                                              new FilePersistentData(Logger));
 
-                cashRecyclerDevice.SetServiceProvider = cashRecyclerService;
-                Publisher.Add(cashRecyclerService);
+                pinPadDevice.SetServiceProvider = pinPadService;
+                Publisher.Add(pinPadService);
 
                 await Publisher.RunAsync(new CancellationSource(Logger));
             }
