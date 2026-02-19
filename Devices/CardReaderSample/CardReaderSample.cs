@@ -751,7 +751,8 @@ namespace KAL.XFS4IoTSP.CardReader.Sample
                     Commands:
                     [
                         CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Capabilities,
-                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Status,
+                        CommonCapabilitiesClass.CommonInterfaceClass.CommandEnum.Cancel,
                     ],
                     Events:
                     [

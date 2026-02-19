@@ -57,6 +57,7 @@ namespace TestClientForms
             CaptureCard = new System.Windows.Forms.Button();
             testClientTabControl = new System.Windows.Forms.TabControl();
             CardReaderTab = new System.Windows.Forms.TabPage();
+            buttonCancelAccept = new System.Windows.Forms.Button();
             buttonEMVClessPerformTransaction = new System.Windows.Forms.Button();
             buttonEMVClessQueryApplications = new System.Windows.Forms.Button();
             cardReaderRawBox = new System.Windows.Forms.TextBox();
@@ -150,6 +151,7 @@ namespace TestClientForms
             label21 = new System.Windows.Forms.Label();
             label22 = new System.Windows.Forms.Label();
             PinPadTab = new System.Windows.Forms.TabPage();
+            buttonGetHSMTData = new System.Windows.Forms.Button();
             pinPadTreeView = new System.Windows.Forms.TreeView();
             pinPadRawBox = new System.Windows.Forms.TextBox();
             PinPadGetLayout = new System.Windows.Forms.Button();
@@ -234,7 +236,6 @@ namespace TestClientForms
             auxiliariesRawBox = new System.Windows.Forms.TextBox();
             comboAutoStartupModes = new System.Windows.Forms.ComboBox();
             btnSetAuxiliaries = new System.Windows.Forms.Button();
-            btnRegister = new System.Windows.Forms.Button();
             btnClearAutoStartup = new System.Windows.Forms.Button();
             btnGetAutoStartup = new System.Windows.Forms.Button();
             btnSetAutoStartup = new System.Windows.Forms.Button();
@@ -403,6 +404,8 @@ namespace TestClientForms
             label86 = new System.Windows.Forms.Label();
             label87 = new System.Windows.Forms.Label();
             tabPage1 = new System.Windows.Forms.TabPage();
+            comboTriggerNeutralization = new System.Windows.Forms.ComboBox();
+            IBNSTriggerNeutralization = new System.Windows.Forms.Button();
             GetIBNSUnitInfo = new System.Windows.Forms.Button();
             comboSetProtection = new System.Windows.Forms.ComboBox();
             ibnsTreeView = new System.Windows.Forms.TreeView();
@@ -419,8 +422,6 @@ namespace TestClientForms
             IBNSURI = new System.Windows.Forms.TextBox();
             label91 = new System.Windows.Forms.Label();
             label92 = new System.Windows.Forms.Label();
-            IBNSTriggerNeutralization = new System.Windows.Forms.Button();
-            comboTriggerNeutralization = new System.Windows.Forms.ComboBox();
             testClientTabControl.SuspendLayout();
             CardReaderTab.SuspendLayout();
             DispenserTab.SuspendLayout();
@@ -676,6 +677,7 @@ namespace TestClientForms
             // 
             // CardReaderTab
             // 
+            CardReaderTab.Controls.Add(buttonCancelAccept);
             CardReaderTab.Controls.Add(buttonEMVClessPerformTransaction);
             CardReaderTab.Controls.Add(buttonEMVClessQueryApplications);
             CardReaderTab.Controls.Add(cardReaderRawBox);
@@ -709,6 +711,16 @@ namespace TestClientForms
             CardReaderTab.TabIndex = 0;
             CardReaderTab.Text = "CardReader";
             CardReaderTab.UseVisualStyleBackColor = true;
+            // 
+            // buttonCancelAccept
+            // 
+            buttonCancelAccept.Location = new System.Drawing.Point(1221, 25);
+            buttonCancelAccept.Name = "buttonCancelAccept";
+            buttonCancelAccept.Size = new System.Drawing.Size(115, 32);
+            buttonCancelAccept.TabIndex = 133;
+            buttonCancelAccept.Text = "CancelAccept";
+            buttonCancelAccept.UseVisualStyleBackColor = true;
+            buttonCancelAccept.Click += buttonCancelAccept_Click;
             // 
             // buttonEMVClessPerformTransaction
             // 
@@ -749,7 +761,7 @@ namespace TestClientForms
             // 
             // ResetBinCount
             // 
-            ResetBinCount.Location = new System.Drawing.Point(1230, 72);
+            ResetBinCount.Location = new System.Drawing.Point(1230, 179);
             ResetBinCount.Margin = new System.Windows.Forms.Padding(1);
             ResetBinCount.Name = "ResetBinCount";
             ResetBinCount.Size = new System.Drawing.Size(106, 32);
@@ -760,7 +772,7 @@ namespace TestClientForms
             // 
             // GetStorage
             // 
-            GetStorage.Location = new System.Drawing.Point(1230, 127);
+            GetStorage.Location = new System.Drawing.Point(1230, 220);
             GetStorage.Margin = new System.Windows.Forms.Padding(1);
             GetStorage.Name = "GetStorage";
             GetStorage.Size = new System.Drawing.Size(106, 32);
@@ -771,7 +783,7 @@ namespace TestClientForms
             // 
             // Reset
             // 
-            Reset.Location = new System.Drawing.Point(1230, 25);
+            Reset.Location = new System.Drawing.Point(1230, 127);
             Reset.Margin = new System.Windows.Forms.Padding(1);
             Reset.Name = "Reset";
             Reset.Size = new System.Drawing.Size(106, 32);
@@ -1724,6 +1736,7 @@ namespace TestClientForms
             // 
             // PinPadTab
             // 
+            PinPadTab.Controls.Add(buttonGetHSMTData);
             PinPadTab.Controls.Add(pinPadTreeView);
             PinPadTab.Controls.Add(pinPadRawBox);
             PinPadTab.Controls.Add(PinPadGetLayout);
@@ -1760,6 +1773,16 @@ namespace TestClientForms
             PinPadTab.TabIndex = 4;
             PinPadTab.Text = "PinPad";
             PinPadTab.UseVisualStyleBackColor = true;
+            // 
+            // buttonGetHSMTData
+            // 
+            buttonGetHSMTData.Location = new System.Drawing.Point(1222, 100);
+            buttonGetHSMTData.Name = "buttonGetHSMTData";
+            buttonGetHSMTData.Size = new System.Drawing.Size(120, 29);
+            buttonGetHSMTData.TabIndex = 95;
+            buttonGetHSMTData.Text = "GetHSMTData";
+            buttonGetHSMTData.UseVisualStyleBackColor = true;
+            buttonGetHSMTData.Click += buttonGetHSMTData_Click;
             // 
             // pinPadTreeView
             // 
@@ -2603,7 +2626,6 @@ namespace TestClientForms
             tabPage2.Controls.Add(auxiliariesRawBox);
             tabPage2.Controls.Add(comboAutoStartupModes);
             tabPage2.Controls.Add(btnSetAuxiliaries);
-            tabPage2.Controls.Add(btnRegister);
             tabPage2.Controls.Add(btnClearAutoStartup);
             tabPage2.Controls.Add(btnGetAutoStartup);
             tabPage2.Controls.Add(btnSetAutoStartup);
@@ -2665,17 +2687,6 @@ namespace TestClientForms
             btnSetAuxiliaries.Text = "SetAuxiliaries";
             btnSetAuxiliaries.UseVisualStyleBackColor = true;
             btnSetAuxiliaries.Click += btnSetAuxiliaries_Click;
-            // 
-            // btnRegister
-            // 
-            btnRegister.Location = new System.Drawing.Point(1074, 88);
-            btnRegister.Margin = new System.Windows.Forms.Padding(0);
-            btnRegister.Name = "btnRegister";
-            btnRegister.Size = new System.Drawing.Size(103, 29);
-            btnRegister.TabIndex = 159;
-            btnRegister.Text = "Register";
-            btnRegister.UseVisualStyleBackColor = true;
-            btnRegister.Click += btnRegister_Click;
             // 
             // btnClearAutoStartup
             // 
@@ -4506,6 +4517,24 @@ namespace TestClientForms
             tabPage1.Text = "IBNS";
             tabPage1.UseVisualStyleBackColor = true;
             // 
+            // comboTriggerNeutralization
+            // 
+            comboTriggerNeutralization.FormattingEnabled = true;
+            comboTriggerNeutralization.Location = new System.Drawing.Point(811, 188);
+            comboTriggerNeutralization.Name = "comboTriggerNeutralization";
+            comboTriggerNeutralization.Size = new System.Drawing.Size(104, 28);
+            comboTriggerNeutralization.TabIndex = 122;
+            // 
+            // IBNSTriggerNeutralization
+            // 
+            IBNSTriggerNeutralization.Location = new System.Drawing.Point(931, 187);
+            IBNSTriggerNeutralization.Name = "IBNSTriggerNeutralization";
+            IBNSTriggerNeutralization.Size = new System.Drawing.Size(181, 29);
+            IBNSTriggerNeutralization.TabIndex = 121;
+            IBNSTriggerNeutralization.Text = "TriggerNeutralization";
+            IBNSTriggerNeutralization.UseVisualStyleBackColor = true;
+            IBNSTriggerNeutralization.Click += IBNSTriggerNeutralization_Click;
+            // 
             // GetIBNSUnitInfo
             // 
             GetIBNSUnitInfo.Location = new System.Drawing.Point(931, 99);
@@ -4660,24 +4689,6 @@ namespace TestClientForms
             label92.Size = new System.Drawing.Size(83, 20);
             label92.TabIndex = 109;
             label92.Text = "Service URI";
-            // 
-            // IBNSTriggerNeutralization
-            // 
-            IBNSTriggerNeutralization.Location = new System.Drawing.Point(931, 187);
-            IBNSTriggerNeutralization.Name = "IBNSTriggerNeutralization";
-            IBNSTriggerNeutralization.Size = new System.Drawing.Size(181, 29);
-            IBNSTriggerNeutralization.TabIndex = 121;
-            IBNSTriggerNeutralization.Text = "TriggerNeutralization";
-            IBNSTriggerNeutralization.UseVisualStyleBackColor = true;
-            IBNSTriggerNeutralization.Click += IBNSTriggerNeutralization_Click;
-            // 
-            // comboTriggerNeutralization
-            // 
-            comboTriggerNeutralization.FormattingEnabled = true;
-            comboTriggerNeutralization.Location = new System.Drawing.Point(811, 188);
-            comboTriggerNeutralization.Name = "comboTriggerNeutralization";
-            comboTriggerNeutralization.Size = new System.Drawing.Size(104, 28);
-            comboTriggerNeutralization.TabIndex = 122;
             // 
             // Form1
             // 
@@ -4924,7 +4935,6 @@ namespace TestClientForms
         private System.Windows.Forms.Button btnSetAutoStartup;
         private System.Windows.Forms.DateTimePicker autoStartupDateTime;
         private System.Windows.Forms.Button btnSetAuxiliaries;
-        private System.Windows.Forms.Button btnRegister;
         private System.Windows.Forms.ComboBox comboAutoStartupModes;
         private System.Windows.Forms.TabPage VendorModeTabPage;
         private System.Windows.Forms.Button btnVendorModeServiceDiscovery;
@@ -5119,6 +5129,8 @@ namespace TestClientForms
         private System.Windows.Forms.Button GetIBNSUnitInfo;
         private System.Windows.Forms.ComboBox comboTriggerNeutralization;
         private System.Windows.Forms.Button IBNSTriggerNeutralization;
+        private System.Windows.Forms.Button buttonCancelAccept;
+        private System.Windows.Forms.Button buttonGetHSMTData;
     }
 }
 

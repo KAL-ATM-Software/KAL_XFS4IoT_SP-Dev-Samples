@@ -20,6 +20,8 @@ using XFS4IoT.Storage.Events;
 using XFS4IoT.Common;
 using XFS4IoT.Common.Events;
 using XFS4IoT.CardReader.Events;
+using XFS4IoT.Common.Completions;
+using System.Threading;
 
 namespace TestClientForms.Devices
 {
@@ -46,8 +48,9 @@ namespace TestClientForms.Devices
                 return;
             }
 
+            int readRawCmdId = RequestId.NewID();
             var readRawDataCmd = new ReadRawDataCommand(
-                RequestId.NewID(),
+                readRawCmdId,
                 new ReadRawDataCommand.PayloadData(
                     Track1: true,
                     Track2: true,
@@ -69,13 +72,42 @@ namespace TestClientForms.Devices
 
             await cardReader.SendCommandAsync(readRawDataCmd);
 
+            if (CancelAcceptSemaphore.CurrentCount != 0)
+            {
+                // reset counters
+                await CancelAcceptSemaphore.WaitAsync();
+            }
+                
+            Task[] tasks =
+            [
+                CancelAcceptSemaphore.WaitAsync(),
+                cardReader.ReceiveMessageAsync()
+            ];
+
             for (; ; )
             {
+                var task = await Task.WhenAny(tasks);
+                if (tasks.Length == 2 &&
+                    task == tasks[0])
+                {
+                    var cancelCmd = new XFS4IoT.Common.Commands.CancelCommand(RequestId.NewID(), new([readRawCmdId]), 5000);
+                    
+                    base.OnXFS4IoTMessages(this, cancelCmd.Serialise()); 
+                    
+                    await cardReader.SendCommandAsync(cancelCmd);
+                    tasks = [.. tasks.Where(t => t != task)];
+                    continue;
+                }
+
                 object cmdResponse = await cardReader.ReceiveMessageAsync();
                 if (cmdResponse is ReadRawDataCompletion response)
                 {
                     base.OnXFS4IoTMessages(this, response.Serialise());
                     break;
+                }
+                else if (cmdResponse is XFS4IoT.Common.Completions.CancelCompletion cancelResp)
+                {
+                    base.OnXFS4IoTMessages(this, cancelResp.Serialise());
                 }
                 else if (cmdResponse is XFS4IoT.CardReader.Events.MediaInsertedEvent cardInsertedEv)
                 {
@@ -436,6 +468,7 @@ namespace TestClientForms.Devices
 
             await cardReader.SendCommandAsync(emvPerformTxnCmd);
 
+            
             while (true)
             {
                 switch (await cardReader.ReceiveMessageAsync())
@@ -457,5 +490,17 @@ namespace TestClientForms.Devices
                 }
             }
         }
+
+        public async Task CancelAccept()
+        {
+            await Task.Delay(0);// ensure this is async and can be awaited
+
+            if (CancelAcceptSemaphore.CurrentCount == 0)
+            {
+                CancelAcceptSemaphore.Release();
+            }
+        }
+
+        private readonly SemaphoreSlim CancelAcceptSemaphore = new(0, 1);
     }
 }

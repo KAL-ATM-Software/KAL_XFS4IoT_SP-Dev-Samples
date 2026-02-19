@@ -18,6 +18,10 @@
     <ItemGroup>
         <Content Include="**\*" Exclude="**\bin\**;**\obj\**" />
         <Compile Remove="**\*" />
+        <Compile Remove=".vs\**" />
+        <Content Remove=".vs\**" />
+        <EmbeddedResource Remove=".vs\**" />
+        <None Remove=".vs\**" />
     </ItemGroup>
 
 </Project>

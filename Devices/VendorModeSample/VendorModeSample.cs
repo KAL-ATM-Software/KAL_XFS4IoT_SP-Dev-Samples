@@ -38,15 +38,22 @@ namespace KAL.XFS4IoTSP.VendorMode.Sample
         /// If there are any vendor specific operation required after entering VendorMode, process it in this method.
         /// Throw NotImplementedException if there is no specific operation required.
         /// </summary>
-        public Task<DeviceResult> EnterVendorMode(CancellationToken cancellation) => throw new NotImplementedException();
+        public async Task<DeviceResult> EnterVendorMode(CancellationToken cancellation)
+        {
+            await Task.Delay(0);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
+        }
 
         /// <summary>
         /// This method is called after all registered clients are acknowledged to exit vendor mode.
         /// If there are any vendor specific operation required after exiting VendorMode, process it in this method.
         /// /// Throw NotImplementedException if there is no specific operation required.
         /// </summary>
-        public Task<DeviceResult> ExitVendorMode(CancellationToken cancellation) => throw new NotImplementedException();
-
+        public async Task<DeviceResult> ExitVendorMode(CancellationToken cancellation)
+        {
+            await Task.Delay(0);
+            return new DeviceResult(MessageHeader.CompletionCodeEnum.Success);
+        }
         /// <summary>
         /// RunAync
         /// Handle unsolic events

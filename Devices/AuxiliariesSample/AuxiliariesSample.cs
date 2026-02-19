@@ -88,8 +88,6 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
                 AuxiliariesStatus.Heating = AuxiliariesStatusClass.SensorEnum.Off;
             }
 
-            sendStatusChangedEventSignal.Release();
-
             return Task.FromResult(new DeviceResult(MessageHeader.CompletionCodeEnum.Success));
         }
 
@@ -122,11 +120,10 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
                 (
                     Commands:
                     [
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartUpTime,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartUpTime,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartUpTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartupTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartupTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartupTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAuxiliaries,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.Register,
                     ]
                 ),
                 LightsInterface: new CommonCapabilitiesClass.LightsInterfaceClass
@@ -213,8 +210,5 @@ namespace KAL.XFS4IoTSP.Auxiliaries.Sample
         public LightsStatusClass LightsStatus { get; set; } = new();
 
         #endregion
-
-
-        private readonly SemaphoreSlim sendStatusChangedEventSignal = new(0, 1);
     }
 }

@@ -100,9 +100,9 @@ namespace Auxiliaries.AuxiliariesTemplate
                 (
                     Commands:
                     [
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartUpTime,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartUpTime,
-                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartUpTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAutoStartupTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.ClearAutoStartupTime,
+                        CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.GetAutoStartupTime,
                         CommonCapabilitiesClass.AuxiliariesInterfaceClass.CommandEnum.SetAuxiliaries,
                     ]
                 ),

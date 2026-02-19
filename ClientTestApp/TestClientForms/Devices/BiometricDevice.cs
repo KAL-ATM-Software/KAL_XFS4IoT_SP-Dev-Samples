@@ -38,9 +38,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             do
             {
@@ -49,6 +46,17 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
+                }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
+                else
+                {
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
         }
@@ -63,9 +71,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             do
             {
@@ -74,6 +79,17 @@ namespace TestClientForms.Devices
                 {
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
+                }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
+                else
+                {
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
         }
@@ -92,9 +108,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             string retVal = "";
             do
@@ -107,11 +120,16 @@ namespace TestClientForms.Devices
                     if (response?.Payload?.DataRead is not null && response.Payload.DataRead.Count > 0 && response.Payload.DataRead[0].Data != null)
                         retVal = Convert.ToBase64String(response.Payload.DataRead[0].Data.ToArray());
                 }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
-                { }
+                {
+                }
                 else
                 {
-                    base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
             return retVal;
@@ -127,9 +145,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             do
             {
@@ -139,11 +154,16 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
                 else if (cmdResponse is Acknowledge)
-                { }
+                {
+                }
                 else
                 {
-                    base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
         }
@@ -161,9 +181,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             do
             {
@@ -173,9 +190,16 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
-                    base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
         }
@@ -190,9 +214,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             do
             {
@@ -202,9 +223,16 @@ namespace TestClientForms.Devices
                     base.OnXFS4IoTMessages(this,response.Serialise());
                     completed = true;
                 }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
-                    base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
         }
@@ -219,9 +247,6 @@ namespace TestClientForms.Devices
 
             await device.SendCommandAsync(cmd);
 
-            
-            
-
             bool completed = false;
             List<string> identifiers = new();
             do
@@ -235,9 +260,16 @@ namespace TestClientForms.Devices
                     if (response?.Payload?.Templates is { Count: > 0 })
                         identifiers = response.Payload.Templates.Keys.ToList();
                 }
+                else if (cmdResponse is XFS4IoT.Common.Events.StatusChangedEvent statusChangedEv)
+                {
+                    base.OnXFS4IoTMessages(this, statusChangedEv.Serialise());
+                }
+                else if (cmdResponse is Acknowledge)
+                {
+                }
                 else
                 {
-                    base.OnXFS4IoTMessages(this, (cmdResponse as MessageBase).Serialise());
+                    base.OnXFS4IoTMessages(this, "<Unknown Event>");
                 }
             } while (!completed);
             return identifiers;

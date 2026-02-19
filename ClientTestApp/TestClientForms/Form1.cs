@@ -270,6 +270,11 @@ namespace TestClientForms
             await CardReaderDev.EMVClessPerformTransaction();
         }
 
+        private async void buttonCancelAccept_Click(object sender, EventArgs e)
+        {
+            await CardReaderDev.CancelAccept();
+        }
+
         #endregion
 
         #region CashDispenser
@@ -626,6 +631,12 @@ namespace TestClientForms
         {
             await PinPadDev.GetLayout();
         }
+
+        private async void buttonGetHSMTData_Click(object sender, EventArgs e)
+        {
+            await PinPadDev.GetHSMTData();
+        }
+
         #endregion
 
         #region Printer

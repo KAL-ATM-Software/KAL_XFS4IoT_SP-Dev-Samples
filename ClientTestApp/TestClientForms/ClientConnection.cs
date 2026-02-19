@@ -8,11 +8,12 @@ using System;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net.WebSockets;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text;
-using System.Reflection;
 using XFS4IoT;
+using XFS4IoT.ServicePublisher.Completions;
 
 namespace XFS4IoTClient
 {
@@ -170,7 +171,7 @@ namespace XFS4IoTClient
         /// <summary>
         /// Message decoder for responses
         /// </summary>
-        private static readonly MessageDecoder ResponseDecoder = new(MessageDecoder.AutoPopulateType.Response);
+        private static readonly MessageDecoder ResponseDecoder = new([Assembly.GetAssembly(typeof(GetServicesCompletion))]);
 
         /// <summary>
         /// WebSocket client object

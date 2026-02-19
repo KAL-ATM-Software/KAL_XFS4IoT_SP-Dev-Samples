@@ -181,6 +181,7 @@ namespace TestClientForms.Devices
                 {
                     case GetTransactionStatusCompletion response:
                         base.OnXFS4IoTMessages(this, response.Serialise());
+                        GetTransactionStatusPayload = response.Payload;
                         return;
                     case StatusChangedEvent statusChangedEvent:
                         base.OnXFS4IoTMessages(this, statusChangedEvent.Serialise());
