@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="3.3.5" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.PinPad" Version="3.3.6" />
   </ItemGroup>
 
 </Project>
