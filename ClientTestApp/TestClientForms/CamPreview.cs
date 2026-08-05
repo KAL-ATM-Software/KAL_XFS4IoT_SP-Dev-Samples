@@ -8,20 +8,19 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TestClientForms
+namespace XFS4IoT.TestTool;
+
+public partial class CamPreview : Form
 {
-    public partial class CamPreview : Form
+    public CamPreview()
     {
-        public CamPreview()
-        {
-            InitializeComponent();
-        }
-
-        public void UpdateImage(Bitmap bmp)
-        {
-            picBox.Invoke(() => picBox.Image = bmp);
-        }
-
-
+        InitializeComponent();
     }
+
+    public void UpdateImage(Bitmap bmp)
+    {
+        picBox.Invoke(() => picBox.Image = bmp);
+    }
+
+
 }
