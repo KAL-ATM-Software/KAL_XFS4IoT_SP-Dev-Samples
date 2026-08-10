@@ -17,11 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.3.0-Internal.10" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.3.8" />
     <!-- Referenced explicitly (it's already a transitive dependency of the Server package at the
          same version) purely so GeneratePathProperty exposes $(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)
          below — that's what lets us copy its XML doc comments into the PropertyGrid descriptions. -->
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Core" Version="3.3.0-Internal.10" GeneratePathProperty="true" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Core" Version="3.3.8" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,10 +33,7 @@
          will be read.") instead of just the field name. LogicalName is set explicitly because the
          file lives outside the project directory, where the default logical-name generation is
          unpredictable. -->
-    <EmbeddedResource Include="$(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)\lib\net8.0\XFS4IoT.SP.Framework.Core.xml"
-                       Condition="Exists('$(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)\lib\net8.0\XFS4IoT.SP.Framework.Core.xml')"
-                       LogicalName="XFS4IoT.SP.Framework.Core.xml"
-                       Visible="false" />
+    <EmbeddedResource Include="$(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)\lib\net8.0\XFS4IoT.SP.Framework.Core.xml" Condition="Exists('$(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)\lib\net8.0\XFS4IoT.SP.Framework.Core.xml')" LogicalName="XFS4IoT.SP.Framework.Core.xml" Visible="false" />
   </ItemGroup>
 
 </Project>
