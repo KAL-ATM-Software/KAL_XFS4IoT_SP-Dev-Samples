@@ -17,11 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.3.8" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Server" Version="3.3.9" />
     <!-- Referenced explicitly (it's already a transitive dependency of the Server package at the
          same version) purely so GeneratePathProperty exposes $(PkgKAL_XFS4IoT_SP-Dev_Framework_Core)
          below — that's what lets us copy its XML doc comments into the PropertyGrid descriptions. -->
-    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Core" Version="3.3.8" GeneratePathProperty="true" />
+    <PackageReference Include="KAL.XFS4IoT.SP-Dev.Framework.Core" Version="3.3.9" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup>

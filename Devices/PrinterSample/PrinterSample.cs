@@ -9,21 +9,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Text;
-using System.Linq;
 using XFS4IoT;
 using XFS4IoTFramework.Printer;
 using XFS4IoTFramework.Common;
-using XFS4IoT.Common.Commands;
-using XFS4IoT.Common.Completions;
-using XFS4IoT.Common;
 using XFS4IoT.Printer.Events;
-using XFS4IoT.Printer;
-using XFS4IoT.Printer.Completions;
-using XFS4IoT.Completions;
 using XFS4IoTServer;
 using XFS4IoTFramework.Storage;
 
+/* PRINT TO BITMAP
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Drawing.Text;
+*/
 namespace KAL.XFS4IoTSP.Printer.Sample
 {
     /// <summary>
@@ -145,11 +145,10 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// Measurements in all tasks are in printer dots.
         /// This method must be implemented if your device is capable or printing.
         /// </summary>
-        /// [SupportedOSPlatform("windows")]
+        //[SupportedOSPlatform("windows")]
         public async Task<PrintTaskResult> ExecutePrintTasksAsync(PrintTaskRequest request,
                                                                   CancellationToken cancellation)
         {
-            await Task.Delay(200, cancellation);
             foreach (var task in request.PrintJob.Tasks)
             {
                 if (task.Type == FieldTypeEnum.TEXT)
@@ -162,14 +161,14 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                 }
             }
 
-            /* Example of usage for the Bitmap printing for Windows only for now
+            /* PRINT TO BITMAP
             PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
-            int bitCount = 24;
+            int bitCount = 1;
 
             bool success = printerServiceProvider.PrintToBitmap(request.PrintJob, bitCount, true, out ImageInfo imageInfo);
             if (!success)
             {
-                return new PrintTaskResult(MessageHeader.CompletionCodeEnum.HardwareError, $"Failed on printing form to an image.", PrintFormCompletion.PayloadData.ErrorCodeEnum.FormInvalid);
+                return new PrintTaskResult(MessageHeader.CompletionCodeEnum.HardwareError, $"Failed on printing form to an image.", PrintFormCompletion.PayloadData.ErrorCodeEnum.FormNotFound);
             }
 
             PixelFormat pixelFormat = bitCount switch
@@ -226,13 +225,14 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         /// i.e. width and height of rectangle needed to contain the task when executed.
         /// Normally expected to return true since no hardware action is requested.
         /// </summary>
-        ///[SupportedOSPlatform("windows")]
+        //[SupportedOSPlatform("windows")]
         public bool GetTaskDimensions(PrintTask task, out int width, out int height)
         {
-            /* Sample of Bitmap printing
+            /* PRINT TO BITMAP
             PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
             return printerServiceProvider.GetBitmapPrintDimensions(task, out width, out height);
             */
+
             width = 0;
             height = 0;
 
@@ -295,6 +295,8 @@ namespace KAL.XFS4IoTSP.Printer.Sample
         public async Task RunAsync(CancellationToken cancel)
         {
             PrinterServiceProvider printerServiceProvider = SetServiceProvider as PrinterServiceProvider;
+            // Sample embedded form and media registration.
+            RegisterForm(printerServiceProvider);
 
             for (;;)
             {
@@ -306,6 +308,92 @@ namespace KAL.XFS4IoTSP.Printer.Sample
                 }
             }
         }
+
+        private void RegisterForm(PrinterServiceProvider serviceProvider)
+        {
+            Media media = new(
+                Logger, this,
+                Name: "TestMedia",
+                Type: Media.TypeEnum.GENERIC,
+                Source: Media.SourceEnum.UPPER,
+                Base: Media.BaseEnum.ROWCOLUMN,
+                UnitX: 1, UnitY: 1,
+                Width: 40, Height: 50,
+                PrintAreaX: 0, PrintAreaY: 0,
+                PrintAreaWidth: 40, PrintAreaHeight: 50,
+                RestrictedAreaX: 0, RestrictedAreaY: 0, RestrictedAreaWidth: 0, RestrictedAreaHeight: 0,
+                Fold: Media.FoldEnum.NONE, Staggering: 0, Pages: 0, Lines: 0);
+
+            Form form1 = new(
+                Logger, this,
+                Name: "TestForm",
+                Base: Form.BaseEnum.ROWCOLUMN,
+                UnitX: 1, UnitY: 1,
+                Width: 40, Height: 50,
+                XOffset: 0, YOffset: 0,
+                VersionMajor: 1, VersionMinor: 0,
+                Date: null, Author: null, Copyright: null,
+                Title: "Test Form", Comment: null, Prompt: null,
+                Skew: 0,
+                Alignment: Form.AlignmentEnum.TOPLEFT,
+                Orientation: FormOrientationEnum.PORTRAIT);
+
+            form1.AddField(
+                Name: "Line1",
+                X: 0, Y: 0, Width: 40, Height: 1,
+                Follows: null, Repeat: 0, XOffset: 0, YOffset: 0,
+                Font: "Lucida Console", PointSize: -1, CPI: -1, LPI: -1,
+                Format: null, InitialValue: "0123456789012345678901234567890123456789",
+                Side: FieldSideEnum.FRONT, Type: FieldTypeEnum.TEXT,
+                Class: FormField.ClassEnum.OPTIONAL, Access: FieldAccessEnum.WRITE,
+                Overflow: FormField.OverflowEnum.BESTFIT, Style: FieldStyleEnum.NORMAL,
+                Case: FormField.CaseEnum.UPPER, Horizontal: FormField.HorizontalEnum.LEFT,
+                Vertical: FormField.VerticalEnum.CENTER, Color: FieldColorEnum.BLACK,
+                Scaling: 0, Barcode: 0);
+
+            form1.AddField(
+                Name: "Line2",
+                X: 0, Y: 3, Width: 40, Height: 1,
+                Follows: null, Repeat: 0, XOffset: 0, YOffset: 0,
+                Font: "Lucida Console", PointSize: 8, CPI: -1, LPI: -1,
+                Format: null, "0123456789012345678901234567890123456789",
+                Side: FieldSideEnum.FRONT, Type: FieldTypeEnum.TEXT,
+                Class: FormField.ClassEnum.OPTIONAL, Access: FieldAccessEnum.WRITE,
+                Overflow: FormField.OverflowEnum.BESTFIT, Style: FieldStyleEnum.NORMAL,
+                Case: FormField.CaseEnum.UPPER, Horizontal: FormField.HorizontalEnum.LEFT,
+                Vertical: FormField.VerticalEnum.CENTER, Color: FieldColorEnum.BLACK,
+                Scaling: 0, Barcode: 0);
+
+            form1.AddField(
+                Name: "Line3",
+                X: 0, Y: 6, Width: 40, Height: 2,
+                Follows: null, Repeat: 0, XOffset: 0, YOffset: 0,
+                Font: "Lucida Console", PointSize: 9, CPI: -1, LPI: -1,
+                Format: null, "012345678901234567890123456789",
+                Side: FieldSideEnum.FRONT, Type: FieldTypeEnum.TEXT,
+                Class: FormField.ClassEnum.OPTIONAL, Access: FieldAccessEnum.WRITE,
+                Overflow: FormField.OverflowEnum.WORDWRAP, Style: FieldStyleEnum.NORMAL,
+                Case: FormField.CaseEnum.UPPER, Horizontal: FormField.HorizontalEnum.LEFT,
+                Vertical: FormField.VerticalEnum.CENTER, Color: FieldColorEnum.BLACK,
+                Scaling: 0, Barcode: 0);
+
+            form1.AddField(
+                Name: "Line4",
+                X: 0, Y: 9, Width: 40, Height: 2,
+                Follows: null, Repeat: 0, XOffset: 0, YOffset: 0,
+                Font: "Lucida Console", PointSize: 10, CPI: -1, LPI: -1,
+                Format: null, "012345678901234567890",
+                Side: FieldSideEnum.FRONT, Type: FieldTypeEnum.TEXT,
+                Class: FormField.ClassEnum.OPTIONAL, Access: FieldAccessEnum.WRITE,
+                Overflow: FormField.OverflowEnum.TRUNCATE, Style: FieldStyleEnum.NORMAL,
+                Case: FormField.CaseEnum.UPPER, Horizontal: FormField.HorizontalEnum.LEFT,
+                Vertical: FormField.VerticalEnum.CENTER, Color: FieldColorEnum.BLACK,
+                Scaling: 0, Barcode: 0);
+
+            serviceProvider.SetMedia("TestMedia", media);
+            serviceProvider.SetForm("TestForm", form1);
+        }
+
 
         /// <summary>
         /// This method is to print a loaded form and media in the firmware where all fields prefixed positions are recognized.
