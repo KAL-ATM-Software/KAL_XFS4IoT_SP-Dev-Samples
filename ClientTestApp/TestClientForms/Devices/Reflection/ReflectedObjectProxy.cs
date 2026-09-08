@@ -32,11 +32,39 @@ public sealed class ReflectedObjectProxy : ICustomTypeDescriptor
         {
             _values[parameter.Name!] = Type.Missing;
         }
+
+        if (ParameterShape.TryGetExtendedPropertiesProperty(targetType, out var extendedProperties))
+        {
+            ExtendedPropertiesProperty = extendedProperties;
+            _values[extendedProperties.Name] = Type.Missing;
+        }
     }
 
     public Type TargetType { get; }
 
     public ConstructorInfo Constructor { get; }
+
+    /// <summary>
+    /// Set when <see cref="TargetType"/> has an open-ended <c>ExtendedProperties</c> dictionary
+    /// (see <see cref="ParameterShape.TryGetExtendedPropertiesProperty"/>) — e.g. Cash's per-type
+    /// counts, keyed by banknote type name. <see cref="GetProperties"/> synthesizes an editable
+    /// row for it exactly like a constructor parameter, and
+    /// <see cref="Reflection.ObjectProxyBuilder.Build"/> assigns it onto the built instance
+    /// afterward, since it isn't one of the constructor's own parameters.
+    /// </summary>
+    internal PropertyInfo ExtendedPropertiesProperty { get; }
+
+    /// <summary>
+    /// An optional same-position instance of a differently-shaped, richer sibling type (e.g. a
+    /// Storage.SetStorage <c>SetStorageUnitClass</c> proxy's counterpart
+    /// Storage.GetStorage <c>StorageUnitClass</c> result), set by
+    /// <see cref="Reflection.ObjectProxyBuilder.WrapMatching"/>. Its properties that have no
+    /// settable counterpart on this proxy's own <see cref="TargetType"/> (e.g. the read-only
+    /// <c>capabilities</c>, or unit fields like <c>positionName</c> that "Set" commands never
+    /// accept) are surfaced by <see cref="GetProperties"/> as extra, read-only rows — for
+    /// reference while filling in the editable ones, never sent back when the command is built.
+    /// </summary>
+    public object Reference { get; set; }
 
     private readonly Dictionary<string, object> _values = new();
 
@@ -50,8 +78,26 @@ public sealed class ReflectedObjectProxy : ICustomTypeDescriptor
     {
         var descriptors = Constructor.GetParameters()
             .Select(p => (PropertyDescriptor)new ReflectedPropertyDescriptor(this, p))
-            .ToArray();
-        return new PropertyDescriptorCollection(descriptors);
+            .ToList();
+
+        if (ExtendedPropertiesProperty is not null)
+        {
+            descriptors.Add(new ReflectedPropertyDescriptor(this, ExtendedPropertiesProperty));
+        }
+
+        if (Reference is not null)
+        {
+            // "ExtensionData" is the raw JsonElement backing store behind ExtendedProperties
+            // (see ParameterShape.TryGetExtendedPropertiesProperty) — plumbing, not information,
+            // so it's never worth a reference row even when this proxy has no editable
+            // counterpart for it.
+            var settableNames = new HashSet<string>(descriptors.Select(d => d.Name), StringComparer.OrdinalIgnoreCase) { "ExtensionData" };
+            descriptors.AddRange(Reference.GetType().GetProperties()
+                .Where(p => !settableNames.Contains(p.Name))
+                .Select(p => (PropertyDescriptor)new ReadOnlyPropertyDescriptor(Reference, p)));
+        }
+
+        return new PropertyDescriptorCollection(descriptors.ToArray());
     }
 
     AttributeCollection ICustomTypeDescriptor.GetAttributes() => AttributeCollection.Empty;
@@ -185,6 +231,35 @@ internal static class ParameterShape
 
         return type.IsClass && type.GetConstructors().Length > 0;
     }
+
+    /// <summary>
+    /// Detects the vendor codegen's open-ended-keys convention: a settable
+    /// <c>Dictionary&lt;string, T&gt; ExtendedProperties</c> property backed by a
+    /// <c>[JsonExtensionData]</c> field, used wherever XFS4IoT allows arbitrary keys that can't
+    /// be fixed constructor parameters (e.g. per-banknote-type counts, keyed by type name such as
+    /// <c>typeEUR10</c>). Unlike every other shape here this isn't a constructor parameter at
+    /// all — it's a regular mutable property alongside the type's constructor — so it needs its
+    /// own detection and its own post-construction assignment in
+    /// <see cref="Reflection.ObjectProxyBuilder.Build"/>.
+    /// </summary>
+    public static bool TryGetExtendedPropertiesProperty(Type targetType, out PropertyInfo property)
+    {
+        property = targetType.GetProperty("ExtendedProperties");
+        if (property is null || !property.CanRead || !property.CanWrite)
+        {
+            property = null;
+            return false;
+        }
+
+        var type = property.PropertyType;
+        if (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(Dictionary<,>) || type.GetGenericArguments()[0] != typeof(string))
+        {
+            property = null;
+            return false;
+        }
+
+        return true;
+    }
 }
 
 /// <summary>
@@ -230,14 +305,30 @@ internal sealed class JsonFallbackConverter : TypeConverter
 internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
 {
     public ReflectedPropertyDescriptor(ReflectedObjectProxy owner, ParameterInfo parameter)
-        : base(parameter.Name!, BuildAttributes(parameter))
+        : base(parameter.Name!, BuildAttributes(parameter.ParameterType, GetParameterDescription(parameter)))
     {
         _owner = owner;
-        _parameter = parameter;
+        _name = parameter.Name!;
+        _type = parameter.ParameterType;
+    }
+
+    /// <summary>
+    /// Backs the one property (per <see cref="ReflectedObjectProxy.ExtendedPropertiesProperty"/>)
+    /// that isn't a constructor parameter at all — see
+    /// <see cref="ParameterShape.TryGetExtendedPropertiesProperty"/>. Otherwise identical to the
+    /// constructor-parameter case: same owner-keyed storage, same shape-based rendering.
+    /// </summary>
+    public ReflectedPropertyDescriptor(ReflectedObjectProxy owner, PropertyInfo property)
+        : base(property.Name, BuildAttributes(property.PropertyType, XmlDocComments.GetSummary(property)))
+    {
+        _owner = owner;
+        _name = property.Name;
+        _type = property.PropertyType;
     }
 
     private readonly ReflectedObjectProxy _owner;
-    private readonly ParameterInfo _parameter;
+    private readonly string _name;
+    private readonly Type _type;
 
     public override Type ComponentType => _owner.TargetType;
     public override bool IsReadOnly => false;
@@ -246,7 +337,7 @@ internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
     {
         get
         {
-            var type = _parameter.ParameterType;
+            var type = _type;
             if (ParameterShape.IsComplexSingle(type))
             {
                 return typeof(ReflectedObjectProxy);
@@ -266,16 +357,16 @@ internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
         }
     }
 
-    public override bool CanResetValue(object component) => _owner.IsSet(_parameter.Name!);
+    public override bool CanResetValue(object component) => _owner.IsSet(_name);
 
-    public override void ResetValue(object component) => _owner.SetRaw(_parameter.Name!, Type.Missing);
+    public override void ResetValue(object component) => _owner.SetRaw(_name, Type.Missing);
 
-    public override bool ShouldSerializeValue(object component) => _owner.IsSet(_parameter.Name!);
+    public override bool ShouldSerializeValue(object component) => _owner.IsSet(_name);
 
     public override object GetValue(object component)
     {
-        var name = _parameter.Name!;
-        var type = _parameter.ParameterType;
+        var name = _name;
+        var type = _type;
         var raw = _owner.GetRaw(name);
 
         if (ParameterShape.IsComplexSingle(type))
@@ -331,7 +422,7 @@ internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
 
     public override void SetValue(object component, object value)
     {
-        _owner.SetRaw(_parameter.Name!, value);
+        _owner.SetRaw(_name, value);
         OnValueChanged(component, EventArgs.Empty);
     }
 
@@ -342,16 +433,23 @@ internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
     /// </summary>
     private static readonly CategoryAttribute PropertiesCategory = new("Properties");
 
-    private static Attribute[] BuildAttributes(ParameterInfo parameter)
+    /// <summary>
+    /// Surface the vendor assembly's own XML doc &lt;summary&gt; for this constructor parameter
+    /// (e.g. "Track 1 of the magnetic stripe will be read.") in the PropertyGrid's description
+    /// pane, when the referenced package ships a .xml doc file next to its .dll (it does).
+    /// A ParameterInfo carries no XML doc of its own, so it's looked up via the identically-named
+    /// property the vendor's codegen always declares alongside the constructor.
+    /// </summary>
+    private static string GetParameterDescription(ParameterInfo parameter)
     {
-        var type = parameter.ParameterType;
+        var declaringProperty = parameter.Member.DeclaringType?.GetProperty(parameter.Name!);
+        return declaringProperty is not null ? XmlDocComments.GetSummary(declaringProperty) : null;
+    }
+
+    private static Attribute[] BuildAttributes(Type type, string description)
+    {
         var attributes = new List<Attribute> { PropertiesCategory };
 
-        // Surface the vendor assembly's own XML doc <summary> for this field (e.g. "Track 1 of
-        // the magnetic stripe will be read.") in the PropertyGrid's description pane, when the
-        // referenced package ships a .xml doc file next to its .dll (it does).
-        var declaringProperty = parameter.Member.DeclaringType?.GetProperty(parameter.Name!);
-        var description = declaringProperty is not null ? XmlDocComments.GetSummary(declaringProperty) : null;
         if (description is not null)
         {
             attributes.Add(new DescriptionAttribute(description));
@@ -379,6 +477,134 @@ internal sealed class ReflectedPropertyDescriptor : PropertyDescriptor
             // Uncommon shapes (e.g. Dictionary<string, List<string>> in PrintFormCommand.Fields):
             // fall back to plain JSON text editing rather than leaving the field unsupported.
             attributes.Add(new TypeConverterAttribute(typeof(JsonFallbackConverter)));
+        }
+
+        return attributes.ToArray();
+    }
+}
+
+/// <summary>
+/// A read-only, reflection-driven <see cref="ICustomTypeDescriptor"/> view over a real
+/// instance's public properties, wrapping complex property values recursively so PropertyGrid
+/// can expand them. Backs the extra "Reference (read-only)" rows that
+/// <see cref="ReflectedObjectProxy.GetProperties"/> adds from <see cref="ReflectedObjectProxy.Reference"/>
+/// — informational display only, never converted back into a real instance.
+/// </summary>
+internal sealed class ReadOnlyObjectView : ICustomTypeDescriptor
+{
+    private ReadOnlyObjectView(object instance)
+    {
+        _instance = instance;
+    }
+
+    private readonly object _instance;
+
+    /// <summary>
+    /// Wraps <paramref name="value"/> for read-only display: primitives/enums/strings pass
+    /// through as-is (PropertyGrid already renders those), a list of simple items is joined into
+    /// one comma-separated string, and anything else (a list of complex items, a dictionary, or a
+    /// complex object) is wrapped so it renders as an expandable read-only node.
+    /// </summary>
+    public static object Wrap(object value)
+    {
+        if (value is null)
+        {
+            return null;
+        }
+
+        var type = value.GetType();
+        if (ParameterShape.IsSimple(type) || ParameterShape.IsByteList(type))
+        {
+            return value;
+        }
+
+        if (value is System.Collections.IEnumerable enumerable && type != typeof(string))
+        {
+            var items = enumerable.Cast<object>().ToList();
+            if (items.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            if (items[0] is not null && ParameterShape.IsSimple(items[0].GetType()))
+            {
+                return string.Join(", ", items);
+            }
+
+            return JsonSerializer.Serialize(value);
+        }
+
+        return new ReadOnlyObjectView(value);
+    }
+
+    public PropertyDescriptorCollection GetProperties()
+    {
+        var descriptors = _instance.GetType().GetProperties()
+            .Where(p => p.GetIndexParameters().Length == 0)
+            .Select(p => (PropertyDescriptor)new ReadOnlyPropertyDescriptor(_instance, p))
+            .ToArray();
+        return new PropertyDescriptorCollection(descriptors);
+    }
+
+    AttributeCollection ICustomTypeDescriptor.GetAttributes() => AttributeCollection.Empty;
+    string ICustomTypeDescriptor.GetClassName() => _instance.GetType().Name;
+    string ICustomTypeDescriptor.GetComponentName() => null;
+    TypeConverter ICustomTypeDescriptor.GetConverter() => new ExpandableObjectConverter();
+    EventDescriptor ICustomTypeDescriptor.GetDefaultEvent() => null;
+    PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty() => null;
+    object ICustomTypeDescriptor.GetEditor(Type editorBaseType) => null;
+    EventDescriptorCollection ICustomTypeDescriptor.GetEvents() => EventDescriptorCollection.Empty;
+    EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes) => EventDescriptorCollection.Empty;
+    PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes) => GetProperties();
+    object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd) => this;
+
+    /// <inheritdoc cref="ReflectedObjectProxy.ToString"/>
+    public override string ToString() => string.Empty;
+}
+
+/// <summary>
+/// A <see cref="PropertyDescriptor"/> for one property of a <see cref="ReflectedObjectProxy.Reference"/>
+/// instance (or of a value nested within one, via <see cref="ReadOnlyObjectView"/>). Always
+/// read-only: these rows exist purely so the operator can see what the connected service last
+/// reported (e.g. capabilities, or status fields a "Set" command can't change) without it being
+/// mistaken for something editable or sent back to the service.
+/// </summary>
+internal sealed class ReadOnlyPropertyDescriptor : PropertyDescriptor
+{
+    public ReadOnlyPropertyDescriptor(object owner, PropertyInfo property)
+        : base(property.Name, BuildAttributes(owner, property))
+    {
+        _owner = owner;
+        _property = property;
+    }
+
+    private readonly object _owner;
+    private readonly PropertyInfo _property;
+
+    public override Type ComponentType => _owner.GetType();
+    public override Type PropertyType => typeof(object);
+    public override bool IsReadOnly => true;
+    public override bool CanResetValue(object component) => false;
+    public override void ResetValue(object component) { }
+    public override bool ShouldSerializeValue(object component) => false;
+    public override object GetValue(object component) => ReadOnlyObjectView.Wrap(_property.GetValue(_owner));
+    public override void SetValue(object component, object value) { }
+
+    private static readonly CategoryAttribute ReferenceCategory = new("Reference (read-only)");
+
+    private static Attribute[] BuildAttributes(object owner, PropertyInfo property)
+    {
+        var attributes = new List<Attribute> { ReferenceCategory };
+
+        var description = XmlDocComments.GetSummary(property);
+        if (description is not null)
+        {
+            attributes.Add(new DescriptionAttribute(description));
+        }
+
+        if (ReadOnlyObjectView.Wrap(property.GetValue(owner)) is ReadOnlyObjectView)
+        {
+            attributes.Add(new TypeConverterAttribute(typeof(ExpandableObjectConverter)));
         }
 
         return attributes.ToArray();

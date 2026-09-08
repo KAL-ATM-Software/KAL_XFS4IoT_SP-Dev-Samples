@@ -35,7 +35,21 @@ public static class ObjectProxyBuilder
             };
         }
 
-        return proxy.Constructor.Invoke(args);
+        var instance = proxy.Constructor.Invoke(args);
+
+        // ExtendedProperties (see ParameterShape.TryGetExtendedPropertiesProperty) isn't one of
+        // the constructor's own parameters, so it's assigned separately, after construction,
+        // straight onto the built instance's setter.
+        if (proxy.ExtendedPropertiesProperty is { } extendedProperties)
+        {
+            var raw = proxy.GetRaw(extendedProperties.Name);
+            if (!ReferenceEquals(raw, Type.Missing))
+            {
+                extendedProperties.SetValue(instance, raw is ProxyDictionary entries ? BuildDictionary(entries) : raw);
+            }
+        }
+
+        return instance;
     }
 
     private static object BuildList(ProxyList items)
@@ -117,7 +131,42 @@ public static class ObjectProxyBuilder
             }
         }
 
+        SeedExtendedProperties(proxy, instance, Wrap);
         return proxy;
+    }
+
+    /// <summary>
+    /// Populates <paramref name="proxy"/>'s <see cref="ReflectedObjectProxy.ExtendedPropertiesProperty"/>
+    /// slot (if <see cref="ParameterShape.TryGetExtendedPropertiesProperty"/> found one) from the
+    /// identically-named property on <paramref name="source"/>, shared by <see cref="Wrap"/> and
+    /// <see cref="WrapMatching"/> — the only difference between them is which recursive wrapper
+    /// (<paramref name="wrapValue"/>) nested complex entries go through.
+    /// </summary>
+    private static void SeedExtendedProperties(ReflectedObjectProxy proxy, object source, Func<object, Type, ReflectedObjectProxy> wrapValue)
+    {
+        if (proxy.ExtendedPropertiesProperty is not { } extendedProperties ||
+            source?.GetType().GetProperty(extendedProperties.Name)?.GetValue(source) is not IDictionary sourceDictionary ||
+            sourceDictionary.Count == 0)
+        {
+            return;
+        }
+
+        if (ParameterShape.IsComplexDictionary(extendedProperties.PropertyType, out var valueType))
+        {
+            var dictionary = new ProxyDictionary(valueType);
+            foreach (DictionaryEntry entry in sourceDictionary)
+            {
+                dictionary[(string)entry.Key] = wrapValue(entry.Value, valueType);
+            }
+
+            proxy.SetRaw(extendedProperties.Name, dictionary);
+        }
+        else
+        {
+            // Simple-valued (e.g. Dictionary<string, bool>): no per-entry wrapping needed, the
+            // real dictionary instance is exactly what JsonFallbackConverter's ConvertTo expects.
+            proxy.SetRaw(extendedProperties.Name, sourceDictionary);
+        }
     }
 
     /// <summary>
@@ -133,7 +182,7 @@ public static class ObjectProxyBuilder
     /// </summary>
     public static ReflectedObjectProxy WrapMatching(object source, Type targetType)
     {
-        var proxy = new ReflectedObjectProxy(targetType);
+        var proxy = new ReflectedObjectProxy(targetType) { Reference = source };
         if (source is null)
         {
             return proxy;
@@ -179,6 +228,7 @@ public static class ObjectProxyBuilder
             }
         }
 
+        SeedExtendedProperties(proxy, source, WrapMatching);
         return proxy;
     }
 }
